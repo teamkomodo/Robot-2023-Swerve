@@ -1,9 +1,21 @@
-<mxfile host="app.diagrams.net" modified="2023-01-14T17:50:50.484Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="hs83vsNz653y7O9JmPE8" version="20.8.5" type="github">
+<mxfile host="app.diagrams.net" modified="2023-01-14T17:58:41.576Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="dVIaf8iqTqN_Lg0Wj_d1" version="20.8.5" type="github">
   <diagram id="-GaPFA7t-93g9XGN7D-P" name="Page-1">
     <mxGraphModel dx="1434" dy="796" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="MdZ06SbCLfKT6W0_UMcC-1" value="RoboRIO" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="150" width="220" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="MdZ06SbCLfKT6W0_UMcC-2" value="Battery" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="150" y="545" width="180" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="MdZ06SbCLfKT6W0_UMcC-3" value="-" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;fontSize=19;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="150" y="510" width="90" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="MdZ06SbCLfKT6W0_UMcC-4" value="+" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=19;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="240" y="510" width="90" height="35" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
