@@ -27,7 +27,7 @@ public class RobotContainer {
   
   private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
   private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
-  private boolean xBoxDrive = true;
+  private boolean xBoxDrive = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -47,9 +47,9 @@ public class RobotContainer {
   private void configureBindings() {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
       drivetrainSubsystem,
-      () -> ((xBoxDrive ? driverXBoxController.getRightX() : driverJoystick.getRawAxis(1)) * MAX_VELOCITY_METERS_PER_SECOND),
-      () -> ((xBoxDrive ? driverXBoxController.getRightY() : driverJoystick.getRawAxis(0)) * MAX_VELOCITY_METERS_PER_SECOND),
-      () -> ((xBoxDrive ? driverXBoxController.getLeftX() : driverJoystick.getRawAxis(2)) * MAX_VELOCITY_METERS_PER_SECOND)));
+      () -> ((xBoxDrive ? driverXBoxController.getRightX() : driverJoystick.getRawAxis(1)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+      () -> ((xBoxDrive ? driverXBoxController.getRightY() : driverJoystick.getRawAxis(0)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+      () -> ((xBoxDrive ? driverXBoxController.getLeftX() : driverJoystick.getRawAxis(2)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND)));
   }
 
   /**
