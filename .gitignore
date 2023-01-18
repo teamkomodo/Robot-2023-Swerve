@@ -24,3 +24,8 @@
 hs_err_pid*
 /build/
 .gradle
+
+# Robot Sim Files #
+/simgui-ds.json
+/simgui-window.json
+/simgui.json
