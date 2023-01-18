@@ -5,9 +5,14 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import static frc.robot.Constants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -17,11 +22,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  //private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  
+  private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
+  private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
+  private boolean xBoxDrive = true;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -39,22 +45,11 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-
-    /*
-    // Example code
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
-    */
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-
-    /*
-    // Example code
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    */
-
+    drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+      drivetrainSubsystem,
+      () -> ((xBoxDrive ? driverXBoxController.getRightX() : driverJoystick.getRawAxis(1)) * MAX_VELOCITY_METERS_PER_SECOND),
+      () -> ((xBoxDrive ? driverXBoxController.getRightY() : driverJoystick.getRawAxis(0)) * MAX_VELOCITY_METERS_PER_SECOND),
+      () -> ((xBoxDrive ? driverXBoxController.getLeftX() : driverJoystick.getRawAxis(2)) * MAX_VELOCITY_METERS_PER_SECOND)));
   }
 
   /**
