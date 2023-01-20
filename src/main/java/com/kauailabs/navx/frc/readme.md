@@ -1,2 +1,0 @@
-# Stupid NavX patching
-The NavX MXP library has lost compatibility with WPILib 2023 for simulation. These patches fix compatibility by replacing some deprecated functions within the simulation framework.

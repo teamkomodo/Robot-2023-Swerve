@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -19,6 +21,18 @@ package frc.robot;
 public final class Constants {
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
+    }
+
+    public static class AutoConstants {
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 5;
+        public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
+        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
+        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = Math.PI;
+        public static final double P_X_CONTROLLER = 10;
+        public static final double P_Y_CONTROLLER = 10;
+        public static final double P_THETA_CONTROLLER = 5;
+        public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
     }
 
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;
