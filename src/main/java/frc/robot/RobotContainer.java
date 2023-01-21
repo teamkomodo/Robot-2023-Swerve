@@ -5,10 +5,10 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -45,11 +45,10 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-      drivetrainSubsystem,
-      () -> ((xBoxDrive ? driverXBoxController.getLeftY() : driverJoystick.getRawAxis(1)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-      () -> ((xBoxDrive ? driverXBoxController.getLeftX() : driverJoystick.getRawAxis(0)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-      () -> ((xBoxDrive ? driverXBoxController.getRightX() : driverJoystick.getRawAxis(2)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND)));
+    drivetrainSubsystem.setDefaultCommand(
+      Commands.run(
+        () -> drivetrainSubsystem.drive(driverXBoxController.getLeftY(), driverXBoxController.getLeftX(), driverXBoxController.getRightX(),true),
+        drivetrainSubsystem));
   }
 
   /**

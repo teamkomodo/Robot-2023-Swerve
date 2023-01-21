@@ -134,6 +134,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
         currentChassisSpeeds = speeds;
     }
 
+    public void drive(double forward, double right, double rotation, boolean fieldRealative) {
+        ChassisSpeeds speeds = new ChassisSpeeds(forward, right, rotation);
+        if(fieldRealative) {
+            setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw()));
+            return;
+        }
+        setChassisSpeeds(speeds);
+    }
+
     private void drivePeriodic() {
         if (currentChassisSpeeds == null) {
             return;
