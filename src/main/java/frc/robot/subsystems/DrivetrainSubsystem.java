@@ -47,7 +47,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public DrivetrainSubsystem() {
         tab = Shuffleboard.getTab("Drivetrain");
-        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+
+        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 // This parameter is optional, but will allow you to see the current state of
                 // the module on the dashboard.
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0),
@@ -61,24 +62,40 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 FRONT_LEFT_MODULE_STEER_ENCODER,
                 // This is how much the steer encoder is offset from true zero (In our case,
                 // zero is facing straight forward)
-                FRONT_LEFT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND, MAX_VOLTAGE);
+                FRONT_LEFT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
+                MAX_VOLTAGE);
 
-        // We will do the same for the other modules
-        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD, FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                FRONT_RIGHT_MODULE_DRIVE_MOTOR,
                 FRONT_RIGHT_MODULE_STEER_MOTOR,
-                FRONT_RIGHT_MODULE_STEER_ENCODER, FRONT_RIGHT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND, MAX_VOLTAGE);
+                FRONT_RIGHT_MODULE_STEER_ENCODER,
+                FRONT_RIGHT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
+                MAX_VOLTAGE);
 
-        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 tab.getLayout("Back Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD, BACK_LEFT_MODULE_DRIVE_MOTOR, BACK_LEFT_MODULE_STEER_MOTOR,
-                BACK_LEFT_MODULE_STEER_ENCODER, BACK_LEFT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND, MAX_VOLTAGE);
+                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                BACK_LEFT_MODULE_DRIVE_MOTOR,
+                BACK_LEFT_MODULE_STEER_MOTOR,
+                BACK_LEFT_MODULE_STEER_ENCODER,
+                BACK_LEFT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
+                MAX_VOLTAGE);
 
-        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 tab.getLayout("Back Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(6, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD, BACK_RIGHT_MODULE_DRIVE_MOTOR, BACK_RIGHT_MODULE_STEER_MOTOR,
-                BACK_RIGHT_MODULE_STEER_ENCODER, BACK_RIGHT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND, MAX_VOLTAGE);
+                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                BACK_RIGHT_MODULE_DRIVE_MOTOR,
+                BACK_RIGHT_MODULE_STEER_MOTOR,
+                BACK_RIGHT_MODULE_STEER_ENCODER,
+                BACK_RIGHT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
+                MAX_VOLTAGE);
+
         odometry = new SwerveDriveOdometry(
                 kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
     }
