@@ -4,12 +4,18 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -17,6 +23,29 @@ public final class Constants {
     public static final int driverXBoxControllerPort = 0;
     public static final int driverJoystickPort = 1;
     public static final int driverButtonsPort = 2;
+  }
+  
+  public static class AutoConstants {
+      // Trajectory following
+      public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 5;
+      public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
+      public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
+      public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = Math.PI;
+      public static final double P_X_CONTROLLER = 10;
+      public static final double P_Y_CONTROLLER = 10;
+      public static final double P_THETA_CONTROLLER = 5;
+      public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
+              MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
+      // Autonomous collision avoidance
+      public static final double MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION = 2.5;
+      public static final double TARGET_INTERCEPT_DIFFERENTIAL_SECONDS = 0.10;
+      public static final double TARGET_INTERCEPT_GRAD_RATE = 0.1;
+      public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
+      public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
+      // Auto leveling system
+      public static final double AUTO_LEVEL_K_P = 6.5;
+      public static final double AUTO_LEVEL_K_I = 0.0;
+      public static final double AUTO_LEVEL_K_D = 0.0;
   }
   
   public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;

@@ -60,6 +60,6 @@ public class SwerveModuleImpl implements SwerveModule {
     }
 
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(this.getDrivePosition(), Rotation2d.fromDegrees(this.getSteerAngle()));
+        return new SwerveModulePosition(this.getDrivePosition(), Rotation2d.fromRadians(this.getSteerAngle()));
     }
 }

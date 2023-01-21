@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import frc.robot.util.SwerveDriveOdometryImpl;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,10 +15,12 @@ import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 import static frc.robot.Constants.*;
 
@@ -33,17 +35,23 @@ public class DrivetrainSubsystem extends SubsystemBase {
             new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
             // Back right
             new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
+    public SwerveDriveKinematics getDriveKinematics() {
+        return kinematics;
+    }
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0
             * SdsModuleConfigurations.MK4_L1.getDriveReduction() * SdsModuleConfigurations.MK4_L1.getWheelDiameter()
             * Math.PI;
     private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
+    public AHRS getNavx() {
+        return navx;
+    }
     private final SwerveModuleImpl frontLeftModule;
     private final SwerveModuleImpl frontRightModule;
     private final SwerveModuleImpl backLeftModule;
     private final SwerveModuleImpl backRightModule;
     private final ShuffleboardTab tab;
 
-    private final SwerveDriveOdometry odometry;
+    private final SwerveDriveOdometryImpl odometry;
 
     public DrivetrainSubsystem() {
         tab = Shuffleboard.getTab("Drivetrain");
@@ -96,7 +104,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        odometry = new SwerveDriveOdometry(
+        odometry = new SwerveDriveOdometryImpl(
                 kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
     }
 
@@ -110,14 +118,21 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public void zeroGyro() {
-        navx.zeroYaw();
+        if (RobotBase.isReal()) {
+            navx.zeroYaw();
+            return;
+        }
+        simGyroYawRadians = 0.0;
     }
 
     public Rotation2d getGyroYaw() {
-        if (navx.isMagnetometerCalibrated()) {
-            return Rotation2d.fromDegrees(navx.getFusedHeading());
+        if (RobotBase.isReal()) {
+            if (navx.isMagnetometerCalibrated()) {
+                return Rotation2d.fromDegrees(navx.getFusedHeading());
+            }
+            return Rotation2d.fromDegrees(360.0 - navx.getYaw());
         }
-        return Rotation2d.fromDegrees(360.0 - navx.getYaw());
+        return Rotation2d.fromRadians(simGyroYawRadians);
     }
 
     public void setSwerveModuleStates(SwerveModuleState[] states) {
@@ -150,6 +165,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setSwerveModuleStates(kinematics.toSwerveModuleStates(currentChassisSpeeds));
     }
 
+    public Pose2d getPoseMeters() {
+        return odometry.getPoseMeters();
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        odometry.resetPosition(getGyroYaw(), getModulePositions(), pose);
+    }
+
     @Override
     public void periodic() {
         frontLeftModule.periodic();
@@ -158,6 +181,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         backRightModule.periodic();
 
         odometry.update(this.getGyroYaw(), getModulePositions());
+        simGyroYawRadians += odometry.getLast_dtheta();
+        field2d.setRobotPose(this.getPoseMeters());
+        // setChassisSpeeds(new ChassisSpeeds(2, 0, 1));
         drivePeriodic();
     }
 }

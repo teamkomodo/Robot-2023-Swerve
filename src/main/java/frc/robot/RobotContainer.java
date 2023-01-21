@@ -5,6 +5,13 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoLevelCommand;
+import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.TrajectorySequencer;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,12 +38,19 @@ public class RobotContainer {
   private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
   private boolean xBoxDrive = false;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
-  }
+    // Replace with CommandPS4Controller or CommandJoystick if needed
+    private final CommandXboxController driverController = new CommandXboxController(
+            OperatorConstants.kDriverControllerPort);
 
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
+    public RobotContainer() {
+        if (RobotBase.isSimulation()) {
+            SmartDashboard.putData("Field", field2d);
+        }
+        configureBindings();
+    }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -47,7 +61,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-
     Trigger slowModeButton = driverXBoxController.leftBumper();
 
     drivetrainSubsystem.setDefaultCommand(
@@ -67,12 +80,14 @@ public class RobotContainer {
       drivetrainSubsystem));
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return null; //FIXME return our autonomous command
-  }
+    }
+
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return new AutoLevelCommand(drivetrainSubsystem);
+    }
 }
