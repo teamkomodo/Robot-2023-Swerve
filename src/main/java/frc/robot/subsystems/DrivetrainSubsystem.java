@@ -63,7 +63,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         this.field2d = field;
         tab = Shuffleboard.getTab("Drivetrain");
 
-        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
+        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
                 // This parameter is optional, but will allow you to see the current state of
                 // the module on the dashboard.
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0),
@@ -81,7 +81,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
+        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0),
                 Mk3SwerveModuleHelper.GearRatio.STANDARD,
                 FRONT_RIGHT_MODULE_DRIVE_MOTOR,
@@ -91,7 +91,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
+        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
                 tab.getLayout("Back Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0),
                 Mk3SwerveModuleHelper.GearRatio.STANDARD,
                 BACK_LEFT_MODULE_DRIVE_MOTOR,
@@ -101,7 +101,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
+        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
                 tab.getLayout("Back Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(6, 0),
                 Mk3SwerveModuleHelper.GearRatio.STANDARD,
                 BACK_RIGHT_MODULE_DRIVE_MOTOR,
