@@ -36,7 +36,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0
             * SdsModuleConfigurations.MK4_L1.getDriveReduction() * SdsModuleConfigurations.MK4_L1.getWheelDiameter()
             * Math.PI;
-    private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
+    //private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
     private final SwerveModuleImpl frontLeftModule;
     private final SwerveModuleImpl frontRightModule;
     private final SwerveModuleImpl backLeftModule;
@@ -93,14 +93,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public void zeroGyro() {
-        navx.zeroYaw();
+        //navx.zeroYaw();
     }
 
     public Rotation2d getGyroYaw() {
-        if (navx.isMagnetometerCalibrated()) {
-            return Rotation2d.fromDegrees(navx.getFusedHeading());
-        }
-        return Rotation2d.fromDegrees(360.0 - navx.getYaw());
+        //FIXME When we fix NavX uncomment this
+        // if (navx.isMagnetometerCalibrated()) {
+        //     return Rotation2d.fromDegrees(navx.getFusedHeading());
+        // }
+        // return Rotation2d.fromDegrees(360.0 - navx.getYaw());
+        return Rotation2d.fromDegrees(0.0D);
     }
 
     public void setSwerveModuleStates(SwerveModuleState[] states) {
