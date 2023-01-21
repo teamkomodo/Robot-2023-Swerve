@@ -50,41 +50,60 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModuleImpl backLeftModule;
     private final SwerveModuleImpl backRightModule;
     private final ShuffleboardTab tab;
-    private final Field2d field2d;
-    private double simGyroYawRadians = 0.0;
 
     private final SwerveDriveOdometryImpl odometry;
 
-    public DrivetrainSubsystem(Field2d field) {
-        this.field2d = field;
+    public DrivetrainSubsystem() {
         tab = Shuffleboard.getTab("Drivetrain");
-        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+
+        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
+                // This parameter is optional, but will allow you to see the current state of
+                // the module on the dashboard.
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0),
+                // This can either be STANDARD or FAST depending on your gear configuration
                 Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                // This is the ID of the drive motor
                 FRONT_LEFT_MODULE_DRIVE_MOTOR,
+                // This is the ID of the steer motor
                 FRONT_LEFT_MODULE_STEER_MOTOR,
+                // This is the ID of the steer encoder
                 FRONT_LEFT_MODULE_STEER_ENCODER,
-                FRONT_LEFT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND, MAX_VOLTAGE);
+                // This is how much the steer encoder is offset from true zero (In our case,
+                // zero is facing straight forward)
+                FRONT_LEFT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
+                MAX_VOLTAGE);
 
-        // We will do the same for the other modules
-        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD, FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                FRONT_RIGHT_MODULE_DRIVE_MOTOR,
                 FRONT_RIGHT_MODULE_STEER_MOTOR,
-                FRONT_RIGHT_MODULE_STEER_ENCODER, FRONT_RIGHT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND,
+                FRONT_RIGHT_MODULE_STEER_ENCODER,
+                FRONT_RIGHT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 tab.getLayout("Back Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD, BACK_LEFT_MODULE_DRIVE_MOTOR, BACK_LEFT_MODULE_STEER_MOTOR,
-                BACK_LEFT_MODULE_STEER_ENCODER, BACK_LEFT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND,
+                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                BACK_LEFT_MODULE_DRIVE_MOTOR,
+                BACK_LEFT_MODULE_STEER_MOTOR,
+                BACK_LEFT_MODULE_STEER_ENCODER,
+                BACK_LEFT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(
                 tab.getLayout("Back Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(6, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD, BACK_RIGHT_MODULE_DRIVE_MOTOR, BACK_RIGHT_MODULE_STEER_MOTOR,
-                BACK_RIGHT_MODULE_STEER_ENCODER, BACK_RIGHT_MODULE_STEER_OFFSET), MAX_VELOCITY_METERS_PER_SECOND,
+                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                BACK_RIGHT_MODULE_DRIVE_MOTOR,
+                BACK_RIGHT_MODULE_STEER_MOTOR,
+                BACK_RIGHT_MODULE_STEER_ENCODER,
+                BACK_RIGHT_MODULE_STEER_OFFSET),
+                MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
+
         odometry = new SwerveDriveOdometryImpl(
                 kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
     }
@@ -128,6 +147,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
         currentChassisSpeeds = speeds;
+    }
+
+    public void drive(double forward, double right, double rotation, boolean fieldRealative) {
+        ChassisSpeeds speeds = new ChassisSpeeds(forward, right, rotation);
+        if(fieldRealative) {
+            setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw()));
+            return;
+        }
+        setChassisSpeeds(speeds);
     }
 
     private void drivePeriodic() {

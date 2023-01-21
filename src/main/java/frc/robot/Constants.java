@@ -19,56 +19,60 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static class OperatorConstants {
-        public static final int kDriverControllerPort = 0;
-    }
+  public static class OperatorConstants {
+    public static final int driverXBoxControllerPort = 0;
+    public static final int driverJoystickPort = 1;
+    public static final int driverButtonsPort = 2;
+  }
+  
+  public static class AutoConstants {
+      // Trajectory following
+      public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 5;
+      public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
+      public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
+      public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = Math.PI;
+      public static final double P_X_CONTROLLER = 10;
+      public static final double P_Y_CONTROLLER = 10;
+      public static final double P_THETA_CONTROLLER = 5;
+      public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
+              MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
+      // Autonomous collision avoidance
+      public static final double MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION = 2.5;
+      public static final double TARGET_INTERCEPT_DIFFERENTIAL_SECONDS = 0.10;
+      public static final double TARGET_INTERCEPT_GRAD_RATE = 0.1;
+      public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
+      public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
+      // Auto leveling system
+      public static final double AUTO_LEVEL_K_P = 6.5;
+      public static final double AUTO_LEVEL_K_I = 0.0;
+      public static final double AUTO_LEVEL_K_D = 0.0;
+  }
+  
+  public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;
+  public static final double DRIVETRAIN_WHEELBASE_METERS = 0.5969;
+  public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 4; // FIXME Set front left module drive motor ID
+  public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 5; // FIXME Set front left module steer motor ID
+  public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 10; // FIXME Set front left steer encoder ID
+  public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(294.1); // FIXME Measure and set front
+  // left steer offset
+  
+  public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 6; // FIXME Set front right drive motor ID
+  public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 7; // FIXME Set front right steer motor ID
+  public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 11; // FIXME Set front right steer encoder ID
+  public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(356.48); // FIXME Measure and set front
+  // right steer offset
+  
+  public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 2; // FIXME Set back left drive motor ID
+  public static final int BACK_LEFT_MODULE_STEER_MOTOR = 3; // FIXME Set back left steer motor ID
+  public static final int BACK_LEFT_MODULE_STEER_ENCODER = 9; // FIXME Set back left steer encoder ID
+  public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(327.3); // FIXME Measure and set back
+  // left steer offset
+  
+  public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 0; // FIXME Set back right drive motor ID
+  public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 1; // FIXME Set back right steer motor ID
+  public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 8; // FIXME Set back right steer encoder ID
+  public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(168.65); // FIXME Measure and set back
 
-    public static class AutoConstants {
-        // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 5;
-        public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
-        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
-        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = Math.PI;
-        public static final double P_X_CONTROLLER = 10;
-        public static final double P_Y_CONTROLLER = 10;
-        public static final double P_THETA_CONTROLLER = 5;
-        public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
-        // Autonomous collision avoidance
-        public static final double MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION = 2.5;
-        public static final double TARGET_INTERCEPT_DIFFERENTIAL_SECONDS = 0.10;
-        public static final double TARGET_INTERCEPT_GRAD_RATE = 0.1;
-        public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
-        public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
-        // Auto leveling system
-        public static final double AUTO_LEVEL_K_P = 6.5;
-        public static final double AUTO_LEVEL_K_I = 0.0;
-        public static final double AUTO_LEVEL_K_D = 0.0;
-    }
-
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.5969;
-    public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 4; // FIXME Set front left module drive motor ID
-    public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 5; // FIXME Set front left module steer motor ID
-    public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 10; // FIXME Set front left steer encoder ID
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(294.1); // FIXME Measure and set front
-                                                                                        // left steer offset
-
-    public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 6; // FIXME Set front right drive motor ID
-    public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 7; // FIXME Set front right steer motor ID
-    public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 11; // FIXME Set front right steer encoder ID
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(356.48); // FIXME Measure and set front
-                                                                                          // right steer offset
-
-    public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 2; // FIXME Set back left drive motor ID
-    public static final int BACK_LEFT_MODULE_STEER_MOTOR = 3; // FIXME Set back left steer motor ID
-    public static final int BACK_LEFT_MODULE_STEER_ENCODER = 9; // FIXME Set back left steer encoder ID
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(327.3); // FIXME Measure and set back
-                                                                                       // left steer offset
-
-    public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 0; // FIXME Set back right drive motor ID
-    public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 1; // FIXME Set back right steer motor ID
-    public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 8; // FIXME Set back right steer encoder ID
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(168.65); // FIXME Measure and set back
-                                                                                         // right steer offset
+  public static final double SLOW_MODE_MODIFIER = 0.5D;
+  // right steer offset
 }
