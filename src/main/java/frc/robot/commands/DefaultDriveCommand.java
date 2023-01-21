@@ -9,18 +9,18 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 public class DefaultDriveCommand extends CommandBase{
     
     private final DrivetrainSubsystem drivetrainSubsystem;
-    private final DoubleSupplier translationXSupplier;
-    private final DoubleSupplier translationYSupplier;
+    private final DoubleSupplier forwardSupplier;
+    private final DoubleSupplier rightSupplier;
     private final DoubleSupplier rotationSupplier;
 
     public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
-    DoubleSupplier translationXSupplier, 
-    DoubleSupplier translationYSupplier,
+    DoubleSupplier forwardSupplier, 
+    DoubleSupplier rightSupplier,
     DoubleSupplier rotationSupplier) {
 
         this.drivetrainSubsystem = drivetrainSubsystem;
-        this.translationXSupplier = translationXSupplier;
-        this.translationYSupplier = translationYSupplier;
+        this.forwardSupplier = forwardSupplier;
+        this.rightSupplier = rightSupplier;
         this.rotationSupplier = rotationSupplier;
         
         addRequirements(drivetrainSubsystem);
@@ -31,8 +31,8 @@ public class DefaultDriveCommand extends CommandBase{
         //Use `new ChassisSpeeds()` in place of `ChassisSpeeds.fromFieldRelativeSpeeds()` 
         //to achieve robot-oriented movement instead of field oriented movment
         drivetrainSubsystem.setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-            translationXSupplier.getAsDouble(),
-            translationYSupplier.getAsDouble(),
+            forwardSupplier.getAsDouble(),
+            rightSupplier.getAsDouble(),
             rotationSupplier.getAsDouble(),
             drivetrainSubsystem.getGyroYaw()
         ));

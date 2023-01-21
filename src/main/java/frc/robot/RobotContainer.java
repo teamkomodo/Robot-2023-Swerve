@@ -47,9 +47,9 @@ public class RobotContainer {
   private void configureBindings() {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
       drivetrainSubsystem,
-      () -> ((xBoxDrive ? driverXBoxController.getRightX() : driverJoystick.getRawAxis(1)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-      () -> ((xBoxDrive ? driverXBoxController.getRightY() : driverJoystick.getRawAxis(0)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-      () -> ((xBoxDrive ? driverXBoxController.getLeftX() : driverJoystick.getRawAxis(2)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND)));
+      () -> ((xBoxDrive ? driverXBoxController.getLeftX() : driverJoystick.getRawAxis(1)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+      () -> ((xBoxDrive ? driverXBoxController.getLeftY() : driverJoystick.getRawAxis(0)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+      () -> ((xBoxDrive ? driverXBoxController.getRightX() : driverJoystick.getRawAxis(2)) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND)));
   }
 
   /**
