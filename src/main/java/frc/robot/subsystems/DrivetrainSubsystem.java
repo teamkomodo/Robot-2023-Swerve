@@ -26,6 +26,7 @@ import static frc.robot.Constants.*;
 
 public class DrivetrainSubsystem extends SubsystemBase {
     public static final double MAX_VOLTAGE = 12.0;
+    private double simGyroYawRadians = 0.0;
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
             // Front left
             new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
@@ -52,8 +53,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final ShuffleboardTab tab;
 
     private final SwerveDriveOdometryImpl odometry;
+    private final Field2d field2d;
 
-    public DrivetrainSubsystem() {
+    public DrivetrainSubsystem(Field2d field) {
+        this.field2d = field;
         tab = Shuffleboard.getTab("Drivetrain");
 
         frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createNeo(

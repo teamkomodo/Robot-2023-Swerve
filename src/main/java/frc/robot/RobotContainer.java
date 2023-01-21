@@ -6,18 +6,14 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoLevelCommand;
-import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.TrajectorySequencer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
@@ -30,17 +26,14 @@ import static frc.robot.Constants.*;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+  Field2d field2d = new Field2d();
+  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
 
   
   private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
   private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
   private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
   private boolean xBoxDrive = false;
-
-    // Replace with CommandPS4Controller or CommandJoystick if needed
-    private final CommandXboxController driverController = new CommandXboxController(
-            OperatorConstants.kDriverControllerPort);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -79,8 +72,6 @@ public class RobotContainer {
         true),
       drivetrainSubsystem));
   }
-
-    }
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
