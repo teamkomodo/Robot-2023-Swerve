@@ -5,18 +5,25 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutoLevelCommand;
+import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.TrajectorySequencer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
+
+import java.util.List;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -31,6 +38,9 @@ public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     Field2d field2d = new Field2d();
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
+    private final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
+    private final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
+            null);
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
             OperatorConstants.driverXBoxControllerPort);
@@ -93,6 +103,9 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return new AutoLevelCommand(drivetrainSubsystem);
+        return new InstantCommand(
+                () -> trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+                        List.of(new Translation2d(1, 1)),
+                        new Pose2d(0, 0, Rotation2d.fromDegrees(180))));
     }
 }
