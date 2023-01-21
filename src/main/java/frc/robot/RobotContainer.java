@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
@@ -27,6 +28,7 @@ public class RobotContainer {
   
   private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
   private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
+  private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
   private boolean xBoxDrive = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -45,10 +47,24 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+
+    Trigger slowModeButton = driverXBoxController.leftBumper();
+
     drivetrainSubsystem.setDefaultCommand(
       Commands.run(
-        () -> drivetrainSubsystem.drive(driverXBoxController.getLeftY(), driverXBoxController.getLeftX(), driverXBoxController.getRightX(),true),
-        drivetrainSubsystem));
+      () -> drivetrainSubsystem.drive(driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        true),
+      drivetrainSubsystem));
+
+    slowModeButton.whileTrue(
+      Commands.run(
+      () -> drivetrainSubsystem.drive(driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+        driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+        driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+        true),
+      drivetrainSubsystem));
   }
 
   /**
