@@ -5,9 +5,10 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutonomousCommand;
+import frc.robot.commands.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.TrajectorySequencer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -77,6 +78,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return new AutonomousCommand(drivetrainSubsystem, controllerCommandFactory);
+        return new AutoLevelCommand(drivetrainSubsystem);
     }
 }

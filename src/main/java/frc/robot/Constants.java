@@ -24,6 +24,7 @@ public final class Constants {
     }
 
     public static class AutoConstants {
+        // Trajectory following
         public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 5;
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
         public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
@@ -33,6 +34,16 @@ public final class Constants {
         public static final double P_THETA_CONTROLLER = 5;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
+        // Autonomous collision avoidance
+        public static final double MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION = 2.5;
+        public static final double TARGET_INTERCEPT_DIFFERENTIAL_SECONDS = 0.10;
+        public static final double TARGET_INTERCEPT_GRAD_RATE = 0.1;
+        public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
+        public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
+        // Auto leveling system
+        public static final double AUTO_LEVEL_K_P = 6.5;
+        public static final double AUTO_LEVEL_K_I = 0.0;
+        public static final double AUTO_LEVEL_K_D = 0.0;
     }
 
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;

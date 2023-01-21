@@ -42,6 +42,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
             * SdsModuleConfigurations.MK4_L1.getDriveReduction() * SdsModuleConfigurations.MK4_L1.getWheelDiameter()
             * Math.PI;
     private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
+    public AHRS getNavx() {
+        return navx;
+    }
     private final SwerveModuleImpl frontLeftModule;
     private final SwerveModuleImpl frontRightModule;
     private final SwerveModuleImpl backLeftModule;
