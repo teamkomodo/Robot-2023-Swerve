@@ -36,16 +36,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
             new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
             // Back right
             new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
+
     public SwerveDriveKinematics getDriveKinematics() {
         return kinematics;
     }
+
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0
             * SdsModuleConfigurations.MK4_L1.getDriveReduction() * SdsModuleConfigurations.MK4_L1.getWheelDiameter()
             * Math.PI;
     private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
+
     public AHRS getNavx() {
         return navx;
     }
+
     private final SwerveModuleImpl frontLeftModule;
     private final SwerveModuleImpl frontRightModule;
     private final SwerveModuleImpl backLeftModule;
@@ -154,7 +158,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public void drive(double forward, double right, double rotation, boolean fieldRealative) {
         ChassisSpeeds speeds = new ChassisSpeeds(forward, right, rotation);
-        if(fieldRealative) {
+        if (fieldRealative) {
             setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw()));
             return;
         }
