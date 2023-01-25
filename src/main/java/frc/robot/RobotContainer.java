@@ -96,7 +96,14 @@ public class RobotContainer {
                                 true),
                         drivetrainSubsystem));
     }
-
+    private void addTestTrajectories() {
+        trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+                        List.of(),
+                        new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));
+        // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        //                 List.of(),
+        //                 new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));
+    }
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -104,8 +111,6 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return new InstantCommand(
-                () -> trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                        List.of(new Translation2d(1, 1)),
-                        new Pose2d(0, 0, Rotation2d.fromDegrees(180))));
+                () -> addTestTrajectories());
     }
 }

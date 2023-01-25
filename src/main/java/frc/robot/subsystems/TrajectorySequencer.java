@@ -43,6 +43,9 @@ public class TrajectorySequencer extends SubsystemBase {
             commandStack.clear();
         }
         commandStack.add(controllerDesc);
+        if (commandStack.size() == 1) {
+            controllerDesc.command.initialize();
+        }
     }
 
     public void startRelativeTrajectory(Pose2d initialPose, List<Translation2d> waypoints, Pose2d finalPose) {
@@ -128,6 +131,9 @@ public class TrajectorySequencer extends SubsystemBase {
                 commandStack.get(0).command.end(false);
                 drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
                 commandStack.remove(0);
+                if (commandStack.size() > 0) {
+                    commandStack.get(0).command.initialize();
+                }
             }
         }
     }

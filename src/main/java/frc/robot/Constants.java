@@ -27,13 +27,13 @@ public final class Constants {
   
   public static class AutoConstants {
       // Trajectory following
-      public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 5;
-      public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
-      public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
-      public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = Math.PI;
-      public static final double P_X_CONTROLLER = 10;
-      public static final double P_Y_CONTROLLER = 10;
-      public static final double P_THETA_CONTROLLER = 5;
+      public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 0.6;
+      public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 0.8;
+      public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 1;
+      public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 1.2;
+      public static final double P_X_CONTROLLER = 1;
+      public static final double P_Y_CONTROLLER = 1;
+      public static final double P_THETA_CONTROLLER = 1;
       public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
               MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
       // Autonomous collision avoidance
