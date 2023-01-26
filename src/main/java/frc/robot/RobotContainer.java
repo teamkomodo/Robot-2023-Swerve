@@ -9,11 +9,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.PlaygroundSubsystem;
 
 import static frc.robot.Constants.*;
-
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -25,6 +23,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+    private PlaygroundSubsystem playgroundSubsystem = new PlaygroundSubsystem();
 
     private CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
 
@@ -48,27 +48,19 @@ public class RobotContainer {
      */
     private void configureBindings() {
 
-        //Bad implementation, only for playground testing
-        final CANSparkMax motor0 = new CANSparkMax(0, MotorType.kBrushless);
-        final CANSparkMax motor1 = new CANSparkMax(1, MotorType.kBrushless);
-
-
         Trigger leftTrigger = xboxController.axisGreaterThan(XboxController.Axis.kLeftTrigger.value, XBOX_TRIGGER_THRESHOLD);
         Trigger rightTrigger = xboxController.axisGreaterThan(XboxController.Axis.kRightTrigger.value, XBOX_TRIGGER_THRESHOLD);
 
-        Trigger leftJoystickXPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftX.value, XBOX_TRIGGER_THRESHOLD);
-        Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
-        Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
+        //Trigger leftJoystickXPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftX.value, XBOX_TRIGGER_THRESHOLD);
+        //Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
+        //Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
 
         //motor 0 - left trigger for positive speed, right for negative speed
-        leftTrigger.whileTrue(Commands.run(() -> motor0.set(xboxController.getLeftTriggerAxis())));
-        leftTrigger.onFalse(Commands.run(() -> motor0.set(0.0D)));
-        rightTrigger.whileTrue(Commands.run(() -> motor0.set(-xboxController.getRightTriggerAxis())));
-        rightTrigger.onFalse(Commands.run(() -> motor0.set(0.0D)));
+        leftTrigger.whileTrue(Commands.run(() -> playgroundSubsystem.setMotor0Speed(xboxController.getLeftTriggerAxis()), playgroundSubsystem));
+        leftTrigger.onFalse(Commands.run(() -> playgroundSubsystem.setMotor0Speed(0), playgroundSubsystem));
+        rightTrigger.whileTrue(Commands.run(() -> playgroundSubsystem.setMotor0Speed(-xboxController.getLeftTriggerAxis()), playgroundSubsystem));
+        rightTrigger.onFalse(Commands.run(() -> playgroundSubsystem.setMotor0Speed(0), playgroundSubsystem));
 
-        //motor 1 - left joystick x axis
-        leftJoystickX.whileTrue(Commands.run(() -> motor1.set(xboxController.getLeftX())));
-        leftJoystickX.onFalse(Commands.run(() -> motor1.set(0)));
     }
 
     /**
