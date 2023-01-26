@@ -99,7 +99,7 @@ public class RobotContainer {
     private void addTestTrajectories() {
         trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
                         List.of(),
-                        new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));
+                        new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
         // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
         //                 List.of(),
         //                 new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));

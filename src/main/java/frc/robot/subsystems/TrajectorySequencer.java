@@ -2,12 +2,15 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AutoConstants;
@@ -30,12 +33,8 @@ public class TrajectorySequencer extends SubsystemBase {
         this.fieldVelTargetSupplier = fieldVelTargetSupplier;
     }
 
-    public void startRelativeTrajectory(Pose2d initialPose, List<Translation2d> waypoints, Pose2d finalPose,
-            boolean overwriteCurrentCommand) {
-        SwerveControllerCommandDescriptor controllerDesc = controllerCommandFactory
-                .generateCommand(TrajectoryGenerator
-                        .generateTrajectory(initialPose, waypoints, finalPose,
-                                controllerCommandFactory.getTrajectoryConfig()));
+    public void startRelativeTrajectory(Trajectory traj, boolean overwriteCurrentCommand) {
+        SwerveControllerCommandDescriptor controllerDesc = controllerCommandFactory.generateCommand(traj);
         if (overwriteCurrentCommand) {
             if (commandStack.size() > 0) {
                 commandStack.get(0).command.end(true);
@@ -48,8 +47,55 @@ public class TrajectorySequencer extends SubsystemBase {
         }
     }
 
-    public void startRelativeTrajectory(Pose2d initialPose, List<Translation2d> waypoints, Pose2d finalPose) {
-        startRelativeTrajectory(initialPose, waypoints, finalPose, false);
+    private double linearTweak(double input, Random random) {
+        return input + (((random.nextDouble() * 2.0) - 1.0) * AutoConstants.MAX_RANDOM_LINEAR_TWEAKAGE_METERS);
+    }
+
+    private Rotation2d angularTweak(Rotation2d input, Random random) {
+        return Rotation2d.fromRadians(input.getRadians()
+                + (((random.nextDouble() * 2.0) - 1.0) * AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
+    }
+
+    public void startRelativeTrajectory(List<Pose2d> waypoints) {
+        if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
+            Random generator = new Random(4293); // Consistent random seed
+            List<Pose2d> newWaypoints = new ArrayList<Pose2d>();
+            for (int i = 0; i < waypoints.size(); i++) {
+                // Random tweakage to avoid misparameterization
+                Pose2d waypoint = waypoints.get(i);
+                Pose2d newWaypoint = new Pose2d(linearTweak(waypoint.getX(), generator),
+                        linearTweak(waypoint.getY(), generator), angularTweak(waypoint.getRotation(), generator));
+                newWaypoints.add(newWaypoint);
+            }
+            waypoints = newWaypoints;
+        }
+        startRelativeTrajectory(
+                TrajectoryGenerator.generateTrajectory(waypoints, controllerCommandFactory.getTrajectoryConfig()),
+                false);
+    }
+
+    public void startRelativeTrajectory(Pose2d start, List<Translation2d> waypoints, Pose2d end) {
+        if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
+            Random generator = new Random(4293); // Consistent random seed
+            start = new Pose2d(linearTweak(start.getX(), generator),
+                    linearTweak(start.getY(), generator), angularTweak(start.getRotation(), generator));
+            end = new Pose2d(linearTweak(end.getX(), generator),
+                    linearTweak(end.getY(), generator), angularTweak(end.getRotation(), generator));
+
+            List<Translation2d> newWaypoints = new ArrayList<Translation2d>();
+            for (int i = 0; i < waypoints.size(); i++) {
+                // Random tweakage to avoid misparameterization
+                Translation2d waypoint = waypoints.get(i);
+                Translation2d newWaypoint = new Translation2d(linearTweak(waypoint.getX(), generator),
+                        linearTweak(waypoint.getY(), generator));
+                newWaypoints.add(newWaypoint);
+            }
+            waypoints = newWaypoints;
+        }
+        startRelativeTrajectory(
+                TrajectoryGenerator.generateTrajectory(start, waypoints, end,
+                        controllerCommandFactory.getTrajectoryConfig()),
+                false);
     }
 
     public void pause() {
