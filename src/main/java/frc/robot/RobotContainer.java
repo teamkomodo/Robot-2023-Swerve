@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -96,14 +97,23 @@ public class RobotContainer {
                                 true),
                         drivetrainSubsystem));
     }
+
     private void addTestTrajectories() {
+        List<Translation2d> waypoints = new ArrayList<Translation2d>();
+        for (int i = 0; i < 5; i++) {
+            waypoints.add(new Translation2d(2, 0));
+            waypoints.add(new Translation2d(0, 0));
+        }
+        waypoints.add(new Translation2d(2, 0));
         trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                        List.of(),
-                        new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-        // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-        //                 List.of(),
-        //                 new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));
+                waypoints,
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+        // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0,
+        // Rotation2d.fromDegrees(0)),
+        // List.of(),
+        // new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));
     }
+
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
