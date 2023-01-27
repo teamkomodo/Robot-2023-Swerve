@@ -79,39 +79,47 @@ public class RobotContainer {
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
                         () -> drivetrainSubsystem.drive(
-                                driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                -driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                -driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                -driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 true),
                         drivetrainSubsystem));
 
         slowModeButton.whileTrue(
                 Commands.run(
                         () -> drivetrainSubsystem.drive(
-                                driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+                                -driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
                                         * SLOW_MODE_MODIFIER,
-                                driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+                                -driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
                                         * SLOW_MODE_MODIFIER,
-                                driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+                                -driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
                                         * SLOW_MODE_MODIFIER,
                                 true),
                         drivetrainSubsystem));
     }
 
     private void addTestTrajectories() {
-        List<Translation2d> waypoints = new ArrayList<Translation2d>();
-        for (int i = 0; i < 5; i++) {
-            waypoints.add(new Translation2d(2, 0));
-            waypoints.add(new Translation2d(0, 0));
-        }
-        waypoints.add(new Translation2d(2, 0));
+        //List<Translation2d> waypoints = new ArrayList<Translation2d>();
+        // for (int i = 0; i < 1; i++) {
+        //     waypoints.add(new Translation2d(2, 0));
+        //     waypoints.add(new Translation2d(0, 0));
+        // }
+        //waypoints.add(new Translation2d(2, 0));
+        // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        //         waypoints,
+        //         new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
         trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                waypoints,
-                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-        // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0,
-        // Rotation2d.fromDegrees(0)),
-        // List.of(),
-        // new Pose2d(-0.5, 0, Rotation2d.fromDegrees(0)));
+        List.of(),
+        new Pose2d(1, 0, Rotation2d.fromDegrees(0)));
+        trajectorySequencer.startRelativeTrajectory(new Pose2d(1, 0, Rotation2d.fromDegrees(0)),
+        List.of(),
+        new Pose2d(1, 1, Rotation2d.fromDegrees(0)));
+        trajectorySequencer.startRelativeTrajectory(new Pose2d(1, 1, Rotation2d.fromDegrees(0)),
+        List.of(),
+        new Pose2d(0, 1, Rotation2d.fromDegrees(0)));
+        trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 1, Rotation2d.fromDegrees(0)),
+        List.of(),
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     }
 
     /**

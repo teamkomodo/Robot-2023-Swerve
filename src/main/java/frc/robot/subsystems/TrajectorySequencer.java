@@ -52,23 +52,23 @@ public class TrajectorySequencer extends SubsystemBase {
     }
 
     private Rotation2d angularTweak(Rotation2d input, Random random) {
-        return Rotation2d.fromRadians(input.getRadians()
-                + (((random.nextDouble() * 2.0) - 1.0) * AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
+        return input;//Rotation2d.fromRadians(input.getRadians()
+                //+ (((random.nextDouble() * 2.0) - 1.0) * AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
     }
 
     public void startRelativeTrajectory(List<Pose2d> waypoints) {
-        if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
-            Random generator = new Random(4293); // Consistent random seed
-            List<Pose2d> newWaypoints = new ArrayList<Pose2d>();
-            for (int i = 0; i < waypoints.size(); i++) {
-                // Random tweakage to avoid misparameterization
-                Pose2d waypoint = waypoints.get(i);
-                Pose2d newWaypoint = new Pose2d(linearTweak(waypoint.getX(), generator),
-                        linearTweak(waypoint.getY(), generator), angularTweak(waypoint.getRotation(), generator));
-                newWaypoints.add(newWaypoint);
-            }
-            waypoints = newWaypoints;
-        }
+        // if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
+        //     Random generator = new Random(4293); // Consistent random seed
+        //     List<Pose2d> newWaypoints = new ArrayList<Pose2d>();
+        //     for (int i = 0; i < waypoints.size(); i++) {
+        //         // Random tweakage to avoid misparameterization
+        //         Pose2d waypoint = waypoints.get(i);
+        //         Pose2d newWaypoint = new Pose2d(linearTweak(waypoint.getX(), generator),
+        //                 linearTweak(waypoint.getY(), generator), angularTweak(waypoint.getRotation(), generator));
+        //         newWaypoints.add(newWaypoint);
+        //     }
+        //     waypoints = newWaypoints;
+        // }
         startRelativeTrajectory(
                 TrajectoryGenerator.generateTrajectory(waypoints, controllerCommandFactory.getTrajectoryConfig()),
                 false);

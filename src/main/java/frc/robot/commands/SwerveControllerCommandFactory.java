@@ -42,9 +42,13 @@ public class SwerveControllerCommandFactory {
         ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.P_THETA_CONTROLLER, 0, 0,
                 AutoConstants.THETA_PID_CONTROLLER_CONSTRAINTS);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        Pose2d relativePose = drivetrainSubsystem.getPoseMeters().relativeTo(traj.getInitialPose());
+        Pose2d relativePose = drivetrainSubsystem.getPoseMeters();
         SwerveControllerCommandImpl controllerCommand = new SwerveControllerCommandImpl(traj,
-                () -> drivetrainSubsystem.getPoseMeters().relativeTo(relativePose),
+                () -> new Pose2d(
+                        drivetrainSubsystem.getPoseMeters().getTranslation()
+                                .minus(relativePose.getTranslation())
+                                .plus(traj.getInitialPose().getTranslation()),
+                        drivetrainSubsystem.getPoseMeters().getRotation()),
                 drivetrainSubsystem.getDriveKinematics(),
                 new PIDController(AutoConstants.P_X_CONTROLLER, 0, 0),
                 new PIDController(AutoConstants.P_X_CONTROLLER, 0, 0), thetaController,

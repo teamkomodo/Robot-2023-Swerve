@@ -27,18 +27,18 @@ public final class Constants {
 
     public static class AutoConstants {
         // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 0.6;
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 0.3;
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
-        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 1;
-        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 1.2;
-        public static final double P_X_CONTROLLER = 1;
-        public static final double P_Y_CONTROLLER = 1;
-        public static final double P_THETA_CONTROLLER = 1;
+        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 3;
+        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 5;
+        public static final double P_X_CONTROLLER = 2;
+        public static final double P_Y_CONTROLLER = 2;
+        public static final double P_THETA_CONTROLLER = 3;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
         public static final double MAX_RANDOM_LINEAR_TWEAKAGE_METERS = 0.03;
-        public static final double MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS = 0.03;
+        public static final double MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS = 0.0;
         // Autonomous collision avoidance
         public static final double MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION = 2.5;
         public static final double TARGET_INTERCEPT_DIFFERENTIAL_SECONDS = 0.10;
@@ -76,6 +76,6 @@ public final class Constants {
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 8; // FIXME Set back right steer encoder ID
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(168.65); // FIXME Measure and set back
 
-    public static final double SLOW_MODE_MODIFIER = 0.5D;
+    public static final double SLOW_MODE_MODIFIER = 0.1D;
     // right steer offset
 }

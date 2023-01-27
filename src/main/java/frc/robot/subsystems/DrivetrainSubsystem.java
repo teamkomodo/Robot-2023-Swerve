@@ -113,6 +113,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         odometry = new SwerveDriveOdometryImpl(
                 kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
+        // odometry.forgetGyro = true;
     }
 
     public SwerveModulePosition[] getModulePositions() {
