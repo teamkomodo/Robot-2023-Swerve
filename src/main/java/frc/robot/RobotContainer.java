@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PlaygroundSubsystem;
 
 import static frc.robot.Constants.*;
@@ -24,7 +25,8 @@ import static frc.robot.Constants.*;
  */
 public class RobotContainer {
 
-    private PlaygroundSubsystem playgroundSubsystem = new PlaygroundSubsystem();
+    //private PlaygroundSubsystem playgroundSubsystem = new PlaygroundSubsystem();
+    private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
 
     private CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
 
@@ -55,11 +57,8 @@ public class RobotContainer {
         //Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
         //Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
 
-        //motor 0 - left trigger for positive speed, right for negative speed
-        leftTrigger.whileTrue(Commands.run(() -> playgroundSubsystem.setMotor0Speed(xboxController.getLeftTriggerAxis()), playgroundSubsystem));
-        leftTrigger.onFalse(Commands.run(() -> playgroundSubsystem.setMotor0Speed(0), playgroundSubsystem));
-        rightTrigger.whileTrue(Commands.run(() -> playgroundSubsystem.setMotor0Speed(-xboxController.getLeftTriggerAxis()), playgroundSubsystem));
-        rightTrigger.onFalse(Commands.run(() -> playgroundSubsystem.setMotor0Speed(0), playgroundSubsystem));
+        leftTrigger.whileTrue(Commands.run(() -> elevatorSubsystem.setElevatorSpeed(xboxController.getLeftTriggerAxis()), elevatorSubsystem));
+        rightTrigger.whileTrue(Commands.run(() -> elevatorSubsystem.setElevatorSpeed(-xboxController.getRightTriggerAxis()), elevatorSubsystem));
 
     }
 
