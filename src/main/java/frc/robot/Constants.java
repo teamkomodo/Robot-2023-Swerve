@@ -15,4 +15,13 @@ package frc.robot;
 public final class Constants {
   public static final int XBOX_CONTROLLER_PORT = 0;
   public static final double XBOX_TRIGGER_THRESHOLD = 0.1D;
+
+  public static final int TELESCOPE_MOTOR_ID = 0;
+  public static final int ELEVATOR_MOTOR_ID = 0;
+
+  public static final int TELESCOPE_ZERO_SWITCH_CHANNEL = 0;
+  public static final int ELEVATOR_ZERO_SWITCH_CHANNEL = 0;
+
+  public static final int CLAW_SOLENOID_FORWARD_CHANNEL = 0;
+  public static final int CLAW_SOLENOID_REVERSE_CHANNEL = 1;
 }

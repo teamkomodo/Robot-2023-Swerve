@@ -1,36 +1,70 @@
 ## Elevator Subsystem
-Driver Inputs and Expected Results  
-Right joystick Y axis controls elevator up/down
 
-Sensor Inputs
-- Upper limit switch
+Actuators
+- Motor for up/down movement
+
+Sensors
+- Zero limit switch
 - Motor encoder
 
 Shuffleboard Outputs  
 - Motor speed
 - Motor position
 
-Sudocode:  
-```
-Elevator Subsystem Default Command:
-    Set elevator motor speed to right joystick y axis
+Inputs and Behavior
+- Stow/Zero command -> zero at stow position
+- Low Node command -> move to low node position
+- Mid Node command -> move to mid node position
+- High Node command -> move to high node position
+- Joystick -> move up and down freely
+- Zero limit switch active -> set zero position and stop motor
 
-constant Motor Near End Max Speed
+## Telescope Subsystem
 
-Elevator Subsystem.setElevatorSpeed( Input Speed )
-{
-    IF ( Top Limit Switch is activated )
-        Set motor speed to 0
-        exit function
+Actuators
+- Motor for extending telescope
 
-    IF ( motor position is not near top or motor )
-        Set motor speed to Input Speed
-    ELSE
-        Set motor speed to Motor Near Top Max Speed
-}
+Sensors
+- Motor encoder
+- Limit switch at zero position
 
-Elevator Subsystem.periodic()
-{
-    Update shuffleboard values for motor speed and motor position
-}
-```
+Shuffleboard Outputs
+- Motor speed
+- Motor position
+
+Inputs and Behavior
+- Zero limit switch -> set zero position and stop motor
+- Low Node Button -> moves telescope to low node position
+- Mid Node Button -> moves telescope to mid node position
+- High Node Button -> moves telescope to high node position
+- Shelf Button -> moves telescope to shelf position
+- R/L triggers -> manual control over telescope
+
+## Joint Subsystem
+
+Actuators
+- Motor for rotating joint
+
+Sensors
+- Motor Encoder
+- Limit switch at zero position
+
+Inputs and Behavior
+- Low node command -> move to low node position
+- Mid node command -> move to mid node position
+- High node command -> move to high node position
+- Zero command -> move to zero position
+- Zero limit switch active -> set zero position and stop motor
+
+## Claw Subsystem
+
+Mechanical Components
+- Solenoid value for controlling 2 x pneumatic cylinders
+- Compressor
+
+Sensor Inputs
+- None
+
+Inputs and Behavior
+- Close Button -> Closes claw
+- Open Button -> Opens claw
