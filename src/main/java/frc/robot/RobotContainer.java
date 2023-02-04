@@ -30,9 +30,9 @@ import org.opencv.video.TrackerGOTURN;
 public class RobotContainer {
 
     //private PlaygroundSubsystem playgroundSubsystem = new PlaygroundSubsystem();
-    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
-   // private final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    private final ClawSubsystem clawSubsystem = new ClawSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
 
@@ -70,17 +70,17 @@ public class RobotContainer {
         //     () -> telescopeSubsystem.setTelescopePercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
         //     telescopeSubsystem));
 
-        elevatorSubsystem.setDefaultCommand(Commands.run(
-            () -> elevatorSubsystem.setElevatorPercent(xboxController.getLeftY()),
-            elevatorSubsystem));
+        // elevatorSubsystem.setDefaultCommand(Commands.run(
+        //     () -> elevatorSubsystem.setElevatorPercent(xboxController.getLeftY()),
+        //     elevatorSubsystem));
 
-        aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
-        bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
-        yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
-        xButton.onTrue(elevatorSubsystem.runShelfCommand());
+        // aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
+        // bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
+        // yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
+        // xButton.onTrue(elevatorSubsystem.runShelfCommand());
 
-        // rightBumper.whileTrue(clawSubsystem.openCommand());
-        // leftBumper.whileTrue(clawSubsystem.closeCommand());
+        rightBumper.whileTrue(clawSubsystem.openCommand());
+        leftBumper.whileTrue(clawSubsystem.closeCommand());
 
     }
 

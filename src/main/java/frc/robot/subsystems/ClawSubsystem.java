@@ -10,8 +10,8 @@ import static frc.robot.Constants.*;
 import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 
 public class ClawSubsystem extends SubsystemBase{
-    Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
-    DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, CLAW_SOLENOID_FORWARD_CHANNEL, CLAW_SOLENOID_REVERSE_CHANNEL);
+    Compressor compressor = new Compressor(2, PneumaticsModuleType.REVPH);
+    DoubleSolenoid solenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, CLAW_SOLENOID_FORWARD_CHANNEL, CLAW_SOLENOID_REVERSE_CHANNEL);
 
     public ClawSubsystem() {
         compressor.enableDigital();
