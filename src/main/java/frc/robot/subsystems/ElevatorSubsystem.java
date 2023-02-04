@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.Map;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -32,6 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final GenericEntry motorVelocityEntry = elevTab.add("Motor Velocity", 0).getEntry();
     private final GenericEntry motorSpeedEntry = elevTab.add("Motor Speed", 0).getEntry();
     private final GenericEntry motorPositionEntry = elevTab.add("Motor Position", 0).getEntry();
+    private final GenericEntry limitSwitchEntry = elevTab.add("Limit Switch", false).getEntry();
 
 
     public void setElevatorPercent(double percent) {
@@ -67,6 +66,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         motorVelocityEntry.setDouble(elevatorMotor.getEncoder().getVelocity());
         motorSpeedEntry.setDouble(elevatorMotor.get());
         motorPositionEntry.setDouble(elevatorMotor.getEncoder().getPosition());
+        limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
         
         if(zeroLimitSwitch.get()) {
             zeroPosition = encoder.getPosition();

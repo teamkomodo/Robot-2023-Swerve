@@ -31,8 +31,8 @@ public class RobotContainer {
 
     //private PlaygroundSubsystem playgroundSubsystem = new PlaygroundSubsystem();
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
-    private final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
+   // private final ClawSubsystem clawSubsystem = new ClawSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
 
@@ -66,17 +66,21 @@ public class RobotContainer {
         //Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
         //Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
 
-        telescopeSubsystem.setDefaultCommand(Commands.run(
-            () -> telescopeSubsystem.setTelescopePercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
-            telescopeSubsystem));
+        // telescopeSubsystem.setDefaultCommand(Commands.run(
+        //     () -> telescopeSubsystem.setTelescopePercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
+        //     telescopeSubsystem));
 
-        aButton.onTrue(telescopeSubsystem.runLowNodeCommand());
-        bButton.onTrue(telescopeSubsystem.runMidNodeCommand());
-        yButton.onTrue(telescopeSubsystem.runHighNodeCommand());
-        xButton.onTrue(telescopeSubsystem.runShelfCommand());
+        elevatorSubsystem.setDefaultCommand(Commands.run(
+            () -> elevatorSubsystem.setElevatorPercent(xboxController.getLeftY()),
+            elevatorSubsystem));
 
-        rightBumper.whileTrue(clawSubsystem.openCommand());
-        leftBumper.whileTrue(clawSubsystem.closeCommand());
+        aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
+        bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
+        yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
+        xButton.onTrue(elevatorSubsystem.runShelfCommand());
+
+        // rightBumper.whileTrue(clawSubsystem.openCommand());
+        // leftBumper.whileTrue(clawSubsystem.closeCommand());
 
     }
 
