@@ -26,12 +26,17 @@ public class ElevatorSubsystem extends SubsystemBase{
     private double highNodePosition = 0;
     private double shelfPosition = 0;
 
+    //Shuffleboard Stuff
     private final ShuffleboardTab elevTab = Shuffleboard.getTab("Elevator");
-    private final GenericEntry motorVelocityEntry = elevTab.add("Motor Velocity", 0).getEntry();
-    private final GenericEntry motorSpeedEntry = elevTab.add("Motor Speed", 0).getEntry();
+    private final GenericEntry motorVelocityEntry = elevTab.add("Motor RPM", 0).getEntry();
+    private final GenericEntry motorSpeedEntry = elevTab.add("Motor %", 0).getEntry();
     private final GenericEntry motorPositionEntry = elevTab.add("Motor Position", 0).getEntry();
     private final GenericEntry limitSwitchEntry = elevTab.add("Limit Switch", false).getEntry();
-
+    private final GenericEntry zeroPositionEntry = elevTab.add("Zero Position", zeroPosition).getEntry();
+    private final GenericEntry lowNodePositionEntry = elevTab.add("Low Node Position", lowNodePosition).getEntry();
+    private final GenericEntry midNodePositionEntry = elevTab.add("Mid Node Position", midNodePosition).getEntry();
+    private final GenericEntry highNodePositionEntry = elevTab.add("High Node Position", highNodePosition).getEntry();
+    private final GenericEntry shelfPositionEntry = elevTab.add("Shelf Position", shelfPosition).getEntry();
 
     public void setElevatorPercent(double percent) {
         pidController.setReference(percent, ControlType.kDutyCycle);
@@ -63,11 +68,19 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
+        //Update shuffleboard values
         motorVelocityEntry.setDouble(elevatorMotor.getEncoder().getVelocity());
         motorSpeedEntry.setDouble(elevatorMotor.get());
         motorPositionEntry.setDouble(elevatorMotor.getEncoder().getPosition());
         limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
         
+        //Fetch values from shuffleboard
+        zeroPosition = zeroPositionEntry.getDouble(zeroPosition);
+        lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
+        midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
+        highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
+        shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
+
         if(zeroLimitSwitch.get()) {
             zeroPosition = encoder.getPosition();
             setElevatorPercent(0);

@@ -6,7 +6,10 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.ControlType;
 
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +27,10 @@ public class TelescopeSubsystem extends SubsystemBase{
     private double midNodePosition = 0.0;
     private double highNodePosition = 0.0;
     private double shelfPosition = 0.0;
+
+    private final ShuffleboardTab telescopeTab = Shuffleboard.getTab("Telescope");
+    GenericEntry motorPositionEntry = telescopeTab.add("Elevator Position", 0).getEntry();
+    GenericEntry limitSwitchEntry = telescopeTab.add("Zero Limit Switch", false).getEntry();
 
     public void setTelescopePercent(double percent) {
         pidController.setReference(percent, ControlType.kDutyCycle);

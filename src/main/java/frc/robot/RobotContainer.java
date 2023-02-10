@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.PlaygroundSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
@@ -29,9 +28,8 @@ import org.opencv.video.TrackerGOTURN;
  */
 public class RobotContainer {
 
-    //private PlaygroundSubsystem playgroundSubsystem = new PlaygroundSubsystem();
-    //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
     private final ClawSubsystem clawSubsystem = new ClawSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
@@ -62,26 +60,25 @@ public class RobotContainer {
         Trigger rightBumper = xboxController.rightBumper();
         Trigger leftBumper = xboxController.leftBumper();
 
-        //Trigger leftJoystickXPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftX.value, XBOX_TRIGGER_THRESHOLD);
-        //Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
-        //Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
+        Trigger leftJoystickXPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftX.value, XBOX_TRIGGER_THRESHOLD);
+        Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
+        Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
 
-        // telescopeSubsystem.setDefaultCommand(Commands.run(
-        //     () -> telescopeSubsystem.setTelescopePercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
-        //     telescopeSubsystem));
+        telescopeSubsystem.setDefaultCommand(Commands.run(
+            () -> telescopeSubsystem.setTelescopePercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
+            telescopeSubsystem));
 
-        // elevatorSubsystem.setDefaultCommand(Commands.run(
-        //     () -> elevatorSubsystem.setElevatorPercent(xboxController.getLeftY()),
-        //     elevatorSubsystem));
+        elevatorSubsystem.setDefaultCommand(Commands.run(
+            () -> elevatorSubsystem.setElevatorPercent(xboxController.getLeftY()),
+            elevatorSubsystem));
 
-        // aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
-        // bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
-        // yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
-        // xButton.onTrue(elevatorSubsystem.runShelfCommand());
+        aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
+        bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
+        yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
+        xButton.onTrue(elevatorSubsystem.runShelfCommand());
 
         rightBumper.whileTrue(clawSubsystem.openCommand());
         leftBumper.whileTrue(clawSubsystem.closeCommand());
-
     }
 
     /**
