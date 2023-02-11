@@ -76,23 +76,23 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     }
 
     public Command runLowNodeCommand() {
-        return this.runOnce(() -> setPosition(lowNodePosition));
+        return this.run(() -> setPosition(lowNodePosition));
     }
 
     public Command runMidNodeCommand() {
-        return this.runOnce(() -> setPosition(midNodePosition));
+        return this.run(() -> setPosition(midNodePosition));
     }
 
     public Command runHighNodeCommand() {
-        return this.runOnce(() -> setPosition(highNodePosition));
+        return this.run(() -> setPosition(highNodePosition));
     }
 
     public Command runShelfCommand() {
-        return this.runOnce(() -> setPosition(shelfPosition));
+        return this.run(() -> setPosition(shelfPosition));
     }
 
     public Command runZeroCommand() {
-        return this.runOnce(() -> setPosition(0));
+        return this.run(() -> setPosition(0));
     }
 
     protected void setPID(double p, double i, double d) {

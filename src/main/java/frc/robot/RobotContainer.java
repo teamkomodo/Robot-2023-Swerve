@@ -65,17 +65,17 @@ public class RobotContainer {
         Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
 
         telescopeSubsystem.setDefaultCommand(Commands.run(
-            () -> telescopeSubsystem.setTelescopePercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
+            () -> telescopeSubsystem.setMotorPercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
             telescopeSubsystem));
 
         elevatorSubsystem.setDefaultCommand(Commands.run(
-            () -> elevatorSubsystem.setElevatorPercent(xboxController.getLeftY()),
+            () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
             elevatorSubsystem));
 
-        aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
-        bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
-        yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
-        xButton.onTrue(elevatorSubsystem.runShelfCommand());
+        aButton.whileTrue(elevatorSubsystem.runLowNodeCommand());
+        bButton.whileTrue(elevatorSubsystem.runMidNodeCommand());
+        yButton.whileTrue(elevatorSubsystem.runHighNodeCommand());
+        xButton.whileTrue(elevatorSubsystem.runShelfCommand());
 
         rightBumper.whileTrue(clawSubsystem.openCommand());
         leftBumper.whileTrue(clawSubsystem.closeCommand());
