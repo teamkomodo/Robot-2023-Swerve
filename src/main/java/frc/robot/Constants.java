@@ -14,7 +14,7 @@ package frc.robot;
  */
 public final class Constants {
   public static final int XBOX_CONTROLLER_PORT = 0;
-  public static final double XBOX_TRIGGER_THRESHOLD = 0.1D;
+  public static final double XBOX_JOYSTICK_THRESHOLD = 0.05D;
 
   public static final int TELESCOPE_MOTOR_ID = 31;
   public static final int ELEVATOR_MOTOR_ID = 30;

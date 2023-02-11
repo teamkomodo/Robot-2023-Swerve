@@ -60,23 +60,20 @@ public class RobotContainer {
         Trigger rightBumper = xboxController.rightBumper();
         Trigger leftBumper = xboxController.leftBumper();
 
-        Trigger leftJoystickXPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftX.value, XBOX_TRIGGER_THRESHOLD);
-        Trigger leftJoystickXNegative = xboxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_TRIGGER_THRESHOLD);
-        Trigger leftJoystickX = leftJoystickXPositive.or(leftJoystickXNegative);
+        Trigger leftJoystickYPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD);
+        Trigger leftJoystickYNegative = xboxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD);
+        Trigger leftJoystickY = leftJoystickYPositive.or(leftJoystickYNegative);
 
-        telescopeSubsystem.setDefaultCommand(Commands.run(
-            () -> telescopeSubsystem.setMotorPercent(xboxController.getLeftTriggerAxis() - xboxController.getRightTriggerAxis()),
-            telescopeSubsystem));
-
-        elevatorSubsystem.setDefaultCommand(Commands.run(
+        //Elevator Triggers
+        aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
+        bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
+        yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
+        xButton.onTrue(elevatorSubsystem.runShelfCommand());
+        leftJoystickY.whileTrue(Commands.run(
             () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
             elevatorSubsystem));
 
-        aButton.whileTrue(elevatorSubsystem.runLowNodeCommand());
-        bButton.whileTrue(elevatorSubsystem.runMidNodeCommand());
-        yButton.whileTrue(elevatorSubsystem.runHighNodeCommand());
-        xButton.whileTrue(elevatorSubsystem.runShelfCommand());
-
+        //Claw Triggers
         rightBumper.whileTrue(clawSubsystem.openCommand());
         leftBumper.whileTrue(clawSubsystem.closeCommand());
     }

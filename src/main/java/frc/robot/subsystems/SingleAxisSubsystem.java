@@ -67,32 +67,44 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         dEntry = shuffleboardTab.add("D Gain", d).getEntry();
     }
 
+    public boolean atZeroLimitSwitch() {
+        if(zeroLimitSwitch.get())
+            return false;
+        zeroPosition = encoder.getPosition();
+        setMotorPercent(0);
+        return true;
+    }
+
     public void setMotorPercent(double percent) {
+        if(atZeroLimitSwitch())
+            return;
         pidController.setReference(percent, ControlType.kDutyCycle);
     }
 
     public void setPosition(double position) {
+        if(atZeroLimitSwitch())
+            return;
         pidController.setReference(position + zeroPosition, ControlType.kPosition);
     }
 
     public Command runLowNodeCommand() {
-        return this.run(() -> setPosition(lowNodePosition));
+        return this.runOnce(() -> setPosition(lowNodePosition));
     }
 
     public Command runMidNodeCommand() {
-        return this.run(() -> setPosition(midNodePosition));
+        return this.runOnce(() -> setPosition(midNodePosition));
     }
 
     public Command runHighNodeCommand() {
-        return this.run(() -> setPosition(highNodePosition));
+        return this.runOnce(() -> setPosition(highNodePosition));
     }
 
     public Command runShelfCommand() {
-        return this.run(() -> setPosition(shelfPosition));
+        return this.runOnce(() -> setPosition(shelfPosition));
     }
 
     public Command runZeroCommand() {
-        return this.run(() -> setPosition(0));
+        return this.runOnce(() -> setPosition(0));
     }
 
     protected void setPID(double p, double i, double d) {
@@ -112,9 +124,9 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         motorPercentEntry.setDouble(motor.get());
         motorPositionEntry.setDouble(encoder.getPosition());
         limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
+        zeroPositionEntry.setDouble(zeroPosition);
         
         //Fetch values from shuffleboard
-        zeroPosition = zeroPositionEntry.getDouble(zeroPosition);
         lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
         midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
@@ -139,9 +151,6 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
             d = newD;
         }
 
-        if(!zeroLimitSwitch.get()) {
-            zeroPosition = encoder.getPosition();
-            setMotorPercent(0);
-        }
+        atZeroLimitSwitch();
     }
 }
