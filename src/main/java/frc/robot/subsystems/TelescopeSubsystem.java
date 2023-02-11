@@ -29,8 +29,15 @@ public class TelescopeSubsystem extends SubsystemBase{
     private double shelfPosition = 0.0;
 
     private final ShuffleboardTab telescopeTab = Shuffleboard.getTab("Telescope");
-    GenericEntry motorPositionEntry = telescopeTab.add("Elevator Position", 0).getEntry();
-    GenericEntry limitSwitchEntry = telescopeTab.add("Zero Limit Switch", false).getEntry();
+    private final GenericEntry motorVelocityEntry = telescopeTab.add("Motor RPM", 0).getEntry();
+    private final GenericEntry motorPercentEntry = telescopeTab.add("Motor %", 0).getEntry();
+    private final GenericEntry motorPositionEntry = telescopeTab.add("Motor Position", 0).getEntry();
+    private final GenericEntry limitSwitchEntry = telescopeTab.add("Limit Switch", false).getEntry();
+    private final GenericEntry zeroPositionEntry = telescopeTab.add("Zero Position", zeroPosition).getEntry();
+    private final GenericEntry lowNodePositionEntry = telescopeTab.add("Low Node Position", lowNodePosition).getEntry();
+    private final GenericEntry midNodePositionEntry = telescopeTab.add("Mid Node Position", midNodePosition).getEntry();
+    private final GenericEntry highNodePositionEntry = telescopeTab.add("High Node Position", highNodePosition).getEntry();
+    private final GenericEntry shelfPositionEntry = telescopeTab.add("Shelf Position", shelfPosition).getEntry();
 
     public void setTelescopePercent(double percent) {
         pidController.setReference(percent, ControlType.kDutyCycle);
@@ -62,8 +69,20 @@ public class TelescopeSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-        if(zeroLimitSwitch.get()) {
-            pidController.setReference(0, CANSparkMax.ControlType.kDutyCycle);
+        //Update shuffleboard values
+        motorVelocityEntry.setDouble(encoder.getVelocity());
+        motorPercentEntry.setDouble(telescopeMotor.get());
+        motorPositionEntry.setDouble(encoder.getPosition());
+        limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
+        
+        //Fetch values from shuffleboard
+        zeroPosition = zeroPositionEntry.getDouble(zeroPosition);
+        lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
+        midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
+        highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
+        shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
+        if(!zeroLimitSwitch.get()) {
+            setTelescopePercent(0);
             zeroPosition = encoder.getPosition();
         }
     }
