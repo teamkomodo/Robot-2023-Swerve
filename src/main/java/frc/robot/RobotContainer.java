@@ -11,11 +11,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.JointSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
-
-import org.opencv.video.TrackerGOTURN;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -29,7 +28,8 @@ import org.opencv.video.TrackerGOTURN;
 public class RobotContainer {
 
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
+    //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
+    //private final JointSubsystem jointSubsystem = new JointSubsystem();
     private final ClawSubsystem clawSubsystem = new ClawSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
