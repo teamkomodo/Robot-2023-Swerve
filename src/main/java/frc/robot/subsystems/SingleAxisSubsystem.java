@@ -153,4 +153,24 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
 
         atZeroLimitSwitch();
     }
+
+    public void setLowNodePosition(double lowNodePosition) {
+        this.lowNodePosition = lowNodePosition;
+        lowNodePositionEntry.setDouble(lowNodePosition);
+    }
+
+    public void setMidNodePosition(double midNodePosition) {
+        this.midNodePosition = lowNodePosition;
+        midNodePositionEntry.setDouble(midNodePosition);
+    }
+
+    public void setHighNodePosition(double highNodePosition) {
+        this.highNodePosition = lowNodePosition;
+        highNodePositionEntry.setDouble(highNodePosition); 
+    }
+
+    public void setShelfPosition(double shelfPosition) {
+        this.shelfPosition = shelfPosition;
+        shelfPositionEntry.setDouble(shelfPosition);
+    }
 }
