@@ -50,13 +50,15 @@ public class RobotContainer {
   private void configureBindings() {
 
     Trigger slowModeButton = driverXBoxController.leftBumper();
+    Trigger aButton = driverXBoxController.a();
+    Trigger bButton = driverXBoxController.b();
 
     drivetrainSubsystem.setDefaultCommand(
       Commands.run(
       () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
         joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
         joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        true),
+        false),
       drivetrainSubsystem));
 
     slowModeButton.whileTrue(
@@ -64,8 +66,21 @@ public class RobotContainer {
       () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
         joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
         joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-        true),
+        false),
       drivetrainSubsystem));
+
+    aButton.whileTrue(
+        Commands.run(
+            () -> drivetrainSubsystem.drive(0.1, 0, 0, false), drivetrainSubsystem
+        )
+    );
+
+    bButton.whileTrue(
+        Commands.run(
+            () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
+        )
+    );
+    
   }
 
   /**
