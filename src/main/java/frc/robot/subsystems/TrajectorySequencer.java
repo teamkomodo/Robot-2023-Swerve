@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -55,9 +54,9 @@ public class TrajectorySequencer extends SubsystemBase {
     }
 
     private Rotation2d angularTweak(Rotation2d input, Random random) {
-        return input;// Rotation2d.fromRadians(input.getRadians()
-        // + (((random.nextDouble() * 2.0) - 1.0) *
-        // AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
+        return Rotation2d.fromRadians(input.getRadians()
+        + (((random.nextDouble() * 2.0) - 1.0) *
+        AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
     }
 
     public void startRelativeTrajectory(List<Pose2d> waypoints, boolean relativeToInitialTranslation,
@@ -104,6 +103,10 @@ public class TrajectorySequencer extends SubsystemBase {
                 TrajectoryGenerator.generateTrajectory(start, waypoints, end,
                         controllerCommandFactory.getTrajectoryConfig()),
                 relativeToInitialTranslation, false, onComplete);
+    }
+
+    public void startNonRelativeTrajectory(List<Translation2d> waypoints, Pose2d end, Runnable onComplete) {
+        startRelativeTrajectory(drivetrainSubsystem.getPoseMeters(), waypoints, end, false, onComplete);
     }
 
     public void pause() {

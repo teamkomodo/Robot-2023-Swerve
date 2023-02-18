@@ -11,6 +11,7 @@ import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
+import frc.robot.util.VisionPipelineConnector;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,6 +34,7 @@ public class RobotContainer {
     private final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
             null);
     private final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
+    private final VisionPipelineConnector visionPipeline = new VisionPipelineConnector("VisionPipeline");
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
             OperatorConstants.driverXBoxControllerPort);

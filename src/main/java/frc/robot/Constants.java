@@ -51,6 +51,9 @@ public final class Constants {
         public static final double TARGET_INTERCEPT_GRAD_RATE = 0.1;
         public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
         public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
+        // Field position lineup tolerances
+        public static final double MAX_POSITIONING_ERROR_METERS = 0.06;
+        public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(5);
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 6.5;
         public static final double AUTO_LEVEL_K_I = 0.0;
