@@ -45,4 +45,8 @@ public final class Constants {
   public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(205.0-180);
 
   public static final double SLOW_MODE_MODIFIER = 0.5D;
+
+  public static final double SWERVE_STEER_P = 1.0;
+  public static final double SWERVE_STEER_I = 0.0;
+  public static final double SWERVE_STEER_D = 0.1;
 }

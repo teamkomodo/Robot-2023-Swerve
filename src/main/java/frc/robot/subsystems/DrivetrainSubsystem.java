@@ -12,12 +12,22 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.SwerveModuleImpl;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
 import com.swervedrivespecialties.swervelib.Mk4iSwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
+import com.swervedrivespecialties.swervelib.SwerveModule;
+import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
+import com.swervedrivespecialties.swervelib.Mk4iSwerveModuleHelper.GearRatio;
+import com.swervedrivespecialties.swervelib.ctre.CanCoderAbsoluteConfiguration;
+import com.swervedrivespecialties.swervelib.ctre.CanCoderFactoryBuilder;
+import com.swervedrivespecialties.swervelib.rev.NeoDriveControllerFactoryBuilder;
+import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
+import com.swervedrivespecialties.swervelib.rev.NeoSteerControllerFactoryBuilder;
 
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import static frc.robot.Constants.*;
@@ -48,7 +58,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public DrivetrainSubsystem() {
         tab = Shuffleboard.getTab("Drivetrain");
 
-        frontLeftModule = new SwerveModuleImpl(Mk4iSwerveModuleHelper.createNeo(
+        frontLeftModule = new SwerveModuleImpl(createCustomNeo(
                 // This parameter is optional, but will allow you to see the current state of
                 // the module on the dashboard.
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0),
@@ -66,7 +76,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        frontRightModule = new SwerveModuleImpl(Mk4iSwerveModuleHelper.createNeo(
+        frontRightModule = new SwerveModuleImpl(createCustomNeo(
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0),
                 Mk4iSwerveModuleHelper.GearRatio.L1,
                 FRONT_RIGHT_MODULE_DRIVE_MOTOR,
@@ -76,7 +86,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backLeftModule = new SwerveModuleImpl(Mk4iSwerveModuleHelper.createNeo(
+        backLeftModule = new SwerveModuleImpl(createCustomNeo(
                 tab.getLayout("Back Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0),
                 Mk4iSwerveModuleHelper.GearRatio.L1,
                 BACK_LEFT_MODULE_DRIVE_MOTOR,
@@ -86,7 +96,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backRightModule = new SwerveModuleImpl(Mk4iSwerveModuleHelper.createNeo(
+        backRightModule = new SwerveModuleImpl(createCustomNeo(
                 tab.getLayout("Back Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(6, 0),
                 Mk4iSwerveModuleHelper.GearRatio.L1,
                 BACK_RIGHT_MODULE_DRIVE_MOTOR,
@@ -148,6 +158,38 @@ public class DrivetrainSubsystem extends SubsystemBase {
             return;
         }
         setSwerveModuleStates(kinematics.toSwerveModuleStates(currentChassisSpeeds));
+    }
+
+    private SwerveModule createCustomNeo(
+        ShuffleboardLayout container,
+            GearRatio gearRatio,
+            int driveMotorPort,
+            int steerMotorPort,
+            int steerEncoderPort,
+            double steerOffset
+    ) {
+        Mk4ModuleConfiguration configuration = new Mk4ModuleConfiguration();
+        return new SwerveModuleFactory<>(
+                gearRatio.getConfiguration(),
+                new NeoDriveControllerFactoryBuilder()
+                .withVoltageCompensation(configuration.getNominalVoltage())
+                .withCurrentLimit(configuration.getDriveCurrentLimit())
+                .build(),
+                new NeoSteerControllerFactoryBuilder()
+                .withVoltageCompensation(configuration.getNominalVoltage())
+                .withPidConstants(SWERVE_STEER_P, SWERVE_STEER_I, SWERVE_STEER_D)
+                .withCurrentLimit(configuration.getSteerCurrentLimit())
+                .build(new CanCoderFactoryBuilder()
+                        .withReadingUpdatePeriod(100)
+                        .build())
+        ).create(
+                container,
+                driveMotorPort,
+                new NeoSteerConfiguration<>(
+                        steerMotorPort,
+                        new CanCoderAbsoluteConfiguration(steerEncoderPort, steerOffset)
+                )
+        );
     }
 
     @Override
