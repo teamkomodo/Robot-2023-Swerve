@@ -9,11 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.JointSubsystem;
-import frc.robot.subsystems.LEDStripSubsystem;
-import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
 
@@ -29,10 +25,6 @@ import static frc.robot.Constants.*;
 public class RobotContainer {
 
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
-    //private final JointSubsystem jointSubsystem = new JointSubsystem();
-    private final ClawSubsystem clawSubsystem = new ClawSubsystem();
-    private final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
 
@@ -59,8 +51,6 @@ public class RobotContainer {
         Trigger bButton = xboxController.b();
         Trigger xButton = xboxController.x();
         Trigger yButton = xboxController.y();
-        Trigger rightBumper = xboxController.rightBumper();
-        Trigger leftBumper = xboxController.leftBumper();
 
         Trigger leftJoystickYPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD);
         Trigger leftJoystickYNegative = xboxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD);
@@ -74,10 +64,6 @@ public class RobotContainer {
         leftJoystickY.whileTrue(Commands.run(
             () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
             elevatorSubsystem));
-
-        //Claw Triggers
-        rightBumper.whileTrue(clawSubsystem.openCommand());
-        leftBumper.whileTrue(clawSubsystem.closeCommand());
     }
 
     /**
