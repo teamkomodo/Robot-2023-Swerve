@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,8 +32,11 @@ public class TrajectorySequencer extends SubsystemBase {
         this.fieldVelTargetSupplier = fieldVelTargetSupplier;
     }
 
-    public void startRelativeTrajectory(Trajectory traj, boolean overwriteCurrentCommand) {
-        SwerveControllerCommandDescriptor controllerDesc = controllerCommandFactory.generateCommand(traj);
+    public void startRelativeTrajectory(Trajectory traj, boolean relativeToInitialTranslation,
+            boolean overwriteCurrentCommand, Runnable onComplete) {
+
+        SwerveControllerCommandDescriptor controllerDesc = controllerCommandFactory.generateCommand(traj,
+                relativeToInitialTranslation, onComplete);
         if (overwriteCurrentCommand) {
             if (commandStack.size() > 0) {
                 commandStack.get(0).command.end(true);
@@ -52,29 +54,34 @@ public class TrajectorySequencer extends SubsystemBase {
     }
 
     private Rotation2d angularTweak(Rotation2d input, Random random) {
-        return input;//Rotation2d.fromRadians(input.getRadians()
-                //+ (((random.nextDouble() * 2.0) - 1.0) * AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
+        return Rotation2d.fromRadians(input.getRadians()
+        + (((random.nextDouble() * 2.0) - 1.0) *
+        AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
     }
 
-    public void startRelativeTrajectory(List<Pose2d> waypoints) {
-        // if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
-        //     Random generator = new Random(4293); // Consistent random seed
-        //     List<Pose2d> newWaypoints = new ArrayList<Pose2d>();
-        //     for (int i = 0; i < waypoints.size(); i++) {
-        //         // Random tweakage to avoid misparameterization
-        //         Pose2d waypoint = waypoints.get(i);
-        //         Pose2d newWaypoint = new Pose2d(linearTweak(waypoint.getX(), generator),
-        //                 linearTweak(waypoint.getY(), generator), angularTweak(waypoint.getRotation(), generator));
-        //         newWaypoints.add(newWaypoint);
-        //     }
-        //     waypoints = newWaypoints;
-        // }
+    public void startRelativeTrajectory(List<Pose2d> waypoints, boolean relativeToInitialTranslation,
+            Runnable onComplete) {
+
+        if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
+            Random generator = new Random(4293); // Consistent random seed
+            List<Pose2d> newWaypoints = new ArrayList<Pose2d>();
+            for (int i = 0; i < waypoints.size(); i++) {
+                // Random tweakage to avoid misparameterization
+                Pose2d waypoint = waypoints.get(i);
+                Pose2d newWaypoint = new Pose2d(linearTweak(waypoint.getX(), generator),
+                        linearTweak(waypoint.getY(), generator), angularTweak(waypoint.getRotation(), generator));
+                newWaypoints.add(newWaypoint);
+            }
+            waypoints = newWaypoints;
+        }
         startRelativeTrajectory(
                 TrajectoryGenerator.generateTrajectory(waypoints, controllerCommandFactory.getTrajectoryConfig()),
-                false);
+                relativeToInitialTranslation, false, onComplete);
     }
 
-    public void startRelativeTrajectory(Pose2d start, List<Translation2d> waypoints, Pose2d end) {
+    public void startRelativeTrajectory(Pose2d start, List<Translation2d> waypoints, Pose2d end,
+            boolean relativeToInitialTranslation, Runnable onComplete) {
+
         if (AutoConstants.ENABLE_RANDOM_GENERATION_TWEAKAGE) {
             Random generator = new Random(4293); // Consistent random seed
             start = new Pose2d(linearTweak(start.getX(), generator),
@@ -95,7 +102,11 @@ public class TrajectorySequencer extends SubsystemBase {
         startRelativeTrajectory(
                 TrajectoryGenerator.generateTrajectory(start, waypoints, end,
                         controllerCommandFactory.getTrajectoryConfig()),
-                false);
+                relativeToInitialTranslation, false, onComplete);
+    }
+
+    public void startNonRelativeTrajectory(List<Translation2d> waypoints, Pose2d end, Runnable onComplete) {
+        startRelativeTrajectory(drivetrainSubsystem.getPoseMeters(), waypoints, end, false, onComplete);
     }
 
     public void pause() {
@@ -108,6 +119,25 @@ public class TrajectorySequencer extends SubsystemBase {
         if (commandStack.size() > 0) {
             commandStack.get(0).baseCommand.unpause();
         }
+    }
+
+    public void stageCurrentTrajectory(boolean interrupted) {
+        if (commandStack.size() > 0) {
+            commandStack.get(0).command.end(interrupted);
+            drivetrainSubsystem.stopMotion();
+            commandStack.remove(0);
+            if (commandStack.size() > 0) {
+                commandStack.get(0).command.initialize();
+            }
+        }
+    }
+
+    public void cancelTrajectoryQueue() {
+        if (commandStack.size() > 0) {
+            commandStack.get(0).command.end(true);
+            commandStack.clear();
+        }
+        drivetrainSubsystem.stopMotion();
     }
 
     private double unchecked_getTargetDistanceMeters(double timeFromNow_sec) {
@@ -155,31 +185,26 @@ public class TrajectorySequencer extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (AutoConstants.ENABLE_TARGET_INTERCEPT_CHECK) {
-            if (lastInterceptCheck == (long) (-1)) {
-                lastInterceptCheck = System.currentTimeMillis();
-            } else if (System.currentTimeMillis()
-                    - lastInterceptCheck > AutoConstants.TARGET_INTERCEPT_CHECK_PERIOD_MS) {
-                double interceptDistanceMeters = getClosestTargetIntersectionMeters();
-                if (interceptDistanceMeters > 0) {
-                    if (interceptDistanceMeters < AutoConstants.MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION) {
-                        this.pause();
-                    } else {
-                        this.unpause();
-                    }
-                }
-                lastInterceptCheck = System.currentTimeMillis();
-            }
-        }
         if (commandStack.size() > 0) {
+            if (AutoConstants.ENABLE_TARGET_INTERCEPT_CHECK) {
+                if (lastInterceptCheck == (long) (-1)) {
+                    lastInterceptCheck = System.currentTimeMillis();
+                } else if (System.currentTimeMillis()
+                        - lastInterceptCheck > AutoConstants.TARGET_INTERCEPT_CHECK_PERIOD_MS) {
+                    double interceptDistanceMeters = getClosestTargetIntersectionMeters();
+                    if (interceptDistanceMeters > 0) {
+                        if (interceptDistanceMeters < AutoConstants.MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION) {
+                            this.pause();
+                        } else {
+                            this.unpause();
+                        }
+                    }
+                    lastInterceptCheck = System.currentTimeMillis();
+                }
+            }
             commandStack.get(0).command.execute();
             if (commandStack.get(0).command.isFinished()) {
-                commandStack.get(0).command.end(false);
-                drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
-                commandStack.remove(0);
-                if (commandStack.size() > 0) {
-                    commandStack.get(0).command.initialize();
-                }
+                this.stageCurrentTrajectory(false);
             }
         }
     }

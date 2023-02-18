@@ -59,6 +59,8 @@ public class AutoLevelCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        Shuffleboard.getTab("Autolevel X PID").add(x_pid);
+        Shuffleboard.getTab("Autolevel Y PID").add(y_pid);
         if (RobotBase.isSimulation()) {
             drivetrainSubsystem.resetOdometry(new Pose2d(1, 3, Rotation2d.fromDegrees(0)));
         }
@@ -99,7 +101,7 @@ public class AutoLevelCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
+        drivetrainSubsystem.stopMotion();
     }
 
     @Override

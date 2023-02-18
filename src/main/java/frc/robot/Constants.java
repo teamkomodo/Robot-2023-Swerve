@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
@@ -27,13 +30,16 @@ public final class Constants {
 
     public static class AutoConstants {
         // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 0.3;
-        public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 5;
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
+        public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 10;
         public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 3;
-        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 5;
-        public static final double P_X_CONTROLLER = 2;
-        public static final double P_Y_CONTROLLER = 2;
+        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 10;
+        public static final double P_X_CONTROLLER = 1.2;
+        public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
+        public static final double I_X_CONTROLLER = 0.25;
+        public static final double I_Y_CONTROLLER = I_X_CONTROLLER;
         public static final double P_THETA_CONTROLLER = 3;
+        public static final double I_THETA_CONTROLLER = 0.7;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
@@ -45,10 +51,21 @@ public final class Constants {
         public static final double TARGET_INTERCEPT_GRAD_RATE = 0.1;
         public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
         public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
+        // Field position lineup tolerances
+        public static final double MAX_POSITIONING_ERROR_METERS = 0.06;
+        public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(5);
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 1.2;
         public static final double AUTO_LEVEL_K_I = 0.3;
         public static final double AUTO_LEVEL_K_D = 0.2;
+    }
+
+    public static class VisionConstants {
+        public static final Transform3d rbt2cam = new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0));
+        // 0 for no filtering, 1 for an integration over all of time. Don't do 1.
+        public static final double ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT = 0.9;
     }
 
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;
