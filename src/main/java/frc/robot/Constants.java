@@ -47,6 +47,6 @@ public final class Constants {
   public static final double SLOW_MODE_MODIFIER = 0.5D;
 
   public static final double SWERVE_STEER_P = 1.0;
-  public static final double SWERVE_STEER_I = 0.0;
+  public static final double SWERVE_STEER_I = 1.0e-3;
   public static final double SWERVE_STEER_D = 0.1;
 }
