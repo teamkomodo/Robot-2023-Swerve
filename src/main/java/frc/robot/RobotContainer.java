@@ -49,6 +49,8 @@ public class RobotContainer {
 
     private void configureBindings() {
         Trigger slowModeButton = driverXBoxController.leftBumper();
+        Trigger autoLevelButton = driverXBoxController.a();
+        autoLevelButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
 
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
@@ -88,6 +90,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new FollowApriltagCommand(drivetrainSubsystem, vision);
+        return null;
     }
 }

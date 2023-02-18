@@ -55,9 +55,9 @@ public final class Constants {
         public static final double MAX_POSITIONING_ERROR_METERS = 0.06;
         public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(5);
         // Auto leveling system
-        public static final double AUTO_LEVEL_K_P = 6.5;
-        public static final double AUTO_LEVEL_K_I = 0.0;
-        public static final double AUTO_LEVEL_K_D = 0.0;
+        public static final double AUTO_LEVEL_K_P = 1.2;
+        public static final double AUTO_LEVEL_K_I = 0.3;
+        public static final double AUTO_LEVEL_K_D = 0.2;
     }
 
     public static class VisionConstants {
