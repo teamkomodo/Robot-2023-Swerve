@@ -46,9 +46,9 @@ public final class Constants {
         public static final long TARGET_INTERCEPT_CHECK_PERIOD_MS = 200;
         public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
         // Auto leveling system
-        public static final double AUTO_LEVEL_K_P = 6.5;
-        public static final double AUTO_LEVEL_K_I = 0.0;
-        public static final double AUTO_LEVEL_K_D = 0.0;
+        public static final double AUTO_LEVEL_K_P = 1.2;
+        public static final double AUTO_LEVEL_K_I = 0.3;
+        public static final double AUTO_LEVEL_K_D = 0.2;
     }
 
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5969;

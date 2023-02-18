@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
@@ -75,6 +76,8 @@ public class RobotContainer {
      */
     private void configureBindings() {
         Trigger slowModeButton = driverXBoxController.leftBumper();
+        Trigger autoLevelButton = driverXBoxController.a();
+        autoLevelButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
 
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
@@ -99,15 +102,6 @@ public class RobotContainer {
     }
 
     private void addTestTrajectories() {
-        //List<Translation2d> waypoints = new ArrayList<Translation2d>();
-        // for (int i = 0; i < 1; i++) {
-        //     waypoints.add(new Translation2d(2, 0));
-        //     waypoints.add(new Translation2d(0, 0));
-        // }
-        //waypoints.add(new Translation2d(2, 0));
-        // trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-        //         waypoints,
-        //         new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
         trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
         List.of(),
         new Pose2d(1, 0, Rotation2d.fromDegrees(0)));
@@ -128,7 +122,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return new InstantCommand(
-                () -> addTestTrajectories());
+        return new AutoLevelCommand(drivetrainSubsystem);
     }
 }

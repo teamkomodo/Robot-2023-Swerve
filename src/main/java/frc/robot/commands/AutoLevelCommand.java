@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.Constants.AutoConstants;
@@ -21,13 +22,22 @@ public class AutoLevelCommand extends CommandBase {
     public AutoLevelCommand(DrivetrainSubsystem drivetrainSubsystem) {
         addRequirements(drivetrainSubsystem);
         this.drivetrainSubsystem = drivetrainSubsystem;
+        Shuffleboard.getTab("Autolevel X PID").add(x_pid);
+        Shuffleboard.getTab("Autolevel Y PID").add(y_pid);
     }
 
     private double simAlpha = 0;
 
+    private double deadzone(double angle) {
+        if (Math.abs(angle) < Math.toRadians(5)) {
+            return 0;
+        }
+        return angle;
+    }
+
     private Rotation2d getCurrentRoll() {
         if (RobotBase.isReal()) {
-            return Rotation2d.fromDegrees(this.drivetrainSubsystem.getNavx().getRoll());
+            return Rotation2d.fromDegrees(-this.drivetrainSubsystem.getNavx().getPitch());
         }
         double dPhi_x = Math.tan(simAlpha);
         double dPhi_L = Math.sin(getCurrentYaw().getRadians()) * dPhi_x;
@@ -36,7 +46,7 @@ public class AutoLevelCommand extends CommandBase {
 
     private Rotation2d getCurrentPitch() {
         if (RobotBase.isReal()) {
-            return Rotation2d.fromDegrees(this.drivetrainSubsystem.getNavx().getPitch());
+            return Rotation2d.fromDegrees(this.drivetrainSubsystem.getNavx().getRoll());
         }
         double dPhi_x = Math.tan(simAlpha);
         double dPhi_L = Math.cos(getCurrentYaw().getRadians()) * dPhi_x;
@@ -49,15 +59,29 @@ public class AutoLevelCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        Shuffleboard.getTab("Autolevel X PID").add(x_pid);
-        Shuffleboard.getTab("Autolevel Y PID").add(y_pid);
-        drivetrainSubsystem.resetOdometry(new Pose2d(1, 3, Rotation2d.fromDegrees(0)));
+        if (RobotBase.isSimulation()) {
+            drivetrainSubsystem.resetOdometry(new Pose2d(1, 3, Rotation2d.fromDegrees(0)));
+        }
     }
+
+    // private double norm(double v) {
+    // while (v > Math.PI) {
+    // v -= 2 * Math.PI;
+    // }
+    // while (v < -Math.PI) {
+    // v += 2 * Math.PI;
+    // }
+    // return v;
+    // }
 
     @Override
     public void execute() {
-        ChassisSpeeds correction = new ChassisSpeeds(x_pid.calculate(Math.atan(getCurrentPitch().getRadians()), 0),
-                -y_pid.calculate(Math.atan(getCurrentRoll().getRadians()), 0), 1);
+        ChassisSpeeds correction = new ChassisSpeeds(
+                x_pid.calculate(Math.tan(deadzone(getCurrentPitch().getRadians())), 0),
+                -y_pid.calculate(Math.tan(deadzone(getCurrentRoll().getRadians())), 0), 0);
+        SmartDashboard.putNumber("GYRO ROLL", Math.toDegrees(deadzone(getCurrentRoll().getRadians())));
+        SmartDashboard.putNumber("GYRO PITCH", Math.toDegrees(deadzone(getCurrentPitch().getRadians())));
+        SmartDashboard.putString("Calculated correction", "" + correction);
         if (RobotBase.isSimulation()) {
             simAlpha = (drivetrainSubsystem.getPoseMeters().getX() - 4) * 0.5;
             simAlpha = Math.min(Math.toRadians(15), simAlpha);
