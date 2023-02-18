@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
+import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
@@ -31,6 +32,7 @@ public class RobotContainer {
     //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
     //private final JointSubsystem jointSubsystem = new JointSubsystem();
     private final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    private final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
 

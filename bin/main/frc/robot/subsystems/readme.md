@@ -68,3 +68,12 @@ Sensor Inputs
 Inputs and Behavior
 - Close Button -> Closes claw
 - Open Button -> Opens claw
+
+## Lights Subsystem
+
+Mechanical Components
+- RGB controller
+
+Behavior
+- Flash Orange on button hold
+- Flash Purple on button hold
