@@ -31,7 +31,7 @@ public class RobotContainer {
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
     //private final JointSubsystem jointSubsystem = new JointSubsystem();
-    private final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    //private final ClawSubsystem clawSubsystem = new ClawSubsystem();
     private final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
 
     private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
@@ -76,8 +76,8 @@ public class RobotContainer {
             elevatorSubsystem));
 
         //Claw Triggers
-        rightBumper.whileTrue(clawSubsystem.openCommand());
-        leftBumper.whileTrue(clawSubsystem.closeCommand());
+        // rightBumper.whileTrue(clawSubsystem.openCommand());
+        // leftBumper.whileTrue(clawSubsystem.closeCommand());
     }
 
     /**

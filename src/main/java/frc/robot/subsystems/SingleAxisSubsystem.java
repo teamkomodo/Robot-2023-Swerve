@@ -30,6 +30,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     protected final GenericEntry midNodePositionEntry;
     protected final GenericEntry highNodePositionEntry;
     protected final GenericEntry shelfPositionEntry;
+    protected final GenericEntry maxPositionEntry;
     protected final GenericEntry pEntry;
     protected final GenericEntry iEntry;
     protected final GenericEntry dEntry;
@@ -38,11 +39,13 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     protected double i = 0;
     protected double d = 0;
     
-    protected double zeroPosition ;
-    protected double lowNodePosition;
-    protected double midNodePosition;
-    protected double highNodePosition;
-    protected double shelfPosition;
+    protected double zeroPosition = 0;
+    protected double lowNodePosition = 0;
+    protected double midNodePosition = 0;
+    protected double highNodePosition = 0;
+    protected double shelfPosition = 0;
+
+    protected double maxPosition = 0;
 
     public SingleAxisSubsystem(final int MOTOR_ID, final int ZERO_LIMIT_SWITCH_CHANNEL, String shuffleboardTabName) {
 
@@ -62,6 +65,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         midNodePositionEntry = shuffleboardTab.add("Mid Node Position", midNodePosition).getEntry();
         highNodePositionEntry = shuffleboardTab.add("High Node Position", highNodePosition).getEntry();
         shelfPositionEntry = shuffleboardTab.add("Shelf Position", shelfPosition).getEntry();
+        maxPositionEntry = shuffleboardTab.add("Max Position", maxPosition).getEntry();
         pEntry = shuffleboardTab.add("P Gain", p).getEntry();
         iEntry = shuffleboardTab.add("I Gain", i).getEntry();
         dEntry = shuffleboardTab.add("D Gain", d).getEntry();
@@ -71,18 +75,25 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         if(zeroLimitSwitch.get())
             return false;
         zeroPosition = encoder.getPosition();
-        setMotorPercent(0);
+        pidController.setReference(0, ControlType.kDutyCycle);
+        return true;
+    }
+
+    public boolean atMaxLimit() {
+        if(encoder.getPosition() + zeroPosition < maxPosition)
+            return false;
+        pidController.setReference(0, ControlType.kDutyCycle);
         return true;
     }
 
     public void setMotorPercent(double percent) {
-        if(atZeroLimitSwitch())
+        if(atZeroLimitSwitch() || atMaxLimit())
             return;
         pidController.setReference(percent, ControlType.kDutyCycle);
     }
 
     public void setPosition(double position) {
-        if(atZeroLimitSwitch())
+        if(atZeroLimitSwitch() || atMaxLimit())
             return;
         pidController.setReference(position + zeroPosition, ControlType.kPosition);
     }
@@ -152,6 +163,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         }
 
         atZeroLimitSwitch();
+        atMaxLimit();
     }
 
     public void setLowNodePosition(double lowNodePosition) {
@@ -172,5 +184,10 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     public void setShelfPosition(double shelfPosition) {
         this.shelfPosition = shelfPosition;
         shelfPositionEntry.setDouble(shelfPosition);
+    }
+
+    public void setMaxPosition(double maxPosition) {
+        this.maxPosition = maxPosition;
+        maxPositionEntry.setDouble(maxPosition);
     }
 }
