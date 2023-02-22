@@ -24,8 +24,7 @@ public class TrajectorySequencer extends SubsystemBase {
     private ArrayList<SwerveControllerCommandDescriptor> commandStack = new ArrayList<SwerveControllerCommandDescriptor>();
 
     public TrajectorySequencer(DrivetrainSubsystem drive, SwerveControllerCommandFactory controllerCommandFactory,
-            Supplier<Pose2d> fieldPosTargetSupplier,
-            Supplier<Transform2d> fieldVelTargetSupplier) {
+            Supplier<Pose2d> fieldPosTargetSupplier, Supplier<Transform2d> fieldVelTargetSupplier) {
         this.drivetrainSubsystem = drive;
         this.controllerCommandFactory = controllerCommandFactory;
         this.fieldPosTargetSupplier = fieldPosTargetSupplier;
@@ -55,8 +54,8 @@ public class TrajectorySequencer extends SubsystemBase {
 
     private Rotation2d angularTweak(Rotation2d input, Random random) {
         return Rotation2d.fromRadians(input.getRadians()
-        + (((random.nextDouble() * 2.0) - 1.0) *
-        AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
+                + (((random.nextDouble() * 2.0) - 1.0) *
+                        AutoConstants.MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS));
     }
 
     public void startRelativeTrajectory(List<Pose2d> waypoints, boolean relativeToInitialTranslation,

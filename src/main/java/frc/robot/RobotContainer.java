@@ -6,8 +6,8 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoLevelCommand;
-import frc.robot.commands.FollowApriltagCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
@@ -27,14 +27,17 @@ import static frc.robot.Constants.*;
 import java.util.List;
 
 public class RobotContainer {
-    // The robot's subsystems and commands are defined here...
-    Field2d field2d = new Field2d();
-    private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
-    private final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
-    private final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
+    private final Field2d field2d = new Field2d();
+
+    // Subsystem definitions should be public for auto reasons
+    public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
+    public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
+    public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
             null);
-    private final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
-    private final VisionPipelineConnector visionPipeline = new VisionPipelineConnector("VisionPipeline");
+    public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
+    public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
+
+    private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
             OperatorConstants.driverXBoxControllerPort);
@@ -44,6 +47,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         SmartDashboard.putData("Field", field2d);
+        autonomousController.initAutonomous();
         configureBindings();
     }
 
@@ -74,22 +78,8 @@ public class RobotContainer {
                         drivetrainSubsystem));
     }
 
-    private void addTestTrajectories(boolean r) {
-        trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                List.of(),
-                new Pose2d(4, 0, Rotation2d.fromDegrees(90)), r, null);
-        trajectorySequencer.startRelativeTrajectory(new Pose2d(4, 0, Rotation2d.fromDegrees(90)),
-                List.of(),
-                new Pose2d(4, 4, Rotation2d.fromDegrees(180)), r, null);
-        trajectorySequencer.startRelativeTrajectory(new Pose2d(4, 4, Rotation2d.fromDegrees(180)),
-                List.of(),
-                new Pose2d(0, 4, Rotation2d.fromDegrees(270)), r, null);
-        trajectorySequencer.startRelativeTrajectory(new Pose2d(0, 4, Rotation2d.fromDegrees(270)),
-                List.of(),
-                new Pose2d(0, 0, Rotation2d.fromDegrees(0)), r, null);
-    }
-
     public Command getAutonomousCommand() {
-        return null;
+        autonomousController.initAutonomous();
+        return autonomousController.chooser.getSelected().generateCommand();
     }
 }

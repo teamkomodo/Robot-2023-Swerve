@@ -20,6 +20,21 @@ public class VisionPipelineConnector {
         public double centerY;
         public double width;
         public double height;
+
+        public double getArea() {
+            return width * height;
+        }
+
+        public boolean isValid() {
+            if (this.getArea() <= 0) {
+                return false;
+            } else if (this.centerX < -1.0 || this.centerX > 1.0) {
+                return false;
+            } else if (this.centerY < -1.0 || this.centerY > 1.0) {
+                return false;
+            }
+            return true;
+        }
     }
 
     private final NetworkTable table;
@@ -63,6 +78,9 @@ public class VisionPipelineConnector {
     }
 
     public Target[] getAllTargets() {
+        if (!isReady()) {
+            return null;
+        }
         long num_targets = getNumTargets();
         Target[] ret = new Target[(int) num_targets];
         for (long i = 0; i < num_targets; i++) {
@@ -74,6 +92,22 @@ public class VisionPipelineConnector {
                 ret[(int) i] = new Target(data);
             }
             s.close();
+        }
+        return ret;
+    }
+
+    public Target getLargestTarget() {
+        Target[] targets = getAllTargets();
+        if (targets == null) {
+            return null;
+        }
+        Target ret = null;
+        for (Target t : targets) {
+            if (t == null)
+                continue;
+            if (ret == null || t.getArea() >= ret.getArea()) {
+                ret = t;
+            }
         }
         return ret;
     }
