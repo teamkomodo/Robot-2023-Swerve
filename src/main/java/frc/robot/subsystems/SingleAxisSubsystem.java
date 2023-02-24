@@ -8,7 +8,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -56,19 +58,22 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         motor.restoreFactoryDefaults();
 
         shuffleboardTab = Shuffleboard.getTab(shuffleboardTabName);
-        motorVelocityEntry = shuffleboardTab.add("Motor RPM", 0).getEntry();
-        motorPercentEntry = shuffleboardTab.add("Motor %", 0).getEntry();
-        motorPositionEntry = shuffleboardTab.add("Motor Position", 0).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).getEntry();
-        zeroPositionEntry = shuffleboardTab.add("Zero Position", zeroPosition).getEntry();
-        lowNodePositionEntry = shuffleboardTab.add("Low Node Position", lowNodePosition).getEntry();
-        midNodePositionEntry = shuffleboardTab.add("Mid Node Position", midNodePosition).getEntry();
-        highNodePositionEntry = shuffleboardTab.add("High Node Position", highNodePosition).getEntry();
-        shelfPositionEntry = shuffleboardTab.add("Shelf Position", shelfPosition).getEntry();
-        maxPositionEntry = shuffleboardTab.add("Max Position", maxPosition).getEntry();
-        pEntry = shuffleboardTab.add("P Gain", p).getEntry();
-        iEntry = shuffleboardTab.add("I Gain", i).getEntry();
-        dEntry = shuffleboardTab.add("D Gain", d).getEntry();
+        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
+        ShuffleboardLayout pidList = shuffleboardTab.getLayout("PID", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 2);
+        motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
+        motorPercentEntry = motorList.add("Motor %", 0).getEntry();
+        motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
+        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
+        zeroPositionEntry = positionList.add("Zero Position", zeroPosition).getEntry();
+        lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
+        midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
+        highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
+        shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
+        maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
+        pEntry = pidList.add("P Gain", p).getEntry();
+        iEntry = pidList.add("I Gain", i).getEntry();
+        dEntry = pidList.add("D Gain", d).getEntry();
     }
 
     public boolean atZeroLimitSwitch() {

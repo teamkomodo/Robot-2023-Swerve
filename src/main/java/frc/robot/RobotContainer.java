@@ -73,7 +73,7 @@ public class RobotContainer {
         xButton.onTrue(elevatorSubsystem.runShelfCommand());
         leftJoystickY.whileTrue(Commands.run(
             () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
-            elevatorSubsystem));
+            elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
 
         //Claw Triggers
         // rightBumper.whileTrue(clawSubsystem.openCommand());
