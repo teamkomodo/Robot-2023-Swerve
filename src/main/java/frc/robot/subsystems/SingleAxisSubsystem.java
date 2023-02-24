@@ -36,6 +36,9 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     protected final GenericEntry pEntry;
     protected final GenericEntry iEntry;
     protected final GenericEntry dEntry;
+    protected final GenericEntry atZeroEntry;
+    protected final GenericEntry atMaxEntry;
+    protected final GenericEntry commandedPositionEntry;
 
     protected double p = 0;
     protected double i = 0;
@@ -53,9 +56,10 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
 
         motor = new CANSparkMax(MOTOR_ID, MotorType.kBrushless);
         zeroLimitSwitch = new DigitalInput(ZERO_LIMIT_SWITCH_CHANNEL);
+        motor.restoreFactoryDefaults();
         pidController = motor.getPIDController();
         encoder = motor.getEncoder();
-        motor.restoreFactoryDefaults();
+        motor.setInverted(false);
 
         shuffleboardTab = Shuffleboard.getTab(shuffleboardTabName);
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
@@ -64,6 +68,8 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
         motorPercentEntry = motorList.add("Motor %", 0).getEntry();
         motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
+        atZeroEntry = shuffleboardTab.add("At Zero", false).getEntry();
+        atMaxEntry = shuffleboardTab.add("At Max", false).getEntry();
         limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
         zeroPositionEntry = positionList.add("Zero Position", zeroPosition).getEntry();
         lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
@@ -71,16 +77,17 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
         shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
+        commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
         pEntry = pidList.add("P Gain", p).getEntry();
         iEntry = pidList.add("I Gain", i).getEntry();
         dEntry = pidList.add("D Gain", d).getEntry();
     }
-
+    
     public boolean atZeroLimitSwitch() {
         if(zeroLimitSwitch.get())
             return false;
         zeroPosition = encoder.getPosition();
-        pidController.setReference(0, ControlType.kDutyCycle);
+        pidController.setReference(zeroPosition, ControlType.kPosition);
         return true;
     }
 
@@ -101,6 +108,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         if(atZeroLimitSwitch() || atMaxLimit())
             return;
         pidController.setReference(position + zeroPosition, ControlType.kPosition);
+        commandedPositionEntry.setDouble(position + zeroPosition);
     }
 
     public Command runLowNodeCommand() {
@@ -139,6 +147,8 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         motorVelocityEntry.setDouble(encoder.getVelocity());
         motorPercentEntry.setDouble(motor.get());
         motorPositionEntry.setDouble(encoder.getPosition());
+        atZeroEntry.setBoolean(atZeroLimitSwitch());
+        atMaxEntry.setBoolean(atMaxLimit());
         limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
         zeroPositionEntry.setDouble(zeroPosition);
         
@@ -148,6 +158,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
 
+        /*
         double newP = pEntry.getDouble(p);
         double newI = iEntry.getDouble(i);
         double newD = dEntry.getDouble(d);
@@ -166,6 +177,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
             pidController.setD(newD);
             d = newD;
         }
+        */
 
         atZeroLimitSwitch();
         atMaxLimit();
