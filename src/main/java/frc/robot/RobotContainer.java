@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
+import static frc.robot.util.Util.*;
 
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
@@ -49,30 +50,36 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        Trigger slowModeButton = driverXBoxController.leftBumper();
-        Trigger autoLevelButton = driverXBoxController.a();
-        autoLevelButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
+            Trigger slowModeButton = driverXBoxController.leftBumper();
+    Trigger aButton = driverXBoxController.a();
+    Trigger bButton = driverXBoxController.b();
+    drivetrainSubsystem.setDefaultCommand(
+      Commands.run(
+      () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        false),
+      drivetrainSubsystem));
 
-        drivetrainSubsystem.setDefaultCommand(
-                Commands.run(
-                        () -> drivetrainSubsystem.drive(
-                                -driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                -driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                -driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                true),
-                        drivetrainSubsystem));
+    slowModeButton.whileTrue(
+      Commands.run(
+      () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+        joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+        joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+        false),
+      drivetrainSubsystem));
 
-        slowModeButton.whileTrue(
-                Commands.run(
-                        () -> drivetrainSubsystem.drive(
-                                -driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
-                                        * SLOW_MODE_MODIFIER,
-                                -driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
-                                        * SLOW_MODE_MODIFIER,
-                                -driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
-                                        * SLOW_MODE_MODIFIER,
-                                true),
-                        drivetrainSubsystem));
+    aButton.whileTrue(
+        Commands.run(
+            () -> drivetrainSubsystem.drive(0.1, 0, 0, false), drivetrainSubsystem
+        )
+    );
+
+    bButton.whileTrue(
+        Commands.run(
+            () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
+        )
+    );
     }
 
     public Command getAutonomousCommand() {
