@@ -77,20 +77,24 @@ public class RobotContainer {
         Trigger leftJoystickYNegative = xboxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD);
         Trigger leftJoystickY = leftJoystickYPositive.or(leftJoystickYNegative);
 
+        Trigger leftTrigger = xboxController.leftTrigger();
+        Trigger rightTrigger = xboxController.rightTrigger();
+
         //Elevator Triggers
         aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
         bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
         yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
         xButton.onTrue(elevatorSubsystem.runShelfCommand());
-        leftJoystickY.whileTrue(Commands.run(
-            () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
+        leftTrigger.whileTrue(Commands.run(
+            () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftTriggerAxis()),
+            elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
+        rightTrigger.whileTrue(Commands.run(
+            () -> elevatorSubsystem.setMotorPercent(xboxController.getRightTriggerAxis()),
             elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
 
         //Claw Triggers
         // rightBumper.whileTrue(clawSubsystem.openCommand());
         // leftBumper.whileTrue(clawSubsystem.closeCommand());
-
-        Trigger slowModeButton = xboxController.leftBumper();
 
         drivetrainSubsystem.setDefaultCommand(
           Commands.run(
@@ -100,7 +104,7 @@ public class RobotContainer {
             false),
           drivetrainSubsystem));
 
-        slowModeButton.whileTrue(
+        leftBumper.whileTrue(
           Commands.run(
           () -> drivetrainSubsystem.drive(joystickCurve(xboxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
             joystickCurve(xboxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
