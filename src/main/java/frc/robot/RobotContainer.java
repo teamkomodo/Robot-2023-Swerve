@@ -22,11 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.JointSubsystem;
-import frc.robot.subsystems.LEDStripSubsystem;
-import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
 
@@ -49,6 +45,7 @@ public class RobotContainer {
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
 
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
@@ -64,6 +61,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+    
             Trigger slowModeButton = driverXBoxController.leftBumper();
     Trigger aButton = driverXBoxController.a();
     Trigger bButton = driverXBoxController.b();
@@ -84,6 +82,9 @@ public class RobotContainer {
         bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
         yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
         xButton.onTrue(elevatorSubsystem.runShelfCommand());
+        leftJoystickY.whileTrue(Commands.run(
+            () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
+            elevatorSubsystem));
         leftTrigger.whileTrue(Commands.run(
             () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
             elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
