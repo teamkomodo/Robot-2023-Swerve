@@ -43,7 +43,7 @@ public class RobotContainer {
     private final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
     
-    private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
+    private final CommandXboxController xboxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
     private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
     private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
     private boolean xBoxDrive = false;
@@ -90,37 +90,23 @@ public class RobotContainer {
         // rightBumper.whileTrue(clawSubsystem.openCommand());
         // leftBumper.whileTrue(clawSubsystem.closeCommand());
 
-        Trigger slowModeButton = driverXBoxController.leftBumper();
-        Trigger aButton = driverXBoxController.a();
-        Trigger bButton = driverXBoxController.b();
+        Trigger slowModeButton = xboxController.leftBumper();
 
         drivetrainSubsystem.setDefaultCommand(
           Commands.run(
-          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+          () -> drivetrainSubsystem.drive(joystickCurve(xboxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            joystickCurve(xboxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            joystickCurve(xboxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
             false),
           drivetrainSubsystem));
 
         slowModeButton.whileTrue(
           Commands.run(
-          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+          () -> drivetrainSubsystem.drive(joystickCurve(xboxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            joystickCurve(xboxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            joystickCurve(xboxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
             false),
           drivetrainSubsystem));
-
-        aButton.whileTrue(
-            Commands.run(
-                () -> drivetrainSubsystem.drive(0.1, 0, 0, false), drivetrainSubsystem
-            )
-        );
-
-        bButton.whileTrue(
-            Commands.run(
-                () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
-            )
-        );
     }
 
     /**
