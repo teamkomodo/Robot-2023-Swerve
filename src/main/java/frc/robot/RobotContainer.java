@@ -7,12 +7,20 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.auto.AutoLevelCommand;
+import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToGamePiece;
+import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.TrajectorySequencer;
+import frc.robot.subsystems.VisionPositioningSubsystem;
+import frc.robot.util.VisionPipelineConnector;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -25,60 +33,51 @@ import static frc.robot.Constants.*;
 import static frc.robot.Constants.*;
 import static frc.robot.util.Util.*;
 
-/**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
- */
 public class RobotContainer {
-
-    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    //private final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
-    //private final JointSubsystem jointSubsystem = new JointSubsystem();
-    //private final ClawSubsystem clawSubsystem = new ClawSubsystem();
-    private final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
-    private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+    private final Field2d field2d = new Field2d();
     
-    private final CommandXboxController xboxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
+    // Subsystem definitions should be public for auto reasons
+    public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    //public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
+    //public final JointSubsystem jointSubsystem = new JointSubsystem();
+    //public final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
+    public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
+    public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
+    public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
+            null);
+    public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
+    public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
+
+    private final AutoDefinitions autonomousController = new AutoDefinitions(this);
+
+    private final CommandXboxController driverXBoxController = new CommandXboxController(
+            OperatorConstants.driverXBoxControllerPort);
     private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
     private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
     private boolean xBoxDrive = false;
+
     public RobotContainer() {
+        SmartDashboard.putData("Field", field2d);
+        autonomousController.initAutonomous();
         configureBindings();
     }
 
-    /**
-     * Use this method to define your trigger->command mappings. Triggers can be
-     * created via the
-     * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-     * an arbitrary
-     * predicate, or via the named factories in {@link
-     * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-     * {@link
-     * CommandXboxController
-     * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-     * PS4} controllers or
-     * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-     * joysticks}.
-     */
     private void configureBindings() {
-        Trigger aButton = xboxController.a();
-        Trigger bButton = xboxController.b();
-        Trigger xButton = xboxController.x();
-        Trigger yButton = xboxController.y();
-        Trigger rightBumper = xboxController.rightBumper();
-        Trigger leftBumper = xboxController.leftBumper();
+            Trigger slowModeButton = driverXBoxController.leftBumper();
+    Trigger aButton = driverXBoxController.a();
+    Trigger bButton = driverXBoxController.b();
+    Trigger xButton = driverXBoxController.x();
+        Trigger yButton = driverXBoxController.y();
+        Trigger rightBumper = driverXBoxController.rightBumper();
+        Trigger leftBumper = driverXBoxController.leftBumper();
 
-        Trigger leftJoystickYPositive = xboxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD);
-        Trigger leftJoystickYNegative = xboxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD);
+        Trigger leftJoystickYPositive = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD);
+        Trigger leftJoystickYNegative = driverXBoxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD);
         Trigger leftJoystickY = leftJoystickYPositive.or(leftJoystickYNegative);
 
-        Trigger leftTrigger = xboxController.leftTrigger();
-        Trigger rightTrigger = xboxController.rightTrigger();
+        Trigger leftTrigger = driverXBoxController.leftTrigger();
+        Trigger rightTrigger = driverXBoxController.rightTrigger();
 
         //Elevator Triggers
         aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
@@ -86,11 +85,18 @@ public class RobotContainer {
         yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
         xButton.onTrue(elevatorSubsystem.runShelfCommand());
         leftTrigger.whileTrue(Commands.run(
-            () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftTriggerAxis()),
+            () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
             elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
         rightTrigger.whileTrue(Commands.run(
-            () -> elevatorSubsystem.setMotorPercent(xboxController.getRightTriggerAxis()),
+            () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getRightTriggerAxis()),
             elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
+    drivetrainSubsystem.setDefaultCommand(
+      Commands.run(
+      () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        false),
+      drivetrainSubsystem));
 
         //Claw Triggers
         // rightBumper.whileTrue(clawSubsystem.openCommand());
@@ -98,27 +104,31 @@ public class RobotContainer {
 
         drivetrainSubsystem.setDefaultCommand(
           Commands.run(
-          () -> drivetrainSubsystem.drive(joystickCurve(xboxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            joystickCurve(xboxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            joystickCurve(xboxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
             false),
           drivetrainSubsystem));
 
         leftBumper.whileTrue(
           Commands.run(
-          () -> drivetrainSubsystem.drive(joystickCurve(xboxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            joystickCurve(xboxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            joystickCurve(xboxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
             false),
           drivetrainSubsystem));
+          bButton.whileTrue(
+        Commands.run(
+            () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
+        )
+    );
+    }
     }
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
+
     public Command getAutonomousCommand() {
-        return null;
+        autonomousController.initAutonomous();
+        return autonomousController.chooser.getSelected().generateCommand();
+        // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
     }
 }
