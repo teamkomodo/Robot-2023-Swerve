@@ -4,13 +4,11 @@
 
 package frc.robot;
 
-
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
-import frc.robot.commands.auto.AlignToGamePiece;
 import frc.robot.commands.auto.AutoDefinitions;
+import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
@@ -23,20 +21,22 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.JointSubsystem;
+import frc.robot.subsystems.LEDStripSubsystem;
+import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
 
-import static frc.robot.Constants.*;
 import static frc.robot.util.Util.*;
 
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
-    
+
     // Subsystem definitions should be public for auto reasons
     public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    //public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
-    //public final JointSubsystem jointSubsystem = new JointSubsystem();
-    //public final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
+    public final JointSubsystem jointSubsystem = new JointSubsystem();
+    public final ClawSubsystem clawSubsystem = new ClawSubsystem();
     public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
@@ -45,7 +45,6 @@ public class RobotContainer {
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
 
-    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
@@ -61,71 +60,67 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-    
-            Trigger slowModeButton = driverXBoxController.leftBumper();
-    Trigger aButton = driverXBoxController.a();
-    Trigger bButton = driverXBoxController.b();
-    Trigger xButton = driverXBoxController.x();
+
+        Trigger aButton = driverXBoxController.a();
+        Trigger bButton = driverXBoxController.b();
+        Trigger xButton = driverXBoxController.x();
         Trigger yButton = driverXBoxController.y();
-        Trigger rightBumper = driverXBoxController.rightBumper();
         Trigger leftBumper = driverXBoxController.leftBumper();
 
-        Trigger leftJoystickYPositive = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD);
-        Trigger leftJoystickYNegative = driverXBoxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD);
+        Trigger leftJoystickYPositive = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftY.value,
+                XBOX_JOYSTICK_THRESHOLD);
+        Trigger leftJoystickYNegative = driverXBoxController.axisLessThan(XboxController.Axis.kLeftY.value,
+                -XBOX_JOYSTICK_THRESHOLD);
         Trigger leftJoystickY = leftJoystickYPositive.or(leftJoystickYNegative);
 
         Trigger leftTrigger = driverXBoxController.leftTrigger();
         Trigger rightTrigger = driverXBoxController.rightTrigger();
 
-        //Elevator Triggers
+        // Elevator Triggers
         aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
         bButton.onTrue(elevatorSubsystem.runMidNodeCommand());
         yButton.onTrue(elevatorSubsystem.runHighNodeCommand());
         xButton.onTrue(elevatorSubsystem.runShelfCommand());
         leftJoystickY.whileTrue(Commands.run(
-            () -> elevatorSubsystem.setMotorPercent(xboxController.getLeftY()),
-            elevatorSubsystem));
+                () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftY()),
+                elevatorSubsystem));
         leftTrigger.whileTrue(Commands.run(
-            () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
-            elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
+                () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
+                elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
         rightTrigger.whileTrue(Commands.run(
-            () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getRightTriggerAxis()),
-            elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
-    drivetrainSubsystem.setDefaultCommand(
-      Commands.run(
-      () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        false),
-      drivetrainSubsystem));
+                () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getRightTriggerAxis()),
+                elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0)));
+        drivetrainSubsystem.setDefaultCommand(
+                Commands.run(
+                        () -> drivetrainSubsystem.drive(
+                                joystickCurve(driverXBoxController.getLeftY())
+                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                joystickCurve(driverXBoxController.getLeftX())
+                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                joystickCurve(driverXBoxController.getRightX())
+                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                false),
+                        drivetrainSubsystem));
 
-        //Claw Triggers
+        // Claw Triggers
         // rightBumper.whileTrue(clawSubsystem.openCommand());
         // leftBumper.whileTrue(clawSubsystem.closeCommand());
 
-        drivetrainSubsystem.setDefaultCommand(
-          Commands.run(
-          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            false),
-          drivetrainSubsystem));
-
         leftBumper.whileTrue(
-          Commands.run(
-          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-            false),
-          drivetrainSubsystem));
-          bButton.whileTrue(
-        Commands.run(
-            () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
-        )
-    );
+                Commands.run(
+                        () -> drivetrainSubsystem.drive(
+                                joystickCurve(driverXBoxController.getLeftY())
+                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+                                joystickCurve(driverXBoxController.getLeftX())
+                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+                                joystickCurve(driverXBoxController.getRightX())
+                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+                                false),
+                        drivetrainSubsystem));
+        bButton.whileTrue(
+                Commands.run(
+                        () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem));
     }
-    }
-
 
     public Command getAutonomousCommand() {
         autonomousController.initAutonomous();
