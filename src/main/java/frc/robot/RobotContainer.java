@@ -77,7 +77,8 @@ public class RobotContainer {
         Trigger leftTrigger = driverXBoxController.leftTrigger();
         Trigger rightTrigger = driverXBoxController.rightTrigger();
 
-        Trigger rightDriverJoystickButtom = new Trigger(() -> driverJoystick.getRawButton(1));
+        Trigger leftDriverJoystickButton = new Trigger(() -> driverJoystick.getRawButton(2));
+        Trigger rightDriverJoystickButton = new Trigger(() -> driverJoystick.getRawButton(1));
 
         // Elevator Triggers
         // aButton.onTrue(elevatorSubsystem.runLowNodeCommand());
@@ -100,10 +101,11 @@ public class RobotContainer {
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 joystickCurve(driverJoystick.getRawAxis(2))
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                false),
+                                true),
                         drivetrainSubsystem));
 
-        rightDriverJoystickButtom.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
+        rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
+        leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
 
         // Claw Triggers
         // rightBumper.whileTrue(clawSubsystem.openCommand());
