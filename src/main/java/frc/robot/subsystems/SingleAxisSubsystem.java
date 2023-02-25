@@ -52,6 +52,8 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
 
     protected double maxPosition = 0;
 
+    protected boolean useLimits = true;
+
     public SingleAxisSubsystem(final int MOTOR_ID, final int ZERO_LIMIT_SWITCH_CHANNEL, String shuffleboardTabName) {
 
         motor = new CANSparkMax(MOTOR_ID, MotorType.kBrushless);
@@ -84,6 +86,8 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     }
     
     public boolean atZeroLimitSwitch() {
+        if(!useLimits)
+            return false;
         if(zeroLimitSwitch.get())
             return false;
         zeroPosition = encoder.getPosition();
@@ -92,6 +96,8 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     }
 
     public boolean atMaxLimit() {
+        if(!useLimits)
+            return false;
         if(encoder.getPosition() + zeroPosition < maxPosition)
             return false;
         pidController.setReference(0, ControlType.kDutyCycle);
