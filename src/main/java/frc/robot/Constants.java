@@ -85,8 +85,8 @@ public final class Constants {
         public static final double ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT = 0.9;
     }
   public static class OperatorConstants {
-    public static final int driverXBoxControllerPort = 0;
-    public static final int driverJoystickPort = 1;
+    public static final int driverXBoxControllerPort = 1;
+    public static final int driverJoystickPort = 0;
     public static final int driverButtonsPort = 2;
   }
 
