@@ -22,6 +22,22 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final int XBOX_CONTROLLER_PORT = 0;
+  public static final double XBOX_JOYSTICK_THRESHOLD = 0.05D;
+
+  public static final int TELESCOPE_MOTOR_ID = 31;
+  public static final int TELESCOPE_ZERO_SWITCH_CHANNEL = 0;
+
+  public static final int ELEVATOR_MOTOR_ID = 30;
+  public static final int ELEVATOR_ZERO_SWITCH_CHANNEL = 1;
+
+  public static final int CLAW_SOLENOID_FORWARD_CHANNEL = 0;
+  public static final int CLAW_SOLENOID_REVERSE_CHANNEL = 1;
+
+  public static final int JOINT_MOTOR_ID = 0;
+  public static final int JOINT_ZERO_SWITCH_CHANNEL = 0;
+
+  public static final int LED_STRIP_PWM_CHANNEL = 0;
   public static class AutoConstants {
         // Trajectory following
         public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
@@ -104,4 +120,5 @@ public final class Constants {
   public static final double SWERVE_STEER_P = 1.0;
   public static final double SWERVE_STEER_I = 1.0e-3;
   public static final double SWERVE_STEER_D = 0.1;
+
 }
