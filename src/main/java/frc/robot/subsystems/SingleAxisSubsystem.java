@@ -60,7 +60,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         pidController = motor.getPIDController();
         encoder = motor.getEncoder();
         motor.setInverted(false);
-
+        
         shuffleboardTab = Shuffleboard.getTab(shuffleboardTabName);
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
         ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
@@ -99,13 +99,17 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     }
 
     public void setMotorPercent(double percent) {
-        if(atZeroLimitSwitch() || atMaxLimit())
+        if(atZeroLimitSwitch() && percent < 0)
+            return;
+        if(atMaxLimit() && percent > 0)
             return;
         pidController.setReference(percent, ControlType.kDutyCycle);
     }
 
     public void setPosition(double position) {
-        if(atZeroLimitSwitch() || atMaxLimit())
+        if(atZeroLimitSwitch() && position < zeroPosition)
+            return;
+        if(atMaxLimit() && position > zeroPosition + maxPosition)
             return;
         pidController.setReference(position + zeroPosition, ControlType.kPosition);
         commandedPositionEntry.setDouble(position + zeroPosition);

@@ -4,6 +4,9 @@ import static frc.robot.Constants.*;
 
 public class ElevatorSubsystem extends SingleAxisSubsystem{
 
+    /*
+    Circumference of pulley * 1:9 ratio from axle to motor
+     */
     private final double INCHES_PER_REVOLUTION = 3.53D/9.0D;
 
     public ElevatorSubsystem() {
