@@ -5,54 +5,54 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.auto.AutoLevelCommand;
+import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToGamePiece;
+import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.TrajectorySequencer;
+import frc.robot.subsystems.VisionPositioningSubsystem;
+import frc.robot.util.VisionPipelineConnector;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
 import static frc.robot.util.Util.*;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
- */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+    private final Field2d field2d = new Field2d();
 
-  
-  private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
-  private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
-  private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
-  private boolean xBoxDrive = false;
+    // Subsystem definitions should be public for auto reasons
+    public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
+    public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
+    public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
+            null);
+    public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
+    public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
-  }
+    private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
-  private void configureBindings() {
+    private final CommandXboxController driverXBoxController = new CommandXboxController(
+            OperatorConstants.driverXBoxControllerPort);
+    private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
+    private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
+    private boolean xBoxDrive = false;
 
-    Trigger slowModeButton = driverXBoxController.leftBumper();
+    public RobotContainer() {
+        SmartDashboard.putData("Field", field2d);
+        autonomousController.initAutonomous();
+        configureBindings();
+    }
+
+    private void configureBindings() {
+            Trigger slowModeButton = driverXBoxController.leftBumper();
     Trigger aButton = driverXBoxController.a();
     Trigger bButton = driverXBoxController.b();
-
     drivetrainSubsystem.setDefaultCommand(
       Commands.run(
       () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
@@ -80,15 +80,11 @@ public class RobotContainer {
             () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
         )
     );
-    
-  }
+    }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return null; //FIXME return our autonomous command
-  }
+    public Command getAutonomousCommand() {
+        autonomousController.initAutonomous();
+        return autonomousController.chooser.getSelected().generateCommand();
+        // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
+    }
 }
