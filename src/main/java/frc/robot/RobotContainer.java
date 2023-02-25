@@ -4,10 +4,15 @@
 
 package frc.robot;
 
+
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -16,6 +21,9 @@ import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
+
+import static frc.robot.Constants.*;
+import static frc.robot.util.Util.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -33,9 +41,12 @@ public class RobotContainer {
     //private final JointSubsystem jointSubsystem = new JointSubsystem();
     //private final ClawSubsystem clawSubsystem = new ClawSubsystem();
     private final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
-
-    private final CommandXboxController xboxController = new CommandXboxController(XBOX_CONTROLLER_PORT);
-
+    private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+    
+    private final CommandXboxController driverXBoxController = new CommandXboxController(OperatorConstants.driverXBoxControllerPort);
+    private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
+    private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
+    private boolean xBoxDrive = false;
     public RobotContainer() {
         configureBindings();
     }
@@ -78,6 +89,38 @@ public class RobotContainer {
         //Claw Triggers
         // rightBumper.whileTrue(clawSubsystem.openCommand());
         // leftBumper.whileTrue(clawSubsystem.closeCommand());
+
+        Trigger slowModeButton = driverXBoxController.leftBumper();
+        Trigger aButton = driverXBoxController.a();
+        Trigger bButton = driverXBoxController.b();
+
+        drivetrainSubsystem.setDefaultCommand(
+          Commands.run(
+          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            false),
+          drivetrainSubsystem));
+
+        slowModeButton.whileTrue(
+          Commands.run(
+          () -> drivetrainSubsystem.drive(joystickCurve(driverXBoxController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            joystickCurve(driverXBoxController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            joystickCurve(driverXBoxController.getRightX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
+            false),
+          drivetrainSubsystem));
+
+        aButton.whileTrue(
+            Commands.run(
+                () -> drivetrainSubsystem.drive(0.1, 0, 0, false), drivetrainSubsystem
+            )
+        );
+
+        bButton.whileTrue(
+            Commands.run(
+                () -> drivetrainSubsystem.drive(-0.1, 0, 0, false), drivetrainSubsystem
+            )
+        );
     }
 
     /**
