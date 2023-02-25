@@ -6,8 +6,50 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.IntegerSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class VisionPipelineConnector {
+    public static class VisionPipelineTest extends CommandBase {
+        private final VisionPipelineConnector connector;
+
+        public VisionPipelineTest(VisionPipelineConnector connector) {
+            this.connector = connector;
+        }
+
+        @Override
+        public void initialize() {
+            connector.setEnabled(true);
+            connector.setOneshot(false);
+        }
+
+        @Override
+        public void execute() {
+            Target[] targets = connector.getAllTargets();
+            StringBuilder s = new StringBuilder(); // Oooooh...
+            if (targets == null) {
+                s.append("Device not ready.");
+            } else {
+                s.append("Got " + targets.length + " targets: [");
+                for (Target t : targets) {
+                    s.append("{" + t.centerX + ", " + t.centerY + ", " + t.width + ", " + t.height + "}, ");
+                }
+                s.append("]");
+            }
+            SmartDashboard.putString("Vision pipeline result", s.toString());
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            connector.setEnabled(false);
+        }
+    }
+
     public static class Target {
         public Target(double[] data) {
             centerX = data[0];

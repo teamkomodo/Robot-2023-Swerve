@@ -55,10 +55,12 @@ public final class Constants {
         public static final double MAX_POSITIONING_ERROR_METERS = 0.06;
         public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(5);
         // Game piece detector
-        public static final double MAX_PIECE_OFFSET_IMGCOORD = 0.07;
+        public static final double MAX_PIECE_OFFSET_RATIO = 0.6; // 1 would be "just within the hitbox", 0 would be
+                                                                 // impossibly precise.
         public static final double PIECE_LINEUP_MIN_ALIGNMENT_TIME = 0.5; // Seconds
-        public static final double P_PIECE_LINEUP = 2.0;
-        public static final double I_PIECE_LINEUP = 0.4;
+        public static final double P_PIECE_LINEUP = 3.0;
+        public static final double I_PIECE_LINEUP = 2.0;
+        public static final double D_PIECE_LINEUP = 0.2;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 1.2;
         public static final double AUTO_LEVEL_K_I = 0.3;

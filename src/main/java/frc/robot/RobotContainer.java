@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToGamePiece;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
@@ -79,7 +80,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        autonomousController.initAutonomous();
-        return autonomousController.chooser.getSelected().generateCommand();
+        // autonomousController.initAutonomous();
+        // return autonomousController.chooser.getSelected().generateCommand();
+        return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
     }
 }
