@@ -8,7 +8,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,61 +32,87 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     protected final GenericEntry midNodePositionEntry;
     protected final GenericEntry highNodePositionEntry;
     protected final GenericEntry shelfPositionEntry;
+    protected final GenericEntry maxPositionEntry;
     protected final GenericEntry pEntry;
     protected final GenericEntry iEntry;
     protected final GenericEntry dEntry;
+    protected final GenericEntry atZeroEntry;
+    protected final GenericEntry atMaxEntry;
+    protected final GenericEntry commandedPositionEntry;
 
     protected double p = 0;
     protected double i = 0;
     protected double d = 0;
     
-    protected double zeroPosition ;
-    protected double lowNodePosition;
-    protected double midNodePosition;
-    protected double highNodePosition;
-    protected double shelfPosition;
+    protected double zeroPosition = 0;
+    protected double lowNodePosition = 0;
+    protected double midNodePosition = 0;
+    protected double highNodePosition = 0;
+    protected double shelfPosition = 0;
+
+    protected double maxPosition = 0;
 
     public SingleAxisSubsystem(final int MOTOR_ID, final int ZERO_LIMIT_SWITCH_CHANNEL, String shuffleboardTabName) {
 
         motor = new CANSparkMax(MOTOR_ID, MotorType.kBrushless);
         zeroLimitSwitch = new DigitalInput(ZERO_LIMIT_SWITCH_CHANNEL);
+        motor.restoreFactoryDefaults();
         pidController = motor.getPIDController();
         encoder = motor.getEncoder();
-        motor.restoreFactoryDefaults();
-
+        motor.setInverted(false);
+        
         shuffleboardTab = Shuffleboard.getTab(shuffleboardTabName);
-        motorVelocityEntry = shuffleboardTab.add("Motor RPM", 0).getEntry();
-        motorPercentEntry = shuffleboardTab.add("Motor %", 0).getEntry();
-        motorPositionEntry = shuffleboardTab.add("Motor Position", 0).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).getEntry();
-        zeroPositionEntry = shuffleboardTab.add("Zero Position", zeroPosition).getEntry();
-        lowNodePositionEntry = shuffleboardTab.add("Low Node Position", lowNodePosition).getEntry();
-        midNodePositionEntry = shuffleboardTab.add("Mid Node Position", midNodePosition).getEntry();
-        highNodePositionEntry = shuffleboardTab.add("High Node Position", highNodePosition).getEntry();
-        shelfPositionEntry = shuffleboardTab.add("Shelf Position", shelfPosition).getEntry();
-        pEntry = shuffleboardTab.add("P Gain", p).getEntry();
-        iEntry = shuffleboardTab.add("I Gain", i).getEntry();
-        dEntry = shuffleboardTab.add("D Gain", d).getEntry();
+        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
+        ShuffleboardLayout pidList = shuffleboardTab.getLayout("PID", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 2);
+        motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
+        motorPercentEntry = motorList.add("Motor %", 0).getEntry();
+        motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
+        atZeroEntry = shuffleboardTab.add("At Zero", false).getEntry();
+        atMaxEntry = shuffleboardTab.add("At Max", false).getEntry();
+        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
+        zeroPositionEntry = positionList.add("Zero Position", zeroPosition).getEntry();
+        lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
+        midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
+        highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
+        shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
+        maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
+        commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
+        pEntry = pidList.add("P Gain", p).getEntry();
+        iEntry = pidList.add("I Gain", i).getEntry();
+        dEntry = pidList.add("D Gain", d).getEntry();
     }
-
+    
     public boolean atZeroLimitSwitch() {
         if(zeroLimitSwitch.get())
             return false;
         zeroPosition = encoder.getPosition();
-        setMotorPercent(0);
+        pidController.setReference(zeroPosition, ControlType.kPosition);
+        return true;
+    }
+
+    public boolean atMaxLimit() {
+        if(encoder.getPosition() + zeroPosition < maxPosition)
+            return false;
+        pidController.setReference(0, ControlType.kDutyCycle);
         return true;
     }
 
     public void setMotorPercent(double percent) {
-        if(atZeroLimitSwitch())
+        if(atZeroLimitSwitch() && percent < 0)
+            return;
+        if(atMaxLimit() && percent > 0)
             return;
         pidController.setReference(percent, ControlType.kDutyCycle);
     }
 
     public void setPosition(double position) {
-        if(atZeroLimitSwitch())
+        if(atZeroLimitSwitch() && position < zeroPosition)
+            return;
+        if(atMaxLimit() && position > zeroPosition + maxPosition)
             return;
         pidController.setReference(position + zeroPosition, ControlType.kPosition);
+        commandedPositionEntry.setDouble(position + zeroPosition);
     }
 
     public Command runLowNodeCommand() {
@@ -123,6 +151,8 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         motorVelocityEntry.setDouble(encoder.getVelocity());
         motorPercentEntry.setDouble(motor.get());
         motorPositionEntry.setDouble(encoder.getPosition());
+        atZeroEntry.setBoolean(atZeroLimitSwitch());
+        atMaxEntry.setBoolean(atMaxLimit());
         limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
         zeroPositionEntry.setDouble(zeroPosition);
         
@@ -132,6 +162,7 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
 
+        /*
         double newP = pEntry.getDouble(p);
         double newI = iEntry.getDouble(i);
         double newD = dEntry.getDouble(d);
@@ -150,8 +181,10 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
             pidController.setD(newD);
             d = newD;
         }
+        */
 
         atZeroLimitSwitch();
+        atMaxLimit();
     }
 
     public void setLowNodePosition(double lowNodePosition) {
@@ -172,5 +205,10 @@ public abstract class SingleAxisSubsystem extends SubsystemBase{
     public void setShelfPosition(double shelfPosition) {
         this.shelfPosition = shelfPosition;
         shelfPositionEntry.setDouble(shelfPosition);
+    }
+
+    public void setMaxPosition(double maxPosition) {
+        this.maxPosition = maxPosition;
+        maxPositionEntry.setDouble(maxPosition);
     }
 }
