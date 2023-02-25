@@ -5,7 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutoLevelCommand;
+import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AlignToGamePiece;
 import frc.robot.commands.auto.AutoDefinitions;
@@ -15,8 +15,6 @@ import frc.robot.subsystems.VisionPositioningSubsystem;
 import frc.robot.util.VisionPipelineConnector;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,8 +22,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
-
-import java.util.List;
 
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
@@ -80,8 +76,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // autonomousController.initAutonomous();
-        // return autonomousController.chooser.getSelected().generateCommand();
-        return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
+        autonomousController.initAutonomous();
+        return autonomousController.chooser.getSelected().generateCommand();
+        // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
     }
 }

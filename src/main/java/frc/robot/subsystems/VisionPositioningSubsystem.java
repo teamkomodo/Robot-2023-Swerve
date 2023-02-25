@@ -21,6 +21,10 @@ public class VisionPositioningSubsystem extends SubsystemBase {
     private PhotonPoseEstimator poseEstimator;
     private final DrivetrainSubsystem drive;
 
+    public void setCameraProcessingIdle(boolean state) {
+        camera.setDriverMode(state);
+    }
+
     public VisionPositioningSubsystem(DrivetrainSubsystem drivetrainSubsystem) {
         this.drive = drivetrainSubsystem;
         camera = new PhotonCamera("FrontCamera");

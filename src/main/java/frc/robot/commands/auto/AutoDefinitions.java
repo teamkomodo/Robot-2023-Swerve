@@ -36,8 +36,8 @@ public class AutoDefinitions {
     public AutoMode mode_template = new AutoMode(() -> {
         Pose2d target = new Pose2d(5, 5, new Rotation2d(0));
         return new Command[] {
-                new ApproximateFieldPose(container.trajectorySequencer, target),
-                new FinetuneFieldPose(container.drivetrainSubsystem, target),
+                FinetuneFieldPose.getPositioningSequenceCommand(container.drivetrainSubsystem,
+                        container.trajectorySequencer, target),
                 new InstantCommand(() -> System.out.println("Done")),
         };
     });

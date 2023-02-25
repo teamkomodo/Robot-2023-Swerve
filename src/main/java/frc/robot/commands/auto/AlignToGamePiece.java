@@ -6,10 +6,10 @@ import java.util.Comparator;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.VisionPositioningSubsystem;
 import frc.robot.util.VisionPipelineConnector;
 import frc.robot.util.VisionPipelineConnector.Target;
 
@@ -18,24 +18,27 @@ public class AlignToGamePiece extends CommandBase {
     private final VisionPipelineConnector detector;
     private final Timer correctTime = new Timer();
     private final double targetX;
+    private final VisionPositioningSubsystem photon;
     private final PIDController controller;
 
     // Use targetX = 0 for straight alignment
-    public AlignToGamePiece(DrivetrainSubsystem drivetrainSubsystem, VisionPipelineConnector detector,
-            double targetX) {
+    public AlignToGamePiece(DrivetrainSubsystem drivetrainSubsystem, VisionPositioningSubsystem photon,
+            VisionPipelineConnector detector, double targetX) {
         this.drivetrainSubsystem = drivetrainSubsystem;
         this.detector = detector;
         this.targetX = targetX;
+        this.photon = photon;
         controller = new PIDController(AutoConstants.P_PIECE_LINEUP, AutoConstants.I_PIECE_LINEUP,
                 AutoConstants.D_PIECE_LINEUP);
         addRequirements(drivetrainSubsystem);
-        Shuffleboard.getTab("Piece alignment").add(controller);
+        // Shuffleboard.getTab("Piece alignment").add(controller);
     }
 
     @Override
     public void initialize() {
         detector.setEnabled(true);
         detector.setOneshot(false);
+        photon.setCameraProcessingIdle(true); // Free resources on the coprocessor
         correctTime.start();
     }
 
@@ -97,6 +100,7 @@ public class AlignToGamePiece extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         detector.setEnabled(false);
+        photon.setCameraProcessingIdle(false); // Restart AprilTag positioning
         correctTime.stop();
         drivetrainSubsystem.stopMotion();
     }

@@ -2,13 +2,20 @@ package frc.robot.commands.auto;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.TrajectorySequencer;
 
 public class FinetuneFieldPose extends CommandBase {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final Pose2d pose;
+
+    public static Command getPositioningSequenceCommand(DrivetrainSubsystem d, TrajectorySequencer t, Pose2d pose) {
+        return new SequentialCommandGroup(new ApproximateFieldPose(t, pose), new FinetuneFieldPose(d, pose));
+    }
 
     public FinetuneFieldPose(DrivetrainSubsystem drivetrainSubsystem, Pose2d pose) {
         this.drivetrainSubsystem = drivetrainSubsystem;

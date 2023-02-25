@@ -33,7 +33,7 @@ public final class Constants {
         public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 10;
         public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 3;
-        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 10;
+        public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 3;
         public static final double P_X_CONTROLLER = 1.2;
         public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
         public static final double I_X_CONTROLLER = 0.25;
