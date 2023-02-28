@@ -38,6 +38,9 @@ public final class Constants {
   public static final int JOINT_ZERO_SWITCH_CHANNEL = 0;
 
   public static final int LED_STRIP_PWM_CHANNEL = 0;
+
+  public static final int TOF_SENSOR_ID = 33;
+  
   public static class AutoConstants {
         // Trajectory following
         public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
