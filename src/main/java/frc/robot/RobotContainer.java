@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
@@ -81,13 +82,13 @@ public class RobotContainer {
         Trigger leftTrigger = driverXBoxController.leftTrigger();
         Trigger rightTrigger = driverXBoxController.rightTrigger();
 
-        Trigger leftDriverJoystickButton = new Trigger(() -> driverJoystick.getRawButton(2));
-        Trigger rightDriverJoystickButton = new Trigger(() -> driverJoystick.getRawButton(1));
+        Trigger rightDriverJoystickButton = new JoystickButton(driverJoystick, 1);
+        Trigger leftDriverJoystickButton = new JoystickButton(driverJoystick, 2);
 
         //Elevator Triggers
         leftJoystick.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftY()),
-                elevatorSubsystem).andThen(() -> elevatorSubsystem.setMotorPercent(0), elevatorSubsystem));
+                elevatorSubsystem)).onFalse(Commands.run(() -> elevatorSubsystem.setMotorPercent(0), elevatorSubsystem));
 
         //Drivetrain triggers
         drivetrainSubsystem.setDefaultCommand(

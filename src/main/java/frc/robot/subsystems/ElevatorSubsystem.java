@@ -19,6 +19,8 @@ import static frc.robot.Constants.*;
 
 public class ElevatorSubsystem extends SubsystemBase{
     
+    // 9:1 reduction
+    // 5.53 in circumference
     private final double INCHES_PER_REVOLUTION = 3.53D/9.0D;
 
     private final CANSparkMax motor;
@@ -56,16 +58,19 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public ElevatorSubsystem() {
 
-        motor = new CANSparkMax(ELEVATOR_MOTOR_ID, MotorType.kBrushless);
         zeroLimitSwitch = new DigitalInput(ELEVATOR_ZERO_SWITCH_CHANNEL);
+
+        motor = new CANSparkMax(ELEVATOR_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
-        pidController = motor.getPIDController();
-        encoder = motor.getEncoder();
         motor.setInverted(false);
-        encoder.setPositionConversionFactor(INCHES_PER_REVOLUTION);
+
+        pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+
+        encoder = motor.getEncoder();
+        encoder.setPositionConversionFactor(INCHES_PER_REVOLUTION);
         
         shuffleboardTab = Shuffleboard.getTab("Elevator");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);

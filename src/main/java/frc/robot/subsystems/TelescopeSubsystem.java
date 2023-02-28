@@ -54,16 +54,19 @@ public class TelescopeSubsystem extends SubsystemBase{
 
     public TelescopeSubsystem() {
 
-        motor = new CANSparkMax(TELESCOPE_MOTOR_ID, MotorType.kBrushless);
         zeroLimitSwitch = new DigitalInput(TELESCOPE_ZERO_SWITCH_CHANNEL);
+
+        motor = new CANSparkMax(TELESCOPE_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
-        pidController = motor.getPIDController();
-        encoder = motor.getEncoder();
         motor.setInverted(false);
+
+        pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-        
+
+        encoder = motor.getEncoder();
+       
         shuffleboardTab = Shuffleboard.getTab("Telescope");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
         ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);

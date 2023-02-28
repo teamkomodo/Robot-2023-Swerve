@@ -42,28 +42,33 @@ public class JointSubsystem extends SubsystemBase{
     private double i = 1.0e-6;
     private double d = 1.0;
     
-    private double lowNodePosition = 0;
-    private double midNodePosition = 0;
-    private double highNodePosition = 0;
-    private double shelfPosition = 0;
+    // 25:1 reduction
+    private double lowNodePosition = 62.5;
+    private double midNodePosition = 50;
+    private double highNodePosition = 30;
+    private double shelfPosition = 50;
 
     private double minPosition = 0;
-    private double maxPosition = 0;
+    private double maxPosition = 70;
 
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
 
     public JointSubsystem() {
 
-        motor = new CANSparkMax(JOINT_MOTOR_ID, MotorType.kBrushless);
         zeroLimitSwitch = new DigitalInput(JOINT_ZERO_SWITCH_CHANNEL);
+
+        motor = new CANSparkMax(JOINT_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
-        pidController = motor.getPIDController();
-        encoder = motor.getEncoder();
         motor.setInverted(false);
+
+        pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+
+        encoder = motor.getEncoder();
+        encoder.setPosition(0); //Zeros encoder on initialization
 
         shuffleboardTab = Shuffleboard.getTab("Joint");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
@@ -87,7 +92,6 @@ public class JointSubsystem extends SubsystemBase{
         if(encoder.getPosition() > minPosition)
             return false;
         
-        //false - switch is active
         if(!atMinLimit) {
             //stop motor on rising edge
             pidController.setReference(0, ControlType.kDutyCycle);
