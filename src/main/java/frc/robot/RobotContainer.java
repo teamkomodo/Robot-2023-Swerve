@@ -6,12 +6,15 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.auto.AutoLevelCommand;
+import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AlignToGamePiece;
+import frc.robot.commands.auto.AlignToReflectiveTape;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
+import frc.robot.util.LimelightConnector;
 import frc.robot.util.VisionPipelineConnector;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,6 +36,7 @@ public class RobotContainer {
             null);
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
+    public final LimelightConnector limelight = new LimelightConnector("limelight");
 
     private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
@@ -76,8 +80,9 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        autonomousController.initAutonomous();
-        return autonomousController.chooser.getSelected().generateCommand();
+        // autonomousController.initAutonomous();
+        // return autonomousController.chooser.getSelected().generateCommand();
         // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
+        return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
     }
 }

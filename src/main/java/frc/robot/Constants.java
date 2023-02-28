@@ -61,6 +61,12 @@ public final class Constants {
         public static final double P_PIECE_LINEUP = 3.0;
         public static final double I_PIECE_LINEUP = 2.0;
         public static final double D_PIECE_LINEUP = 0.2;
+        // Reflective tape alignment
+        public static final double MIN_REFLECTIVE_OFFSET_DEGREES = 2.0;
+        public static final double REFLECTIVE_MIN_ALIGN_TIME = 0.5;
+        public static final double P_REFL_LINEUP = 2.0;
+        public static final double I_REFL_LINEUP = 2.0;
+        public static final double D_REFL_LINEUP = 0.2;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 1.2;
         public static final double AUTO_LEVEL_K_I = 0.3;
