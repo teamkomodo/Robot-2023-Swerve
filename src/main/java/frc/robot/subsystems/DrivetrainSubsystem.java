@@ -164,6 +164,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
         simGyroYawRadians = 0.0;
     }
 
+    /**
+     * 
+     * @return a {@link Rotation2d} object with the heading of the robot (clockwise positive)
+     */
     public Rotation2d getGyroYaw() {
         if (RobotBase.isReal()) {
             if (navx.isMagnetometerCalibrated()) {
@@ -195,7 +199,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public void drive(double forward, double right, double rotation, boolean fieldRelative) {
         ChassisSpeeds speeds = new ChassisSpeeds(forward, right, rotation);
         if (fieldRelative) {
-            setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw()));
+            setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw().times(-1)));
             return;
         }
         setChassisSpeeds(speeds);
