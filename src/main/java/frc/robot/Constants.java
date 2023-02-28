@@ -27,15 +27,21 @@ public final class Constants {
 
   public static final int TELESCOPE_MOTOR_ID = 31;
   public static final int TELESCOPE_ZERO_SWITCH_CHANNEL = 0;
+  public static final double TELESCOPE_MAX_ACCEL = 5650; // RPM/s
+  public static final double TELESCOPE_MAX_VELOCITY = 5650; // RPM
 
   public static final int ELEVATOR_MOTOR_ID = 30;
   public static final int ELEVATOR_ZERO_SWITCH_CHANNEL = 1;
+  public static final double ELEVATOR_MAX_ACCEL = 5650; // RPM/s
+  public static final double ELEVATOR_MAX_VELOCITY = 5650; // RPM
 
   public static final int CLAW_SOLENOID_FORWARD_CHANNEL = 0;
   public static final int CLAW_SOLENOID_REVERSE_CHANNEL = 1;
 
   public static final int JOINT_MOTOR_ID = 0;
   public static final int JOINT_ZERO_SWITCH_CHANNEL = 0;
+  public static final double JOINT_MAX_ACCEL = 5650; // RPM/s
+  public static final double JOINT_MAX_VELOCITY = 5650; // RPM
 
   public static final int LED_STRIP_PWM_CHANNEL = 0;
 

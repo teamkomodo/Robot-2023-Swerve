@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -66,6 +67,10 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+
+        pidController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+        pidController.setSmartMotionMaxAccel(JOINT_MAX_ACCEL, 0); // RPM/S
+        pidController.setSmartMotionMaxVelocity(JOINT_MAX_VELOCITY, 0); // RPM
 
         encoder = motor.getEncoder();
         encoder.setPosition(0); //Zeros encoder on initialization
@@ -134,7 +139,7 @@ public class JointSubsystem extends SubsystemBase{
         if(position < minPosition || position > maxPosition)
             return;
 
-        pidController.setReference(position, ControlType.kPosition);
+        pidController.setReference(position, ControlType.kSmartMotion);
         commandedPositionEntry.setDouble(position);
     }
 

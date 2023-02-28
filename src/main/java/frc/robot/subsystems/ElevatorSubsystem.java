@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -69,6 +70,10 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setI(i);
         pidController.setD(d);
 
+        pidController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+        pidController.setSmartMotionMaxAccel(ELEVATOR_MAX_ACCEL, 0); // RPM/S
+        pidController.setSmartMotionMaxVelocity(ELEVATOR_MAX_VELOCITY, 0); // RPM
+
         encoder = motor.getEncoder();
         encoder.setPositionConversionFactor(INCHES_PER_REVOLUTION);
         
@@ -99,7 +104,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
             encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kPosition);
+            pidController.setReference(0, ControlType.kDutyCycle);
         }
         return true;
     }
@@ -139,7 +144,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(position < 0 || position > maxPosition)
             return;
 
-        pidController.setReference(position, ControlType.kPosition);
+        pidController.setReference(position, ControlType.kSmartMotion);
         commandedPositionEntry.setDouble(position);
     }
 
@@ -178,27 +183,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
-
-        /*
-        double newP = pEntry.getDouble(p);
-        double newI = iEntry.getDouble(i);
-        double newD = dEntry.getDouble(d);
-
-        if(newP != p) {
-            pidController.setP(newP);
-            p = newP;
-        }
-        
-        if(newI != i) {
-            pidController.setI(newI);
-            i = newI;
-        }
-
-        if(newD != d) {
-            pidController.setD(newD);
-            d = newD;
-        }
-        */
 
         checkMinLimit();
         checkMaxLimit();
