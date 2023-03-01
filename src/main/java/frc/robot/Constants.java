@@ -108,4 +108,6 @@ public final class Constants {
 
     public static final double SLOW_MODE_MODIFIER = 0.1D;
     // right steer offset
+
+    public static final double TOF_OFFSET_MM = -13; // Distance = read() + TOF_OFFSET_MM
 }

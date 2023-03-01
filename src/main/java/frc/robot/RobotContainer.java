@@ -8,7 +8,6 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
 import frc.robot.commands.SwerveControllerCommandFactory;
-import frc.robot.commands.auto.AlignToGamePiece;
 import frc.robot.commands.auto.AlignToReflectiveTape;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
