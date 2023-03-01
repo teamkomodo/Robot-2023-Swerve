@@ -39,6 +39,7 @@ public class AlignToGamePiece extends CommandBase {
         detector.setEnabled(true);
         detector.setOneshot(false);
         photon.setCameraProcessingIdle(true); // Free resources on the coprocessor
+        correctTime.reset();
         correctTime.start();
     }
 
