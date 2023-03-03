@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.commands.auto.AutoLevelCommand;
@@ -50,10 +49,10 @@ public class RobotContainer {
     private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
-            OperatorConstants.driverXBoxControllerPort);
-    private final GenericHID driverJoystick = new GenericHID(OperatorConstants.driverJoystickPort);
-    private final GenericHID driverButtons = new GenericHID(OperatorConstants.driverButtonsPort);
-    private boolean xBoxDrive = false;
+            XBOX_CONTROLLER_PORT);
+    private final GenericHID driverJoystick = new GenericHID(JOYSTICK_PORT);
+    private final GenericHID driverButtons = new GenericHID(BUTTONS_PORT);
+    private final GenericHID selector = new GenericHID(SELECTOR_PORT);
 
     public RobotContainer() {
         SmartDashboard.putData("Field", field2d);
@@ -84,6 +83,13 @@ public class RobotContainer {
 
         Trigger rightDriverJoystickButton = new JoystickButton(driverJoystick, 1);
         Trigger leftDriverJoystickButton = new JoystickButton(driverJoystick, 2);
+
+        Trigger toggleSwitch1 = new JoystickButton(driverButtons, 1);
+        Trigger toggleSwitch2 = new JoystickButton(driverButtons, 2);
+        Trigger toggleSwitch3 = new JoystickButton(driverButtons, 3);
+
+        Trigger whiteButton = new JoystickButton(driverButtons, 4);
+        Trigger yellowBUtton = new JoystickButton(driverButtons, 5);
 
         //Elevator Triggers
         leftJoystick.whileTrue(Commands.run(

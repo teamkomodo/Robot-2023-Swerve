@@ -24,6 +24,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 public final class Constants {
   public static final int XBOX_CONTROLLER_PORT = 0;
   public static final double XBOX_JOYSTICK_THRESHOLD = 0.05D;
+  public static final int JOYSTICK_PORT = 1;// HF Joystick
+  public static final int BUTTONS_PORT = 2; // A-PAC Player 1
+  public static final int SELECTOR_PORT = 3; // A-PAC Player 2
 
   public static final int TELESCOPE_MOTOR_ID = 31;
   public static final int TELESCOPE_ZERO_SWITCH_CHANNEL = 0;
@@ -93,16 +96,9 @@ public final class Constants {
         // 0 for no filtering, 1 for an integration over all of time. Don't do 1.
         public static final double ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT = 0.9;
     }
-  public static class OperatorConstants {
-    public static final int driverXBoxControllerPort = 1;
-    public static final int driverJoystickPort = 0;
-    public static final int driverButtonsPort = 2;
-  }
 
-  //Width of robot
-  public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.47625;
-  //Length of robot
-  public static final double DRIVETRAIN_WHEELBASE_METERS = 0.67945;
+  public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.47625; // Width of robot in meters
+  public static final double DRIVETRAIN_WHEELBASE_METERS = 0.67945; // Length of robot in meters
   
   public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 10;
   public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 11;
