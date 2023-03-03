@@ -5,7 +5,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -39,8 +38,6 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final GenericEntry highNodePositionEntry;
     private final GenericEntry shelfPositionEntry;
     private final GenericEntry maxPositionEntry;
-    private final GenericEntry atZeroEntry;
-    private final GenericEntry atMaxEntry;
     private final GenericEntry commandedPositionEntry;
 
     private double p = 5.0e-5;
@@ -64,15 +61,12 @@ public class ElevatorSubsystem extends SubsystemBase{
         motor = new CANSparkMax(ELEVATOR_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
+        motor.setSmartCurrentLimit(30, 60);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-
-        pidController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
-        pidController.setSmartMotionMaxAccel(ELEVATOR_MAX_ACCEL, 0); // RPM/S
-        pidController.setSmartMotionMaxVelocity(ELEVATOR_MAX_VELOCITY, 0); // RPM
 
         encoder = motor.getEncoder();
         encoder.setPositionConversionFactor(INCHES_PER_REVOLUTION);
@@ -83,8 +77,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
         motorPercentEntry = motorList.add("Motor %", 0).getEntry();
         motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
-        atZeroEntry = shuffleboardTab.add("At Zero", false).getEntry();
-        atMaxEntry = shuffleboardTab.add("At Max", false).getEntry();
         limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
         lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
         midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
@@ -93,31 +85,34 @@ public class ElevatorSubsystem extends SubsystemBase{
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
         commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
 
+        shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
+        shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
+
     }
     
-    public boolean checkMinLimit() {
+    public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get()) 
-            return false;
-        
+        if(zeroLimitSwitch.get())
+            atMinLimit = false;
+
         //false - switch is active
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
+            atMinLimit = true;
             encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kDutyCycle);
+            pidController.setReference(0, ControlType.kPosition);
         }
-        return true;
     }
 
-    public boolean checkMaxLimit() {
+    public void checkMaxLimit() {
         if(encoder.getPosition() < maxPosition)
-            return false;
-        
+            atMaxLimit = false;
+                
         if(!atMaxLimit) {
             //stop motor on rising edge
-            pidController.setReference(0, ControlType.kDutyCycle);
+            atMaxLimit = true;
+            pidController.setReference(maxPosition, ControlType.kPosition);
         }
-        return true;
     }
 
     /**
@@ -144,7 +139,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(position < 0 || position > maxPosition)
             return;
 
-        pidController.setReference(position, ControlType.kSmartMotion);
+        pidController.setReference(position, ControlType.kPosition);
         commandedPositionEntry.setDouble(position);
     }
 
@@ -174,8 +169,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         motorVelocityEntry.setDouble(encoder.getVelocity());
         motorPercentEntry.setDouble(motor.get());
         motorPositionEntry.setDouble(encoder.getPosition());
-        atZeroEntry.setBoolean(atMinLimit);
-        atMaxEntry.setBoolean(atMaxLimit);
         limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
 
         //Fetch values from shuffleboard
