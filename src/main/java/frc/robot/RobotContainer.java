@@ -103,7 +103,7 @@ public class RobotContainer {
     // Elevator Commands
         leftJoystickY.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftY()),
-                elevatorSubsystem)).onFalse(Commands.run(() -> elevatorSubsystem.setMotorPercent(0), elevatorSubsystem));
+                elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
 
         selector1.onTrue(elevatorSubsystem.runLowNodeCommand());
 
