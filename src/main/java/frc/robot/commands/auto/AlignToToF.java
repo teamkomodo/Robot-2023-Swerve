@@ -5,7 +5,6 @@ import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -27,7 +26,6 @@ public class AlignToToF extends CommandBase {
     private Rotation2d prevRot = null;
     private Rotation2d bestRot = null;
     private double bestRange;
-    private boolean bestDefaultRange = false;
 
     @Override
     public void initialize() {
@@ -52,7 +50,6 @@ public class AlignToToF extends CommandBase {
                 prevRot = drivetrainSubsystem.getPoseMeters().getRotation();
                 bestRot = drivetrainSubsystem.getPoseMeters().getRotation();
                 bestRange = proc_range;
-                bestDefaultRange = true;
                 if (count > 10) {
                     stage++;
                 }
@@ -63,7 +60,6 @@ public class AlignToToF extends CommandBase {
                 if (proc_range < bestRange) {
                     bestRot = drivetrainSubsystem.getPoseMeters().getRotation();
                     bestRange = proc_range;
-                    bestDefaultRange = false;
                 }
                 double offset = drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians()
                         % (2 * Math.PI);
@@ -85,7 +81,6 @@ public class AlignToToF extends CommandBase {
                 if (proc_range < bestRange) {
                     bestRot = drivetrainSubsystem.getPoseMeters().getRotation();
                     bestRange = proc_range;
-                    bestDefaultRange = false;
                 }
                 double offset = drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians();
                 if (offset > 0) {
