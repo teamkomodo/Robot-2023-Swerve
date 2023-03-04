@@ -38,6 +38,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final GenericEntry highNodePositionEntry;
     private final GenericEntry shelfPositionEntry;
     private final GenericEntry maxPositionEntry;
+    private final GenericEntry currentLimitEntry;
 
     private double p = 5.0e-5;
     private double i = 1.0e-6;
@@ -82,17 +83,18 @@ public class ElevatorSubsystem extends SubsystemBase{
         encoder.setPositionConversionFactor(INCHES_PER_REVOLUTION);
         
         shuffleboardTab = Shuffleboard.getTab("Elevator");
-        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
-        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
+        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(4, 0);
         motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
         motorPercentEntry = motorList.add("Motor %", 0).getEntry();
         motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
+        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(6, 0).getEntry();
         lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
         midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
         highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
         shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
+        currentLimitEntry = shuffleboardTab.add("Current Limit", runningCurrentLimit).getEntry();
 
         shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
@@ -226,10 +228,12 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void useRunningCurrentLimit() {
+        currentLimitEntry.setInteger(runningCurrentLimit);
         motor.setSmartCurrentLimit(runningCurrentLimit);
     }
 
     public void useHoldingCurrentLimit() {
+        currentLimitEntry.setInteger(holdingCurrentLimit);
         motor.setSmartCurrentLimit(holdingCurrentLimit);
     }
 
