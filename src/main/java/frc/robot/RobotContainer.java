@@ -5,13 +5,15 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AutoDefinitions;
-import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
+import frc.robot.util.LimelightConnector;
 import frc.robot.util.VisionPipelineConnector;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,11 +25,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
-import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
-
 import static frc.robot.util.Util.*;
 
 public class RobotContainer {
@@ -45,6 +45,7 @@ public class RobotContainer {
             null);
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
+    public final LimelightConnector limelight = new LimelightConnector("limelight");
 
     private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
@@ -158,5 +159,7 @@ public class RobotContainer {
         // autonomousController.initAutonomous();
         // return autonomousController.chooser.getSelected().generateCommand();
         // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
+        // return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
+        // return new AlignToToF(drivetrainSubsystem, new TimeOfFlight(0));
     }
 }

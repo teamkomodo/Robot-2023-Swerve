@@ -24,6 +24,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 public final class Constants {
     public static final int XBOX_CONTROLLER_PORT = 0;
     public static final double XBOX_JOYSTICK_THRESHOLD = 0.05D;
+
     public static final int JOYSTICK_PORT = 1;// HF Joystick
     public static final int BUTTONS_PORT = 2; // A-PAC Player 1
     public static final int SELECTOR_PORT = 3; // A-PAC Player 2
@@ -43,7 +44,7 @@ public final class Constants {
     public static final int LED_STRIP_PWM_CHANNEL = 0;
 
     public static final int TOF_SENSOR_ID = 33;
-
+    
     public static class AutoConstants {
         // Trajectory following
         public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
@@ -54,8 +55,8 @@ public final class Constants {
         public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
         public static final double I_X_CONTROLLER = 0.25;
         public static final double I_Y_CONTROLLER = I_X_CONTROLLER;
-        public static final double P_THETA_CONTROLLER = 3;
-        public static final double I_THETA_CONTROLLER = 0.7;
+        public static final double P_THETA_CONTROLLER = 5;
+        public static final double I_THETA_CONTROLLER = 1.5;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
@@ -77,6 +78,16 @@ public final class Constants {
         public static final double P_PIECE_LINEUP = 3.0;
         public static final double I_PIECE_LINEUP = 2.0;
         public static final double D_PIECE_LINEUP = 0.2;
+        // Reflective tape alignment
+        public static final double MIN_REFLECTIVE_OFFSET_DEGREES = 2.0;
+        public static final double REFLECTIVE_MIN_ALIGN_TIME = 0.5;
+        public static final double P_REFL_LINEUP = 2.0;
+        public static final double I_REFL_LINEUP = 2.0;
+        public static final double D_REFL_LINEUP = 0.2;
+        // ToF constants
+        public static final double TOF_LEAKY_COEFFICIENT = 0.85;
+        public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(12);
+        public static final double TOF_ANGULAR_VELOCITY = 1.2;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 1.2;
         public static final double AUTO_LEVEL_K_I = 0.3;
@@ -120,4 +131,11 @@ public final class Constants {
     public static final double SWERVE_STEER_I = 1.0e-3;
     public static final double SWERVE_STEER_D = 0.1;
 
+    public static class OperatorConstants {
+        public static final int driverXBoxControllerPort = 1;
+        public static final int driverJoystickPort = 0;
+        public static final int driverButtonsPort = 2;
+    }
+
+    public static final double TOF_OFFSET_MM = -13; // Distance = read() + TOF_OFFSET_MM
 }
