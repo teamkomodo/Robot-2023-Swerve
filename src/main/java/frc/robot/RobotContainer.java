@@ -108,16 +108,19 @@ public class RobotContainer {
         leftJoystickY.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getLeftY()*0.3),
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
-        
+        //Action Button
         yellowButton.onTrue(elevatorSubsystem.runPositionCommand(selectorState));
+
+        //Limits toggle
         toggleSwitch2.onTrue(elevatorSubsystem.runDisableLimitsCommand());
         toggleSwitch2.onFalse(elevatorSubsystem.runEnableLimitsCommand());
 
+        //Slow mode toggle
         toggleSwitch3.onTrue(elevatorSubsystem.runEnableSlowModeCommand());
         toggleSwitch3.onFalse(elevatorSubsystem.runDisableSlowModeCommand());
 
     // Drivetrain Commands
-        // Normal Drive
+        // Drive command
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
                         () -> drivetrainSubsystem.drive(
@@ -127,27 +130,24 @@ public class RobotContainer {
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 joystickCurve(driverJoystick.getRawAxis(2))
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                true),
+                                FIELD_RELATIVE_DRIVE),
                         drivetrainSubsystem));
-        // Slow Drive
-        leftBumper.whileTrue(
-            Commands.run(
-                    () -> drivetrainSubsystem.drive(
-                            joystickCurve(driverXBoxController.getLeftY())
-                                    * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-                            joystickCurve(driverXBoxController.getLeftX())
-                                    * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-                            joystickCurve(driverXBoxController.getRightX())
-                                    * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND * SLOW_MODE_MODIFIER,
-                            false),
-                    drivetrainSubsystem));
 
-        rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
+        // Slow Mode
+        rightDriverJoystickButton.onTrue(drivetrainSubsystem.runEnableSlowModeCommand());
+        rightDriverJoystickButton.onFalse(drivetrainSubsystem.runDisableSlowModeCommand());
+
+        // Zero Gyro (for field relative)
         leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
 
     // Claw Commands
+        // XBox commands
         rightBumper.whileTrue(clawSubsystem.openCommand());
         leftBumper.whileTrue(clawSubsystem.closeCommand());
+
+        // OC Commands
+        whiteButton.onTrue(clawSubsystem.toggleCommand());
+        
 
     // Joint Commands
         rightTrigger.whileTrue(Commands.run(

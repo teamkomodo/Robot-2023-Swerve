@@ -20,7 +20,7 @@ import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 public class ClawSubsystem extends SubsystemBase{
     private Compressor compressor = new Compressor(2, PneumaticsModuleType.REVPH);
     private DoubleSolenoid solenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, CLAW_SOLENOID_FORWARD_CHANNEL, CLAW_SOLENOID_REVERSE_CHANNEL);
-    private TimeOfFlight tofSensor = new TimeOfFlight(TOF_SENSOR_ID);
+    private TimeOfFlight tofSensor = new TimeOfFlight(0);
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Claw");
     private GenericEntry distanceToGamePieceEntry = tab.add("Distance to Game Piece", 0).getEntry();
@@ -47,11 +47,19 @@ public class ClawSubsystem extends SubsystemBase{
     }
 
     public Command openCommand() {
-        return this.runEnd(() -> solenoid.set(kReverse), () -> solenoid.set(kOff));
+        return this.runOnce(() -> solenoid.set(kReverse));
     }
 
     public Command closeCommand() {
-        return this.runEnd(() -> solenoid.set(kForward), () -> solenoid.set(kOff));
+        return this.runOnce(() -> solenoid.set(kForward));
+    }
+
+    public Command toggleCommand() {
+        if(solenoid.get() == kForward) {
+            return openCommand();
+        }else {
+            return closeCommand();
+        }
     }
 
     /**
@@ -63,6 +71,10 @@ public class ClawSubsystem extends SubsystemBase{
             return -1;
         
         return tofSensor.getRange();
+    }
+
+    public TimeOfFlight getTOF() {
+        return tofSensor;
     }
 
     @Override
