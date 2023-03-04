@@ -5,7 +5,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -60,15 +59,12 @@ public class TelescopeSubsystem extends SubsystemBase{
         motor = new CANSparkMax(TELESCOPE_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
+        motor.setSmartCurrentLimit(30, 60);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-
-        pidController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
-        pidController.setSmartMotionMaxAccel(TELESCOPE_MAX_ACCEL, 0); // RPM/S
-        pidController.setSmartMotionMaxVelocity(TELESCOPE_MAX_VELOCITY, 0); // RPM
 
         encoder = motor.getEncoder();
        
@@ -89,29 +85,29 @@ public class TelescopeSubsystem extends SubsystemBase{
         commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
     }
     
-    public boolean checkMinLimit() {
+    public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get()) 
-            return false;
-        
+        if(zeroLimitSwitch.get())
+            atMinLimit = false;
+
         //false - switch is active
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
+            atMinLimit = true;
             encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kDutyCycle);
+            pidController.setReference(0, ControlType.kPosition);
         }
-        return true;
     }
 
-    public boolean checkMaxLimit() {
+    public void checkMaxLimit() {
         if(encoder.getPosition() < maxPosition)
-            return false;
-        
+            atMaxLimit = false;
+                
         if(!atMaxLimit) {
             //stop motor on rising edge
-            pidController.setReference(0, ControlType.kDutyCycle);
+            atMaxLimit = true;
+            pidController.setReference(maxPosition, ControlType.kPosition);
         }
-        return true;
     }
 
     /**
@@ -138,7 +134,7 @@ public class TelescopeSubsystem extends SubsystemBase{
         if(position < 0 || position > maxPosition)
             return;
 
-        pidController.setReference(position, ControlType.kSmartMotion);
+        pidController.setReference(position, ControlType.kPosition);
         commandedPositionEntry.setDouble(position);
     }
 

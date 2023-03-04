@@ -69,14 +69,11 @@ public class RobotContainer {
         Trigger leftBumper = driverXBoxController.leftBumper();
         Trigger rightBumper = driverXBoxController.rightBumper();
 
-        Trigger leftJoystickYPositive = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftY.value,
-                XBOX_JOYSTICK_THRESHOLD);
-        Trigger leftJoystickYNegative = driverXBoxController.axisLessThan(XboxController.Axis.kLeftY.value,
-                -XBOX_JOYSTICK_THRESHOLD);
-        Trigger leftJoystickY = leftJoystickYPositive.or(leftJoystickYNegative);
+        Trigger leftJoystickY = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD)
+        .or(driverXBoxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD));
 
-        Trigger leftJoystick = driverXBoxController.leftStick();
-        Trigger rightJoystick = driverXBoxController.rightStick();
+        Trigger rightJoystickY = driverXBoxController.axisGreaterThan(XboxController.Axis.kRightY.value, XBOX_JOYSTICK_THRESHOLD)
+        .or(driverXBoxController.axisLessThan(XboxController.Axis.kRightY.value, -XBOX_JOYSTICK_THRESHOLD));
 
         Trigger leftTrigger = driverXBoxController.leftTrigger();
         Trigger rightTrigger = driverXBoxController.rightTrigger();
@@ -91,12 +88,27 @@ public class RobotContainer {
         Trigger whiteButton = new JoystickButton(driverButtons, 4);
         Trigger yellowBUtton = new JoystickButton(driverButtons, 5);
 
-        //Elevator Triggers
-        leftJoystick.whileTrue(Commands.run(
-                () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftY()),
-                elevatorSubsystem)).onFalse(Commands.run(() -> elevatorSubsystem.setMotorPercent(0), elevatorSubsystem));
+        Trigger selector1 = new JoystickButton(selector, 1);
+        Trigger selector2 = new JoystickButton(selector, 2);
+        Trigger selector3 = new JoystickButton(selector, 3);
+        Trigger selector4 = new JoystickButton(selector, 4);
+        Trigger selector5 = new JoystickButton(selector, 5);
 
-        //Drivetrain triggers
+    //Position Commands
+        selector1.onTrue(elevatorSubsystem.runLowNodeCommand());
+        selector2.onTrue(elevatorSubsystem.runMidNodeCommand());
+        selector3.onTrue(elevatorSubsystem.runHighNodeCommand());
+        selector4.onTrue(elevatorSubsystem.runShelfCommand());
+
+    // Elevator Commands
+        leftJoystickY.whileTrue(Commands.run(
+                () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftY()),
+                elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
+
+        selector1.onTrue(elevatorSubsystem.runLowNodeCommand());
+
+    // Drivetrain Commands
+        // Normal Drive
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
                         () -> drivetrainSubsystem.drive(
@@ -108,7 +120,7 @@ public class RobotContainer {
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 true),
                         drivetrainSubsystem));
-
+        // Slow Drive
         leftBumper.whileTrue(
             Commands.run(
                     () -> drivetrainSubsystem.drive(
@@ -124,11 +136,11 @@ public class RobotContainer {
         rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
         leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
 
-        //Claw Triggers
+    // Claw Commands
         rightBumper.whileTrue(clawSubsystem.openCommand());
         leftBumper.whileTrue(clawSubsystem.closeCommand());
 
-        //Joint Triggers
+    // Joint Commands
         rightTrigger.whileTrue(Commands.run(
             () -> jointSubsystem.setMotorPercent(-driverXBoxController.getRightTriggerAxis()),
             jointSubsystem).andThen(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
@@ -137,8 +149,8 @@ public class RobotContainer {
             jointSubsystem).andThen(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
     
         
-        //Telescope Triggers
-        rightJoystick.whileTrue(Commands.run(
+    // Telescope Commands
+        rightJoystickY.whileTrue(Commands.run(
             () -> telescopeSubsystem.setMotorPercent(driverXBoxController.getRightY()),
             telescopeSubsystem).andThen(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
     }
