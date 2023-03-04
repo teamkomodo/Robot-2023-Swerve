@@ -15,14 +15,24 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.SwerveModuleImpl;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
+import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.Mk4iSwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
+import com.swervedrivespecialties.swervelib.SwerveModule;
+import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
+import com.swervedrivespecialties.swervelib.Mk4iSwerveModuleHelper.GearRatio;
+import com.swervedrivespecialties.swervelib.ctre.CanCoderAbsoluteConfiguration;
+import com.swervedrivespecialties.swervelib.ctre.CanCoderFactoryBuilder;
+import com.swervedrivespecialties.swervelib.rev.NeoDriveControllerFactoryBuilder;
+import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
+import com.swervedrivespecialties.swervelib.rev.NeoSteerControllerFactoryBuilder;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
@@ -52,7 +62,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0
-            * SdsModuleConfigurations.MK4_L1.getDriveReduction() * SdsModuleConfigurations.MK4_L1.getWheelDiameter()
+            * SdsModuleConfigurations.MK4I_L1.getDriveReduction() * SdsModuleConfigurations.MK4I_L1.getWheelDiameter()
             * Math.PI;
     private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
 
@@ -74,12 +84,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
         tab = Shuffleboard.getTab("Drivetrain");
         tab.addString("Chassis Speeds", () -> ("" + currentChassisSpeeds));
 
-        frontLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        frontLeftModule = new SwerveModuleImpl(createCustomNeo(
                 // This parameter is optional, but will allow you to see the current state of
                 // the module on the dashboard.
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0),
                 // This can either be STANDARD or FAST depending on your gear configuration
-                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                Mk4iSwerveModuleHelper.GearRatio.L1,
                 // This is the ID of the drive motor
                 FRONT_LEFT_MODULE_DRIVE_MOTOR,
                 // This is the ID of the steer motor
@@ -92,9 +102,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        frontRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        frontRightModule = new SwerveModuleImpl(createCustomNeo(
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                Mk4iSwerveModuleHelper.GearRatio.L1,
                 FRONT_RIGHT_MODULE_DRIVE_MOTOR,
                 FRONT_RIGHT_MODULE_STEER_MOTOR,
                 FRONT_RIGHT_MODULE_STEER_ENCODER,
@@ -102,9 +112,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backLeftModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        backLeftModule = new SwerveModuleImpl(createCustomNeo(
                 tab.getLayout("Back Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                Mk4iSwerveModuleHelper.GearRatio.L1,
                 BACK_LEFT_MODULE_DRIVE_MOTOR,
                 BACK_LEFT_MODULE_STEER_MOTOR,
                 BACK_LEFT_MODULE_STEER_ENCODER,
@@ -112,9 +122,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        backRightModule = new SwerveModuleImpl(Mk3SwerveModuleHelper.createFalcon500(
+        backRightModule = new SwerveModuleImpl(createCustomNeo(
                 tab.getLayout("Back Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(6, 0),
-                Mk3SwerveModuleHelper.GearRatio.STANDARD,
+                Mk4iSwerveModuleHelper.GearRatio.L1,
                 BACK_RIGHT_MODULE_DRIVE_MOTOR,
                 BACK_RIGHT_MODULE_STEER_MOTOR,
                 BACK_RIGHT_MODULE_STEER_ENCODER,
@@ -198,6 +208,37 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setSwerveModuleStates(kinematics.toSwerveModuleStates(currentChassisSpeeds));
     }
 
+    private SwerveModule createCustomNeo(
+        ShuffleboardLayout container,
+            GearRatio gearRatio,
+            int driveMotorPort,
+            int steerMotorPort,
+            int steerEncoderPort,
+            double steerOffset
+    ) {
+        Mk4ModuleConfiguration configuration = new Mk4ModuleConfiguration();
+        return new SwerveModuleFactory<>(
+                gearRatio.getConfiguration(),
+                new NeoDriveControllerFactoryBuilder()
+                .withVoltageCompensation(configuration.getNominalVoltage())
+                .withCurrentLimit(configuration.getDriveCurrentLimit())
+                .build(),
+                new NeoSteerControllerFactoryBuilder()
+                .withVoltageCompensation(configuration.getNominalVoltage())
+                .withPidConstants(SWERVE_STEER_P, SWERVE_STEER_I, SWERVE_STEER_D)
+                .withCurrentLimit(configuration.getSteerCurrentLimit())
+                .build(new CanCoderFactoryBuilder()
+                        .withReadingUpdatePeriod(100)
+                        .build())
+        ).create(
+                container,
+                driveMotorPort,
+                new NeoSteerConfiguration<>(
+                        steerMotorPort,
+                        new CanCoderAbsoluteConfiguration(steerEncoderPort, steerOffset)
+                )
+        );
+    }
     public Pose2d getPoseMeters() {
         return odometry.getEstimatedPosition();
     }
