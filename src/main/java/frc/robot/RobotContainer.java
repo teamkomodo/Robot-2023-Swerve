@@ -54,10 +54,11 @@ public class RobotContainer {
     private final GenericHID driverButtons = new GenericHID(BUTTONS_PORT);
     private final GenericHID selector = new GenericHID(SELECTOR_PORT);
 
-    private int selectorState = 0;
+    public int selectorState = 0;
 
     public RobotContainer() {
         SmartDashboard.putData("Field", field2d);
+        
         autonomousController.initAutonomous();
         configureBindings();
     }
@@ -93,26 +94,12 @@ public class RobotContainer {
         Trigger whiteButton = new JoystickButton(driverButtons, 4);
         Trigger yellowButton = new JoystickButton(driverButtons, 5);
 
-        Trigger selector1 = new JoystickButton(selector, 1);
-        Trigger selector2 = new JoystickButton(selector, 2);
-        Trigger selector3 = new JoystickButton(selector, 3);
-        Trigger selector4 = new JoystickButton(selector, 4);
-        Trigger selector5 = new JoystickButton(selector, 5);
-
-    //Selector Updating
-        selector1.onTrue(Commands.runOnce(() -> {selectorState = 1;}));
-        selector2.onTrue(Commands.runOnce(() -> {selectorState = 2;}));
-        selector3.onTrue(Commands.runOnce(() -> {selectorState = 3;}));
-        selector4.onTrue(Commands.runOnce(() -> {selectorState = 4;}));
-        selector5.onTrue(Commands.runOnce(() -> {selectorState = 5;}));
-        selector1.or(selector2).or(selector3).or(selector4).or(selector5).onFalse(Commands.runOnce(() -> {selectorState = 0;}));
-        
     // Elevator Commands
         rightJoystickY.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getRightY()),
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
         //Action Button
-        yellowButton.onTrue(elevatorSubsystem.runPositionCommand(selectorState));
+        yellowButton.whileTrue(Commands.run(() -> elevatorSubsystem.gotoSetPosition(getSelectorState())));
 
         //Limits toggle
         toggleSwitch2.onTrue(elevatorSubsystem.runDisableLimitsCommand());
@@ -169,6 +156,23 @@ public class RobotContainer {
             telescopeSubsystem));
 
         leftJoystickX.onFalse(Commands.runOnce(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
+    }
+
+    private int getSelectorState() {
+        System.out.println("Get Selector");
+        if(selector.getRawButton(1)) {
+            SmartDashboard.putNumber("Selector", 1);
+            return 1;
+        }
+        if(selector.getRawButton(2))
+        return 2;
+        if(selector.getRawButton(3))
+        return 3;
+        if(selector.getRawButton(4))
+        return 4;
+        if(selector.getRawButton(5))
+        return 5;
+        return 0;
     }
 
     public Command getAutonomousCommand() {

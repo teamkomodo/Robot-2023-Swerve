@@ -172,8 +172,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         commandedPosition = position;
     }
 
-    public Command runPositionCommand(int positionId) {
-        return this.runOnce(() -> setPosition(positions[positionId]));
+    public void gotoSetPosition(int positionId) {
+        setPosition(positions[positionId]);
     }
 
     public Command runHoldPositionCommand() {

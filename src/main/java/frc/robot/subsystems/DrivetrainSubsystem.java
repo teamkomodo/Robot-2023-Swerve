@@ -207,7 +207,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public void drive(double forward, double right, double rotation, boolean fieldRelative) {
-        ChassisSpeeds speeds = new ChassisSpeeds(forward * DRIVETRAIN_SLOW_MODE_MODIFIER, right * DRIVETRAIN_SLOW_MODE_MODIFIER, rotation * DRIVETRAIN_SLOW_MODE_MODIFIER);
+        ChassisSpeeds speeds = new ChassisSpeeds(forward * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1), right * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1), rotation * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1));
         if (fieldRelative) {
             setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw().times(-1)));
             return;
