@@ -25,32 +25,45 @@ public class TelescopeSubsystem extends SubsystemBase{
     private final RelativeEncoder encoder;
 
     private final ShuffleboardTab shuffleboardTab;
-    private final GenericEntry motorVelocityEntry;
-    private final GenericEntry motorPercentEntry;
-    private final GenericEntry motorPositionEntry;
-    private final GenericEntry limitSwitchEntry;
     private final GenericEntry lowNodePositionEntry;
     private final GenericEntry midNodePositionEntry;
     private final GenericEntry highNodePositionEntry;
     private final GenericEntry shelfPositionEntry;
     private final GenericEntry maxPositionEntry;
-    private final GenericEntry atZeroEntry;
-    private final GenericEntry atMaxEntry;
-    private final GenericEntry commandedPositionEntry;
+    private final GenericEntry currentLimitEntry;
 
     private double p = 1.0;
     private double i = 1.0e-6;
-    private double d = 1.0;
+    private double d = 0.7;
     
-    private double lowNodePosition = 0;
-    private double midNodePosition = 0;
-    private double highNodePosition = 0;
-    private double shelfPosition = 0;
+    private double stowPosition = 0;
+    private double groundPosition = 0;
+    private double lowNodePosition = 16;
+    private double midNodePosition = 32;
+    private double highNodePosition = 48;
+    private double shelfPosition = 64;
 
-    private double maxPosition = 0;
+    //Order of array corresponds to selector number
+    private double[] positions = {stowPosition, groundPosition, shelfPosition, lowNodePosition, midNodePosition, highNodePosition};
 
-    private boolean atMinLimit = false;
+    private double maxPosition = 70;
+
     private boolean atMaxLimit = false;
+    private boolean atMinLimit = false;
+
+    private int holdingCurrentLimit = 30;
+    private int runningCurrentLimit = 60;
+
+    private double commandedPosition = 0;
+
+    private long lastTimeMillis = 0;
+    private long holdingTimeMillis = 0;
+    private long minHoldingTime = 1000;
+
+    private double holdingVelocityThreshold = 1;
+
+    private boolean useLimits = true;
+    private boolean slowMode = false;
 
     public TelescopeSubsystem() {
 
@@ -59,7 +72,7 @@ public class TelescopeSubsystem extends SubsystemBase{
         motor = new CANSparkMax(TELESCOPE_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
-        motor.setSmartCurrentLimit(30, 60);
+        motor.setSmartCurrentLimit(holdingCurrentLimit, runningCurrentLimit);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
@@ -67,52 +80,64 @@ public class TelescopeSubsystem extends SubsystemBase{
         pidController.setD(d);
 
         encoder = motor.getEncoder();
-       
+        
         shuffleboardTab = Shuffleboard.getTab("Telescope");
-        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
-        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
-        motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
-        motorPercentEntry = motorList.add("Motor %", 0).getEntry();
-        motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
-        atZeroEntry = shuffleboardTab.add("At Zero", false).getEntry();
-        atMaxEntry = shuffleboardTab.add("At Max", false).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
+        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(4, 0);
         lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
         midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
         highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
         shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
-        commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
+        currentLimitEntry = shuffleboardTab.add("Current Limit", runningCurrentLimit).getEntry();
+
+        motorList.addDouble("Motor RPM", () -> encoder.getVelocity());
+        motorList.addDouble("Motor Current", () -> motor.getOutputCurrent());
+        motorList.addDouble("Motor %", () -> motor.get());
+        motorList.addDouble("Motor Position", () -> encoder.getPosition());
+
+        shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
+        shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
+        shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
     }
     
     public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get())
+        if(!useLimits || zeroLimitSwitch.get()) {
             atMinLimit = false;
+            return;
+        }
 
         //false - switch is active
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
             atMinLimit = true;
+            useHoldingCurrentLimit();
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }
     }
 
     public void checkMaxLimit() {
-        if(encoder.getPosition() < maxPosition)
+        if(!useLimits || encoder.getPosition() < maxPosition) {
             atMaxLimit = false;
+            return;
+        }
                 
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
+            useHoldingCurrentLimit();
             pidController.setReference(maxPosition, ControlType.kPosition);
         }
     }
 
     /**
-     * <p>Sets the controller's reference to a percent of the duty cycle.</p>
+     * Sets the controller's reference to a percent of the duty cycle.
+     * <p>
      * Will not set a negative percent if atMinLimit is true and will not set a positive percent if atMaxLimit is true.
+     * <p>
+     * Will set the motor's current limit to the running current limit
      * @param percent the duty cycle percentage (between -1 and 1) to be commanded
      */
     public void setMotorPercent(double percent) {
@@ -123,19 +148,31 @@ public class TelescopeSubsystem extends SubsystemBase{
         //at max and attempting to increase
         if(atMaxLimit && percent > 0)
             return;
-        pidController.setReference(percent, ControlType.kDutyCycle);
+        useRunningCurrentLimit();
+        pidController.setReference(percent * (slowMode? TELESCOPE_ZERO_SWITCH_CHANNEL : 1), ControlType.kDutyCycle);
     }
 
     /**
      * Sets the controller's reference to a position, given the position is between 0 and maxPosition
+     * <p>
+     * Will set the motor's current limit to the running current limit
      * @param position the mechanism position to be commanded
      */
     public void setPosition(double position) {
         if(position < 0 || position > maxPosition)
             return;
 
+        useRunningCurrentLimit();
         pidController.setReference(position, ControlType.kPosition);
-        commandedPositionEntry.setDouble(position);
+        commandedPosition = position;
+    }
+
+    public void gotoSetPosition(int positionId) {
+        setPosition(positions[positionId]);
+    }
+
+    public Command runHoldPositionCommand() {
+        return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
     public Command runLowNodeCommand() {
@@ -158,21 +195,45 @@ public class TelescopeSubsystem extends SubsystemBase{
         return this.runOnce(() -> setPosition(0));
     }
 
+    public Command runDisableLimitsCommand() {
+        return this.runOnce(() -> useLimits = false);
+    }
+
+    public Command runEnableLimitsCommand() {
+        return this.runOnce(() -> useLimits = true);
+    }
+
+    public Command runDisableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = false);
+    }
+
+    public Command runEnableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = true);
+    }
+
     @Override
     public void periodic() {
-        //Update shuffleboard values
-        motorVelocityEntry.setDouble(encoder.getVelocity());
-        motorPercentEntry.setDouble(motor.get());
-        motorPositionEntry.setDouble(encoder.getPosition());
-        atZeroEntry.setBoolean(atMinLimit);
-        atMaxEntry.setBoolean(atMaxLimit);
-        limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
-        
+
         //Fetch values from shuffleboard
         lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
         midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
+
+        // long currentTimeMillis = System.currentTimeMillis();
+        // if(encoder.getVelocity() < holdingVelocityThreshold) {
+        //     holdingTimeMillis += currentTimeMillis - lastTimeMillis;
+        // }else {
+        //     holdingTimeMillis = 0;
+        // }
+
+        // if(holdingTimeMillis > minHoldingTime) {
+        //     useHoldingCurrentLimit();
+        // }else {
+        //     useRunningCurrentLimit();
+        // }
+        
+        // lastTimeMillis = System.currentTimeMillis();
 
         checkMinLimit();
         checkMaxLimit();
@@ -186,6 +247,16 @@ public class TelescopeSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+    }
+
+    public void useRunningCurrentLimit() {
+        currentLimitEntry.setInteger(runningCurrentLimit);
+        //motor.setSmartCurrentLimit(runningCurrentLimit);
+    }
+
+    public void useHoldingCurrentLimit() {
+        currentLimitEntry.setInteger(holdingCurrentLimit);
+        //motor.setSmartCurrentLimit(holdingCurrentLimit);
     }
 
     public void setLowNodePosition(double lowNodePosition) {

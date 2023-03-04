@@ -148,6 +148,8 @@ public class RobotContainer {
         leftTrigger.whileTrue(Commands.run(
             () -> jointSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
             jointSubsystem).andThen(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
+
+        yellowButton.onTrue(Commands.runOnce(() -> jointSubsystem.gotoSetPosition(getSelectorState())));
     
         
     // Telescope Commands
@@ -156,6 +158,7 @@ public class RobotContainer {
             telescopeSubsystem));
 
         leftJoystickX.onFalse(Commands.runOnce(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
+        yellowButton.onTrue(Commands.runOnce(() -> telescopeSubsystem.gotoSetPosition(getSelectorState())));
     }
 
     private int getSelectorState() {
