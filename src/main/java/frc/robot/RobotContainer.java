@@ -54,6 +54,8 @@ public class RobotContainer {
     private final GenericHID driverButtons = new GenericHID(BUTTONS_PORT);
     private final GenericHID selector = new GenericHID(SELECTOR_PORT);
 
+    private int selectorState = 0;
+
     public RobotContainer() {
         SmartDashboard.putData("Field", field2d);
         autonomousController.initAutonomous();
@@ -94,16 +96,20 @@ public class RobotContainer {
         Trigger selector4 = new JoystickButton(selector, 4);
         Trigger selector5 = new JoystickButton(selector, 5);
 
-    //Position Commands
-        selector1.onTrue(elevatorSubsystem.runLowNodeCommand());
-        selector2.onTrue(elevatorSubsystem.runMidNodeCommand());
-        selector3.onTrue(elevatorSubsystem.runHighNodeCommand());
-        selector4.onTrue(elevatorSubsystem.runShelfCommand());
+    //Selector Updating
+        selector1.onTrue(Commands.runOnce(() -> {selectorState = 1;}));
+        selector2.onTrue(Commands.runOnce(() -> {selectorState = 2;}));
+        selector3.onTrue(Commands.runOnce(() -> {selectorState = 3;}));
+        selector4.onTrue(Commands.runOnce(() -> {selectorState = 4;}));
+        selector5.onTrue(Commands.runOnce(() -> {selectorState = 5;}));
+        selector1.or(selector2).or(selector3).or(selector4).or(selector5).onFalse(Commands.runOnce(() -> {selectorState = 0;}));
         
     // Elevator Commands
         leftJoystickY.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getLeftY()*0.3),
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
+        
+        yellowButton.onTrue(elevatorSubsystem.runPositionCommand(selectorState));
 
     // Drivetrain Commands
         // Normal Drive

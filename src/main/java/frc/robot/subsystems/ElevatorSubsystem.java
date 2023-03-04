@@ -29,10 +29,6 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final RelativeEncoder encoder;
 
     private final ShuffleboardTab shuffleboardTab;
-    private final GenericEntry motorVelocityEntry;
-    private final GenericEntry motorPercentEntry;
-    private final GenericEntry motorPositionEntry;
-    private final GenericEntry limitSwitchEntry;
     private final GenericEntry lowNodePositionEntry;
     private final GenericEntry midNodePositionEntry;
     private final GenericEntry highNodePositionEntry;
@@ -44,10 +40,15 @@ public class ElevatorSubsystem extends SubsystemBase{
     private double i = 1.0e-6;
     private double d = 0.7;
     
+    private double stowPosition = 0;
+    private double groundPosition = 0;
     private double lowNodePosition = 12;
     private double midNodePosition = 16;
     private double highNodePosition = 20;
     private double shelfPosition = 25;
+
+    //Order of array corresponds to selector number
+    private double[] positions = {stowPosition, groundPosition, shelfPosition, lowNodePosition, midNodePosition, highNodePosition};
 
     private double maxPosition = 36;
 
@@ -85,10 +86,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         shuffleboardTab = Shuffleboard.getTab("Elevator");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
         ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(4, 0);
-        motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
-        motorPercentEntry = motorList.add("Motor %", 0).getEntry();
-        motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(6, 0).getEntry();
         lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
         midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
         highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
@@ -96,10 +93,14 @@ public class ElevatorSubsystem extends SubsystemBase{
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
         currentLimitEntry = shuffleboardTab.add("Current Limit", runningCurrentLimit).getEntry();
 
+        motorList.addDouble("Motor RPM", () -> encoder.getVelocity());
+        motorList.addDouble("Motor Current", () -> motor.getOutputCurrent());
+        motorList.addDouble("Motor %", () -> motor.get());
+        motorList.addDouble("Motor Position", () -> encoder.getPosition());
+
         shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
-
     }
     
     public void checkMinLimit() {
@@ -134,8 +135,11 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     /**
-     * <p>Sets the controller's reference to a percent of the duty cycle.</p>
+     * Sets the controller's reference to a percent of the duty cycle.
+     * <p>
      * Will not set a negative percent if atMinLimit is true and will not set a positive percent if atMaxLimit is true.
+     * <p>
+     * Will set the motor's current limit to the running current limit
      * @param percent the duty cycle percentage (between -1 and 1) to be commanded
      */
     public void setMotorPercent(double percent) {
@@ -152,6 +156,8 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     /**
      * Sets the controller's reference to a position, given the position is between 0 and maxPosition
+     * <p>
+     * Will set the motor's current limit to the running current limit
      * @param position the mechanism position to be commanded
      */
     public void setPosition(double position) {
@@ -161,6 +167,10 @@ public class ElevatorSubsystem extends SubsystemBase{
         useRunningCurrentLimit();
         pidController.setReference(position, ControlType.kPosition);
         commandedPosition = position;
+    }
+
+    public Command runPositionCommand(int positionId) {
+        return this.runOnce(() -> setPosition(positions[positionId]));
     }
 
     public Command runHoldPositionCommand() {
@@ -189,11 +199,6 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-        //Update shuffleboard values
-        motorVelocityEntry.setDouble(encoder.getVelocity());
-        motorPercentEntry.setDouble(motor.get());
-        motorPositionEntry.setDouble(encoder.getPosition());
-        limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
 
         //Fetch values from shuffleboard
         lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
