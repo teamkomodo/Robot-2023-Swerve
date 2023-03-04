@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.robot.util.SwerveDrivePoseEstimatorImpl;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.SwerveModuleImpl;
 
@@ -83,6 +84,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         this.field2d = field;
         tab = Shuffleboard.getTab("Drivetrain");
         tab.addString("Chassis Speeds", () -> ("" + currentChassisSpeeds));
+
+        tab.addDouble("Gyro Yaw", () -> (getGyroYaw().getDegrees()));
 
         frontLeftModule = new SwerveModuleImpl(createCustomNeo(
                 // This parameter is optional, but will allow you to see the current state of
@@ -173,7 +176,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             if (navx.isMagnetometerCalibrated()) {
                 return Rotation2d.fromDegrees(navx.getFusedHeading());
             }
-            return Rotation2d.fromDegrees(360.0 - navx.getYaw());
+            return Rotation2d.fromDegrees(navx.getYaw());
         }
         return Rotation2d.fromRadians(simGyroYawRadians);
     }
