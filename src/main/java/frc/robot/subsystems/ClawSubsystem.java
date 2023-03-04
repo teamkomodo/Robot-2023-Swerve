@@ -20,7 +20,7 @@ import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 public class ClawSubsystem extends SubsystemBase{
     private Compressor compressor = new Compressor(2, PneumaticsModuleType.REVPH);
     private DoubleSolenoid solenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, CLAW_SOLENOID_FORWARD_CHANNEL, CLAW_SOLENOID_REVERSE_CHANNEL);
-    private TimeOfFlight tofSensor = new TimeOfFlight(0);
+    private TimeOfFlight tofSensor = new TimeOfFlight(TOF_SENSOR_ID);
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Claw");
     private GenericEntry distanceToGamePieceEntry = tab.add("Distance to Game Piece", 0).getEntry();
