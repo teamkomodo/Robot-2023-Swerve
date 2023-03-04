@@ -124,7 +124,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         odometry = new SwerveDrivePoseEstimatorImpl(
                 kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-        odometry.getOdometry().forgetGyro = true;
+        odometry.getOdometry().forgetGyro = false;
 
         ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.P_THETA_CONTROLLER,
                 AutoConstants.I_THETA_CONTROLLER, 0,
