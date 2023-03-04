@@ -9,6 +9,7 @@ import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AlignToReflectiveTape;
+import frc.robot.commands.auto.AlignToToF;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
@@ -24,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.*;
+
+import com.playingwithfusion.TimeOfFlight;
 
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
@@ -55,13 +58,12 @@ public class RobotContainer {
         Trigger slowModeButton = driverXBoxController.leftBumper();
         Trigger autoLevelButton = driverXBoxController.a();
         autoLevelButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
-
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
                         () -> drivetrainSubsystem.drive(
                                 -driverXBoxController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 -driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                -driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                                -driverXBoxController.getRawAxis(2) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 true),
                         drivetrainSubsystem));
 
@@ -72,7 +74,7 @@ public class RobotContainer {
                                         * SLOW_MODE_MODIFIER,
                                 -driverXBoxController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
                                         * SLOW_MODE_MODIFIER,
-                                -driverXBoxController.getRightX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+                                -driverXBoxController.getRawAxis(2) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
                                         * SLOW_MODE_MODIFIER,
                                 true),
                         drivetrainSubsystem));
@@ -82,6 +84,7 @@ public class RobotContainer {
         // autonomousController.initAutonomous();
         // return autonomousController.chooser.getSelected().generateCommand();
         // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
-        return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
+        // return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
+        return new AlignToToF(drivetrainSubsystem, new TimeOfFlight(0));
     }
 }

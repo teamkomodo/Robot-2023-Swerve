@@ -38,8 +38,8 @@ public final class Constants {
         public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
         public static final double I_X_CONTROLLER = 0.25;
         public static final double I_Y_CONTROLLER = I_X_CONTROLLER;
-        public static final double P_THETA_CONTROLLER = 3;
-        public static final double I_THETA_CONTROLLER = 0.7;
+        public static final double P_THETA_CONTROLLER = 5;
+        public static final double I_THETA_CONTROLLER = 1.5;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
@@ -67,6 +67,10 @@ public final class Constants {
         public static final double P_REFL_LINEUP = 2.0;
         public static final double I_REFL_LINEUP = 2.0;
         public static final double D_REFL_LINEUP = 0.2;
+        // ToF constants
+        public static final double TOF_LEAKY_COEFFICIENT = 0.85;
+        public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(12);
+        public static final double TOF_ANGULAR_VELOCITY = 1.2;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 1.2;
         public static final double AUTO_LEVEL_K_I = 0.3;
