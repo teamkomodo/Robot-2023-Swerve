@@ -66,6 +66,9 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     private double holdingVelocityThreshold = 1;
 
+    private boolean useLimits = true;
+    private boolean slowMode = false;
+
     public ElevatorSubsystem() {
 
         zeroLimitSwitch = new DigitalInput(ELEVATOR_ZERO_SWITCH_CHANNEL);
@@ -105,7 +108,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     
     public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get()) {
+        if(!useLimits || zeroLimitSwitch.get()) {
             atMinLimit = false;
             return;
         }
@@ -121,7 +124,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void checkMaxLimit() {
-        if(encoder.getPosition() < maxPosition) {
+        if(!useLimits || encoder.getPosition() < maxPosition) {
             atMaxLimit = false;
             return;
         }
@@ -151,7 +154,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(atMaxLimit && percent > 0)
             return;
         useRunningCurrentLimit();
-        pidController.setReference(percent, ControlType.kDutyCycle);
+        pidController.setReference(percent * (slowMode? ELEVATOR_SLOW_MODE_MULTIPLIER : 1), ControlType.kDutyCycle);
     }
 
     /**
@@ -195,6 +198,22 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public Command runZeroCommand() {
         return this.runOnce(() -> setPosition(0));
+    }
+
+    public Command runDisableLimitsCommand() {
+        return this.runOnce(() -> useLimits = false);
+    }
+
+    public Command runEnableLimitsCommand() {
+        return this.runOnce(() -> useLimits = true);
+    }
+
+    public Command runDisableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = false);
+    }
+
+    public Command runEnableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = true);
     }
 
     @Override

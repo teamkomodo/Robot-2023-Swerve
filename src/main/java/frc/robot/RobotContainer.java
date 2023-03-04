@@ -111,6 +111,11 @@ public class RobotContainer {
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
         
         yellowButton.onTrue(elevatorSubsystem.runPositionCommand(selectorState));
+        toggleSwitch2.onTrue(elevatorSubsystem.runDisableLimitsCommand());
+        toggleSwitch2.onFalse(elevatorSubsystem.runEnableLimitsCommand());
+
+        toggleSwitch3.onTrue(elevatorSubsystem.runEnableSlowModeCommand());
+        toggleSwitch3.onFalse(elevatorSubsystem.runDisableSlowModeCommand());
 
     // Drivetrain Commands
         // Normal Drive

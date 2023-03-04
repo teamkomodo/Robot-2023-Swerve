@@ -34,6 +34,7 @@ public final class Constants {
     
     public static final int ELEVATOR_MOTOR_ID = 30;
     public static final int ELEVATOR_ZERO_SWITCH_CHANNEL = 1;
+    public static final double ELEVATOR_SLOW_MODE_MULTIPLIER = 0.5;
 
     public static final int CLAW_SOLENOID_FORWARD_CHANNEL = 0;
     public static final int CLAW_SOLENOID_REVERSE_CHANNEL = 1;
