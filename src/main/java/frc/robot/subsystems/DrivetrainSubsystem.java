@@ -11,7 +11,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.robot.util.SwerveDrivePoseEstimatorImpl;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.SwerveModuleImpl;
 
@@ -159,9 +158,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
         };
     }
 
+    private Rotation2d gyroOffset = Rotation2d.fromRadians(0);
+
     public void zeroGyro() {
         if (RobotBase.isReal()) {
-            navx.zeroYaw();
+            gyroOffset = getGyroYawRaw();
             return;
         }
         simGyroYawRadians = 0.0;
@@ -172,6 +173,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
      * @return a {@link Rotation2d} object with the heading of the robot (clockwise positive)
      */
     public Rotation2d getGyroYaw() {
+        return getGyroYawRaw().minus(gyroOffset);
+    }
+    private Rotation2d getGyroYawRaw() {
         if (RobotBase.isReal()) {
             if (navx.isMagnetometerCalibrated()) {
                 return Rotation2d.fromDegrees(navx.getFusedHeading());

@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AutoDefinitions;
