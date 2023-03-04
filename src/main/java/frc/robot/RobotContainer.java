@@ -86,7 +86,7 @@ public class RobotContainer {
         Trigger toggleSwitch3 = new JoystickButton(driverButtons, 3);
 
         Trigger whiteButton = new JoystickButton(driverButtons, 4);
-        Trigger yellowBUtton = new JoystickButton(driverButtons, 5);
+        Trigger yellowButton = new JoystickButton(driverButtons, 5);
 
         Trigger selector1 = new JoystickButton(selector, 1);
         Trigger selector2 = new JoystickButton(selector, 2);
@@ -99,13 +99,11 @@ public class RobotContainer {
         selector2.onTrue(elevatorSubsystem.runMidNodeCommand());
         selector3.onTrue(elevatorSubsystem.runHighNodeCommand());
         selector4.onTrue(elevatorSubsystem.runShelfCommand());
-
+        
     // Elevator Commands
         leftJoystickY.whileTrue(Commands.run(
-                () -> elevatorSubsystem.setMotorPercent(driverXBoxController.getLeftY()),
+                () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getLeftY()*0.3),
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
-
-        selector1.onTrue(elevatorSubsystem.runLowNodeCommand());
 
     // Drivetrain Commands
         // Normal Drive

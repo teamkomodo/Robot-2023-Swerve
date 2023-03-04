@@ -40,16 +40,16 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final GenericEntry maxPositionEntry;
     private final GenericEntry currentLimitEntry;
 
-    private double p = 5.0e-5;
+    private double p = 1.0;
     private double i = 1.0e-6;
     private double d = 0.7;
     
-    private double lowNodePosition = 0;
+    private double lowNodePosition = 12;
     private double midNodePosition = 16;
-    private double highNodePosition = 31;
-    private double shelfPosition = 31;
+    private double highNodePosition = 20;
+    private double shelfPosition = 25;
 
-    private double maxPosition = 32;
+    private double maxPosition = 36;
 
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
@@ -104,8 +104,10 @@ public class ElevatorSubsystem extends SubsystemBase{
     
     public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get())
+        if(zeroLimitSwitch.get()) {
             atMinLimit = false;
+            return;
+        }
 
         //false - switch is active
         if(!atMinLimit) {
@@ -118,8 +120,10 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void checkMaxLimit() {
-        if(encoder.getPosition() < maxPosition)
+        if(encoder.getPosition() < maxPosition) {
             atMaxLimit = false;
+            return;
+        }
                 
         if(!atMaxLimit) {
             //stop motor on rising edge
@@ -142,7 +146,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         //at max and attempting to increase
         if(atMaxLimit && percent > 0)
             return;
-
         useRunningCurrentLimit();
         pidController.setReference(percent, ControlType.kDutyCycle);
     }
@@ -198,20 +201,20 @@ public class ElevatorSubsystem extends SubsystemBase{
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
 
-        long currentTimeMillis = System.currentTimeMillis();
-        if(encoder.getVelocity() < holdingVelocityThreshold) {
-            holdingTimeMillis += currentTimeMillis - lastTimeMillis;
-        }else {
-            holdingTimeMillis = 0;
-        }
+        // long currentTimeMillis = System.currentTimeMillis();
+        // if(encoder.getVelocity() < holdingVelocityThreshold) {
+        //     holdingTimeMillis += currentTimeMillis - lastTimeMillis;
+        // }else {
+        //     holdingTimeMillis = 0;
+        // }
 
-        if(holdingTimeMillis > minHoldingTime) {
-            useHoldingCurrentLimit();
-        }else {
-            useRunningCurrentLimit();
-        }
+        // if(holdingTimeMillis > minHoldingTime) {
+        //     useHoldingCurrentLimit();
+        // }else {
+        //     useRunningCurrentLimit();
+        // }
         
-        lastTimeMillis = System.currentTimeMillis();
+        // lastTimeMillis = System.currentTimeMillis();
 
         checkMinLimit();
         checkMaxLimit();
@@ -229,12 +232,12 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public void useRunningCurrentLimit() {
         currentLimitEntry.setInteger(runningCurrentLimit);
-        motor.setSmartCurrentLimit(runningCurrentLimit);
+        //motor.setSmartCurrentLimit(runningCurrentLimit);
     }
 
     public void useHoldingCurrentLimit() {
         currentLimitEntry.setInteger(holdingCurrentLimit);
-        motor.setSmartCurrentLimit(holdingCurrentLimit);
+        //motor.setSmartCurrentLimit(holdingCurrentLimit);
     }
 
     public void setLowNodePosition(double lowNodePosition) {
