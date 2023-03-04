@@ -61,6 +61,7 @@ public class JointSubsystem extends SubsystemBase{
         motor = new CANSparkMax(JOINT_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
+        motor.setSmartCurrentLimit(30, 60);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
@@ -88,26 +89,29 @@ public class JointSubsystem extends SubsystemBase{
         commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
     }
     
-    public boolean checkMinLimit() {
-        if(encoder.getPosition() > minPosition)
-            return false;
-        
+    public void checkMinLimit() {
+        //true - switch is not active
+        if(zeroLimitSwitch.get())
+            atMinLimit = false;
+
+        //false - switch is active
         if(!atMinLimit) {
-            //stop motor on rising edge
-            pidController.setReference(0, ControlType.kDutyCycle);
+            //stop motor and reset encoder position on rising edge
+            atMinLimit = true;
+            encoder.setPosition(0);
+            pidController.setReference(0, ControlType.kPosition);
         }
-        return true;
     }
 
-    public boolean checkMaxLimit() {
+    public void checkMaxLimit() {
         if(encoder.getPosition() < maxPosition)
-            return false;
-        
+            atMaxLimit = false;
+                
         if(!atMaxLimit) {
             //stop motor on rising edge
-            pidController.setReference(0, ControlType.kDutyCycle);
+            atMaxLimit = true;
+            pidController.setReference(maxPosition, ControlType.kPosition);
         }
-        return true;
     }
 
     /**
@@ -176,8 +180,8 @@ public class JointSubsystem extends SubsystemBase{
         maxPosition = maxPositionEntry.getDouble(maxPosition);
         minPosition = minPositionEntry.getDouble(minPosition);
 
-        atMinLimit = checkMinLimit();
-        atMaxLimit = checkMaxLimit();
+        checkMinLimit();
+        checkMaxLimit();
     }
 
     public void setPID(double p, double i, double d) {

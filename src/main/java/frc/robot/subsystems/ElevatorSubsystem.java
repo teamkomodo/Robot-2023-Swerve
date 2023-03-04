@@ -38,23 +38,32 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final GenericEntry highNodePositionEntry;
     private final GenericEntry shelfPositionEntry;
     private final GenericEntry maxPositionEntry;
-    private final GenericEntry atZeroEntry;
-    private final GenericEntry atMaxEntry;
-    private final GenericEntry commandedPositionEntry;
+    private final GenericEntry currentLimitEntry;
 
-    private double p = 5.0e-5;
+    private double p = 1.0;
     private double i = 1.0e-6;
     private double d = 0.7;
     
-    private double lowNodePosition = 0;
+    private double lowNodePosition = 12;
     private double midNodePosition = 16;
-    private double highNodePosition = 31;
-    private double shelfPosition = 31;
+    private double highNodePosition = 20;
+    private double shelfPosition = 25;
 
-    private double maxPosition = 32;
+    private double maxPosition = 36;
 
-    boolean atMaxLimit = false;
-    boolean atMinLimit = false;
+    private boolean atMaxLimit = false;
+    private boolean atMinLimit = false;
+
+    private int holdingCurrentLimit = 30;
+    private int runningCurrentLimit = 60;
+
+    private double commandedPosition = 0;
+
+    private long lastTimeMillis = 0;
+    private long holdingTimeMillis = 0;
+    private long minHoldingTime = 1000;
+
+    private double holdingVelocityThreshold = 1;
 
     public ElevatorSubsystem() {
 
@@ -63,6 +72,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         motor = new CANSparkMax(ELEVATOR_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
+        motor.setSmartCurrentLimit(holdingCurrentLimit, runningCurrentLimit);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
@@ -73,46 +83,54 @@ public class ElevatorSubsystem extends SubsystemBase{
         encoder.setPositionConversionFactor(INCHES_PER_REVOLUTION);
         
         shuffleboardTab = Shuffleboard.getTab("Elevator");
-        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
-        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
+        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(4, 0);
         motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
         motorPercentEntry = motorList.add("Motor %", 0).getEntry();
         motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
-        atZeroEntry = shuffleboardTab.add("At Zero", false).getEntry();
-        atMaxEntry = shuffleboardTab.add("At Max", false).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
+        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(6, 0).getEntry();
         lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
         midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
         highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
         shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
-        commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
+        currentLimitEntry = shuffleboardTab.add("Current Limit", runningCurrentLimit).getEntry();
+
+        shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
+        shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
+        shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
 
     }
     
-    public boolean checkMinLimit() {
+    public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get()) 
-            return false;
-        
+        if(zeroLimitSwitch.get()) {
+            atMinLimit = false;
+            return;
+        }
+
         //false - switch is active
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
+            atMinLimit = true;
+            useHoldingCurrentLimit();
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }
-        return true;
     }
 
-    public boolean checkMaxLimit() {
-        if(encoder.getPosition() < maxPosition)
-            return false;
-        
+    public void checkMaxLimit() {
+        if(encoder.getPosition() < maxPosition) {
+            atMaxLimit = false;
+            return;
+        }
+                
         if(!atMaxLimit) {
             //stop motor on rising edge
-            pidController.setReference(0, ControlType.kDutyCycle);
+            atMaxLimit = true;
+            useHoldingCurrentLimit();
+            pidController.setReference(maxPosition, ControlType.kPosition);
         }
-        return true;
     }
 
     /**
@@ -128,6 +146,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         //at max and attempting to increase
         if(atMaxLimit && percent > 0)
             return;
+        useRunningCurrentLimit();
         pidController.setReference(percent, ControlType.kDutyCycle);
     }
 
@@ -139,8 +158,13 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(position < 0 || position > maxPosition)
             return;
 
+        useRunningCurrentLimit();
         pidController.setReference(position, ControlType.kPosition);
-        commandedPositionEntry.setDouble(position);
+        commandedPosition = position;
+    }
+
+    public Command runHoldPositionCommand() {
+        return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
     public Command runLowNodeCommand() {
@@ -169,8 +193,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         motorVelocityEntry.setDouble(encoder.getVelocity());
         motorPercentEntry.setDouble(motor.get());
         motorPositionEntry.setDouble(encoder.getPosition());
-        atZeroEntry.setBoolean(atMinLimit);
-        atMaxEntry.setBoolean(atMaxLimit);
         limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
 
         //Fetch values from shuffleboard
@@ -179,26 +201,20 @@ public class ElevatorSubsystem extends SubsystemBase{
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
 
-        /*
-        double newP = pEntry.getDouble(p);
-        double newI = iEntry.getDouble(i);
-        double newD = dEntry.getDouble(d);
+        // long currentTimeMillis = System.currentTimeMillis();
+        // if(encoder.getVelocity() < holdingVelocityThreshold) {
+        //     holdingTimeMillis += currentTimeMillis - lastTimeMillis;
+        // }else {
+        //     holdingTimeMillis = 0;
+        // }
 
-        if(newP != p) {
-            pidController.setP(newP);
-            p = newP;
-        }
+        // if(holdingTimeMillis > minHoldingTime) {
+        //     useHoldingCurrentLimit();
+        // }else {
+        //     useRunningCurrentLimit();
+        // }
         
-        if(newI != i) {
-            pidController.setI(newI);
-            i = newI;
-        }
-
-        if(newD != d) {
-            pidController.setD(newD);
-            d = newD;
-        }
-        */
+        // lastTimeMillis = System.currentTimeMillis();
 
         checkMinLimit();
         checkMaxLimit();
@@ -212,6 +228,16 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+    }
+
+    public void useRunningCurrentLimit() {
+        currentLimitEntry.setInteger(runningCurrentLimit);
+        //motor.setSmartCurrentLimit(runningCurrentLimit);
+    }
+
+    public void useHoldingCurrentLimit() {
+        currentLimitEntry.setInteger(holdingCurrentLimit);
+        //motor.setSmartCurrentLimit(holdingCurrentLimit);
     }
 
     public void setLowNodePosition(double lowNodePosition) {

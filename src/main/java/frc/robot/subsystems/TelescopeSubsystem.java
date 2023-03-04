@@ -59,6 +59,7 @@ public class TelescopeSubsystem extends SubsystemBase{
         motor = new CANSparkMax(TELESCOPE_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
+        motor.setSmartCurrentLimit(30, 60);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
@@ -84,29 +85,29 @@ public class TelescopeSubsystem extends SubsystemBase{
         commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
     }
     
-    public boolean checkMinLimit() {
+    public void checkMinLimit() {
         //true - switch is not active
-        if(zeroLimitSwitch.get()) 
-            return false;
-        
+        if(zeroLimitSwitch.get())
+            atMinLimit = false;
+
         //false - switch is active
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
+            atMinLimit = true;
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }
-        return true;
     }
 
-    public boolean checkMaxLimit() {
+    public void checkMaxLimit() {
         if(encoder.getPosition() < maxPosition)
-            return false;
-        
+            atMaxLimit = false;
+                
         if(!atMaxLimit) {
             //stop motor on rising edge
-            pidController.setReference(0, ControlType.kDutyCycle);
+            atMaxLimit = true;
+            pidController.setReference(maxPosition, ControlType.kPosition);
         }
-        return true;
     }
 
     /**
@@ -172,27 +173,6 @@ public class TelescopeSubsystem extends SubsystemBase{
         midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
         highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
         shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
-
-        /*
-        double newP = pEntry.getDouble(p);
-        double newI = iEntry.getDouble(i);
-        double newD = dEntry.getDouble(d);
-
-        if(newP != p) {
-            pidController.setP(newP);
-            p = newP;
-        }
-        
-        if(newI != i) {
-            pidController.setI(newI);
-            i = newI;
-        }
-
-        if(newD != d) {
-            pidController.setD(newD);
-            d = newD;
-        }
-        */
 
         checkMinLimit();
         checkMaxLimit();
