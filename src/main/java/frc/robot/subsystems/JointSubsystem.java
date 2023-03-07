@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -21,6 +22,7 @@ public class JointSubsystem extends SubsystemBase{
     private final CANSparkMax motor;
     private final SparkMaxPIDController pidController;
     private final RelativeEncoder encoder;
+    private final DigitalInput limitSwitch;
 
     private final ShuffleboardTab shuffleboardTab;
     private final GenericEntry lowNodePositionEntry;
@@ -46,6 +48,7 @@ public class JointSubsystem extends SubsystemBase{
     private double minPosition = 5;
     private double maxPosition = 10;
 
+    private boolean atLimitSwitch = false;
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
 
@@ -56,6 +59,8 @@ public class JointSubsystem extends SubsystemBase{
 
     private boolean useLimits = true;
     private boolean slowMode = false;
+
+    private boolean zeroed = false;
 
     public JointSubsystem() {
 
@@ -72,6 +77,8 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setI(i);
         pidController.setD(d);
         pidController.setReference(encoder.getPosition(), ControlType.kPosition);
+
+        limitSwitch = new DigitalInput(JOINT_ZERO_SWITCH_CHANNEL);
         
         shuffleboardTab = Shuffleboard.getTab("Joint");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
@@ -87,29 +94,43 @@ public class JointSubsystem extends SubsystemBase{
         motorList.addDouble("Motor %", () -> motor.get());
         motorList.addDouble("Motor Position", () -> encoder.getPosition());
 
+        shuffleboardTab.addBoolean("Limit Switch", () -> limitSwitch.get());
+        shuffleboardTab.addBoolean("Zeroed", () -> (zeroed));
         shuffleboardTab.addBoolean("At Min", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
     }
+
+    public void checkLimitSwitch() {
+        if(limitSwitch.get()) {
+            atLimitSwitch = false;
+            return;
+        }
+        
+        if(!atLimitSwitch) {
+            //stop motor and reset encoder position on rising edge
+            atLimitSwitch = true;
+            zeroed = true;
+            encoder.setPosition(0);
+            pidController.setReference(0, ControlType.kPosition);
+        }
+        
+    }
     
     public void checkMinLimit() {
-        //true - switch is not active
-        if(!useLimits || encoder.getPosition() > minPosition) {
+        if(encoder.getPosition() > minPosition) {
             atMinLimit = false;
             return;
         }
 
-        //false - switch is active
         if(!atMinLimit) {
-            //stop motor and reset encoder position on rising edge
             atMinLimit = true;
-            encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kPosition);
+            pidController.setReference(minPosition, ControlType.kPosition);
         }
     }
 
     public void checkMaxLimit() {
-        if(!useLimits || encoder.getPosition() < maxPosition) {
+        if(encoder.getPosition() < maxPosition) {
             atMaxLimit = false;
             return;
         }
@@ -130,12 +151,12 @@ public class JointSubsystem extends SubsystemBase{
      * @param percent the duty cycle percentage (between -1 and 1) to be commanded
      */
     public void setMotorPercent(double percent) {
-        //at min and attempting to decrease
-        if(atMinLimit && percent < 0)
+        //at min and attempting to decrease and zeroed (allow movement past limit if not yet zeroed)
+        if(atMinLimit && percent < 0 && zeroed && useLimits)
             return;
         
-        //at max and attempting to increase
-        if(atMaxLimit && percent > 0)
+        //at max or not yet zeroed and attempting to increase
+        if((atMaxLimit || !zeroed) && percent > 0 && useLimits)
             return;
         pidController.setReference(percent * (slowMode? JOINT_SLOWLMODE_MULTIPLIER : 1), ControlType.kDutyCycle);
     }
@@ -147,7 +168,12 @@ public class JointSubsystem extends SubsystemBase{
      * @param position the mechanism position to be commanded
      */
     public void setPosition(double position) {
+        //position out of bounds
         if(position < minPosition || position > maxPosition)
+            return;
+        
+        //not zeroed and moving away from limit switch
+        if(!zeroed & position > encoder.getPosition())
             return;
 
         pidController.setReference(position, ControlType.kPosition);
@@ -163,7 +189,7 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public Command runHoldPositionCommand() {
-        return this.runOnce(() -> setPosition(encoder.getPosition()));
+        return this.runOnce(() -> pidController.setReference(encoder.getPosition(), ControlType.kPosition));
     }
 
     public Command runLowNodeCommand() {
@@ -224,6 +250,7 @@ public class JointSubsystem extends SubsystemBase{
 
         checkMinLimit();
         checkMaxLimit();
+        checkLimitSwitch();
     }
 
     public void setPID(double p, double i, double d) {

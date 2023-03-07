@@ -154,7 +154,10 @@ public class RobotContainer {
         //Limits
         toggleSwitch2.onTrue(jointSubsystem.runDisableLimitsCommand());
         toggleSwitch2.onFalse(jointSubsystem.runEnableLimitsCommand());
-    
+
+        //Slow mode toggle
+        toggleSwitch3.onTrue(jointSubsystem.runEnableSlowModeCommand());
+        toggleSwitch3.onFalse(jointSubsystem.runDisableSlowModeCommand());
         
     // Telescope Commands
         leftJoystickX.whileTrue(Commands.run(
@@ -163,6 +166,16 @@ public class RobotContainer {
 
         leftJoystickX.onFalse(Commands.runOnce(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
         yellowButton.onTrue(Commands.runOnce(() -> telescopeSubsystem.gotoSetPosition(getSelectorState())));
+
+        //Limits
+        toggleSwitch2.onTrue(jointSubsystem.runDisableLimitsCommand());
+        toggleSwitch2.onFalse(jointSubsystem.runEnableLimitsCommand());
+
+        //Slow mode toggle
+        toggleSwitch3.onTrue(telescopeSubsystem.runEnableSlowModeCommand());
+        toggleSwitch3.onFalse(telescopeSubsystem.runDisableSlowModeCommand());
+
+        
     }
 
     private int getSelectorState() {

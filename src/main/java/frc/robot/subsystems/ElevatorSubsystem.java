@@ -62,6 +62,8 @@ public class ElevatorSubsystem extends SubsystemBase{
     private boolean useLimits = true;
     private boolean slowMode = false;
 
+    private boolean zeroed = false;
+
     public ElevatorSubsystem() {
 
         zeroLimitSwitch = new DigitalInput(ELEVATOR_ZERO_SWITCH_CHANNEL);
@@ -94,6 +96,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         motorList.addDouble("Motor %", () -> motor.get());
         motorList.addDouble("Motor Position", () -> encoder.getPosition());
 
+        shuffleboardTab.addBoolean("Limit Switch", () -> zeroLimitSwitch.get());
+        shuffleboardTab.addBoolean("Zeroed", () -> (zeroed));
         shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
@@ -110,6 +114,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
             atMinLimit = true;
+            zeroed = true;
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }
@@ -138,11 +143,11 @@ public class ElevatorSubsystem extends SubsystemBase{
      */
     public void setMotorPercent(double percent) {
         //at min and attempting to decrease
-        if(atMinLimit && percent < 0)
+        if(atMinLimit && percent < 0 && useLimits)
             return;
         
-        //at max and attempting to increase
-        if(atMaxLimit && percent > 0)
+        //at max or not yet zeroed and attempting to increase
+        if((atMaxLimit || !zeroed) && percent > 0 && useLimits)
             return;
         pidController.setReference(percent * (slowMode? ELEVATOR_SLOW_MODE_MULTIPLIER : 1), ControlType.kDutyCycle);
     }
@@ -154,7 +159,12 @@ public class ElevatorSubsystem extends SubsystemBase{
      * @param position the mechanism position to be commanded
      */
     public void setPosition(double position) {
+        //position out of bounds
         if(position < 0 || position > maxPosition)
+            return;
+        
+        //not zeroed and moving away from limit switch
+        if(!zeroed && position > encoder.getPosition())
             return;
 
         pidController.setReference(position, ControlType.kPosition);
