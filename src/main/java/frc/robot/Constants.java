@@ -42,6 +42,7 @@ public final class Constants {
 
     public static final int JOINT_MOTOR_ID = 32;
     public static final int JOINT_ZERO_SWITCH_CHANNEL = 2;
+    public static final double JOINT_SLOWLMODE_MULTIPLIER = 0.5;
     
     public static final int LED_STRIP_PWM_CHANNEL = 0;
 

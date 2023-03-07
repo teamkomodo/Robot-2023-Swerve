@@ -7,7 +7,6 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -29,7 +28,6 @@ public class JointSubsystem extends SubsystemBase{
     private final GenericEntry highNodePositionEntry;
     private final GenericEntry shelfPositionEntry;
     private final GenericEntry maxPositionEntry;
-    private final GenericEntry currentLimitEntry;
 
     private double p = 1.0;
     private double i = 1.0e-6;
@@ -56,12 +54,6 @@ public class JointSubsystem extends SubsystemBase{
 
     private double commandedPosition = 0;
 
-    private long lastTimeMillis = 0;
-    private long holdingTimeMillis = 0;
-    private long minHoldingTime = 1000;
-
-    private double holdingVelocityThreshold = 1;
-
     private boolean useLimits = true;
     private boolean slowMode = false;
 
@@ -72,12 +64,14 @@ public class JointSubsystem extends SubsystemBase{
         motor.setInverted(false);
         motor.setSmartCurrentLimit(holdingCurrentLimit, runningCurrentLimit);
 
+        encoder = motor.getEncoder();
+        encoder.setPosition(0);
+
         pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-
-        encoder = motor.getEncoder();
+        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
         
         shuffleboardTab = Shuffleboard.getTab("Joint");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
@@ -87,7 +81,6 @@ public class JointSubsystem extends SubsystemBase{
         highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
         shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
         maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
-        currentLimitEntry = shuffleboardTab.add("Current Limit", runningCurrentLimit).getEntry();
 
         motorList.addDouble("Motor RPM", () -> encoder.getVelocity());
         motorList.addDouble("Motor Current", () -> motor.getOutputCurrent());
@@ -110,7 +103,6 @@ public class JointSubsystem extends SubsystemBase{
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
             atMinLimit = true;
-            useHoldingCurrentLimit();
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }
@@ -125,7 +117,6 @@ public class JointSubsystem extends SubsystemBase{
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
-            useHoldingCurrentLimit();
             pidController.setReference(maxPosition, ControlType.kPosition);
         }
     }
@@ -146,8 +137,7 @@ public class JointSubsystem extends SubsystemBase{
         //at max and attempting to increase
         if(atMaxLimit && percent > 0)
             return;
-        useRunningCurrentLimit();
-        pidController.setReference(percent, ControlType.kDutyCycle);
+        pidController.setReference(percent * (slowMode? JOINT_SLOWLMODE_MULTIPLIER : 1), ControlType.kDutyCycle);
     }
 
     /**
@@ -160,7 +150,6 @@ public class JointSubsystem extends SubsystemBase{
         if(position < minPosition || position > maxPosition)
             return;
 
-        useRunningCurrentLimit();
         pidController.setReference(position, ControlType.kPosition);
         commandedPosition = position;
     }
@@ -245,16 +234,6 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-    }
-
-    public void useRunningCurrentLimit() {
-        currentLimitEntry.setInteger(runningCurrentLimit);
-        //motor.setSmartCurrentLimit(runningCurrentLimit);
-    }
-
-    public void useHoldingCurrentLimit() {
-        currentLimitEntry.setInteger(holdingCurrentLimit);
-        //motor.setSmartCurrentLimit(holdingCurrentLimit);
     }
 
     public void setLowNodePosition(double lowNodePosition) {

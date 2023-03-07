@@ -150,6 +150,10 @@ public class RobotContainer {
             jointSubsystem).andThen(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
 
         yellowButton.onTrue(Commands.runOnce(() -> jointSubsystem.gotoSetPosition(getSelectorState())));
+
+        //Limits
+        toggleSwitch2.onTrue(jointSubsystem.runDisableLimitsCommand());
+        toggleSwitch2.onFalse(jointSubsystem.runEnableLimitsCommand());
     
         
     // Telescope Commands
