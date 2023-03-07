@@ -94,7 +94,7 @@ public class JointSubsystem extends SubsystemBase{
         motorList.addDouble("Motor %", () -> motor.get());
         motorList.addDouble("Motor Position", () -> encoder.getPosition());
 
-        shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
+        shuffleboardTab.addBoolean("At Min", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
     }
@@ -147,7 +147,7 @@ public class JointSubsystem extends SubsystemBase{
         if(atMaxLimit && percent > 0)
             return;
         useRunningCurrentLimit();
-        pidController.setReference(percent * (slowMode? TELESCOPE_ZERO_SWITCH_CHANNEL : 1), ControlType.kDutyCycle);
+        pidController.setReference(percent, ControlType.kDutyCycle);
     }
 
     /**
@@ -157,7 +157,7 @@ public class JointSubsystem extends SubsystemBase{
      * @param position the mechanism position to be commanded
      */
     public void setPosition(double position) {
-        if(position < 0 || position > maxPosition)
+        if(position < minPosition || position > maxPosition)
             return;
 
         useRunningCurrentLimit();

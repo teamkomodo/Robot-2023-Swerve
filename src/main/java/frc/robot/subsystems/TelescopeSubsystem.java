@@ -71,7 +71,7 @@ public class TelescopeSubsystem extends SubsystemBase{
 
         motor = new CANSparkMax(TELESCOPE_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
-        motor.setInverted(false);
+        motor.setInverted(true);
         motor.setSmartCurrentLimit(holdingCurrentLimit, runningCurrentLimit);
 
         pidController = motor.getPIDController();
@@ -149,7 +149,7 @@ public class TelescopeSubsystem extends SubsystemBase{
         if(atMaxLimit && percent > 0)
             return;
         useRunningCurrentLimit();
-        pidController.setReference(percent * (slowMode? TELESCOPE_ZERO_SWITCH_CHANNEL : 1), ControlType.kDutyCycle);
+        pidController.setReference(percent * (slowMode? TELESCOPE_SLOW_MODE_MULTIPLIER : 1), ControlType.kDutyCycle);
     }
 
     /**
