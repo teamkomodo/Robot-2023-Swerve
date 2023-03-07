@@ -62,7 +62,7 @@ public class JointSubsystem extends SubsystemBase{
 
     private boolean zeroed = false;
 
-    public JointSubsystem() {
+    public JointSubsystem(ShuffleboardTab mainTab) {
 
         motor = new CANSparkMax(JOINT_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
@@ -99,6 +99,9 @@ public class JointSubsystem extends SubsystemBase{
         shuffleboardTab.addBoolean("At Min", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
+
+        mainTab.getLayout("Zeroed", BuiltInLayouts.kList).addBoolean("Joint", () -> zeroed);
+
     }
 
     public void checkLimitSwitch() {

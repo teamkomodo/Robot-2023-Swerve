@@ -5,6 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AutoDefinitions;
@@ -32,10 +34,12 @@ import static frc.robot.util.Util.*;
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
 
+    private final ShuffleboardTab mainTab = Shuffleboard.getTab("Operator Information");
+
     // Subsystem definitions should be public for auto reasons
-    public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem();
-    public final JointSubsystem jointSubsystem = new JointSubsystem();
+    public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(mainTab);
+    public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem(mainTab);
+    public final JointSubsystem jointSubsystem = new JointSubsystem(mainTab);
     public final ClawSubsystem clawSubsystem = new ClawSubsystem();
     //public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);

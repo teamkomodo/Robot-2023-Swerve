@@ -64,8 +64,8 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     private boolean zeroed = false;
 
-    public ElevatorSubsystem() {
-
+    public ElevatorSubsystem(ShuffleboardTab mainTab) {
+        
         zeroLimitSwitch = new DigitalInput(ELEVATOR_ZERO_SWITCH_CHANNEL);
 
         motor = new CANSparkMax(ELEVATOR_MOTOR_ID, MotorType.kBrushless);
@@ -101,6 +101,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
+
+        mainTab.getLayout("Zeroed", BuiltInLayouts.kList).withSize(1, 3).addBoolean("Elevator", () -> zeroed);
     }
     
     public void checkMinLimit() {

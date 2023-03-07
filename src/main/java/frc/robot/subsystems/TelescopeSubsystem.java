@@ -60,7 +60,7 @@ public class TelescopeSubsystem extends SubsystemBase{
 
     private boolean zeroed = false;
 
-    public TelescopeSubsystem() {
+    public TelescopeSubsystem(ShuffleboardTab mainTab) {
 
         zeroLimitSwitch = new DigitalInput(TELESCOPE_ZERO_SWITCH_CHANNEL);
 
@@ -96,6 +96,9 @@ public class TelescopeSubsystem extends SubsystemBase{
         shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
         shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
+
+        mainTab.getLayout("Zeroed", BuiltInLayouts.kList).addBoolean("Telescope", () -> zeroed);
+
     }
     
     public void checkMinLimit() {
