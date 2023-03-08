@@ -1,0 +1,55 @@
+package frc.robot.commands.auto;
+
+import com.playingwithfusion.TimeOfFlight;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.AutoConstants;
+import frc.robot.subsystems.DrivetrainSubsystem;
+
+public class GetToToFDistance extends CommandBase {
+    private final DrivetrainSubsystem drivetrainSubsystem;
+    private final TimeOfFlight sensor;
+    private final PIDController controller;
+    private final double setDistance;
+    private final Timer correctTimer;
+    public GetToToFDistance(DrivetrainSubsystem drivetrainSubsystem, TimeOfFlight sensor, double setDistance_meters) {
+        this.drivetrainSubsystem = drivetrainSubsystem;
+        this.sensor = sensor;
+        this.setDistance = setDistance_meters;
+        this.correctTimer = new Timer();
+        this.controller = new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_X_CONTROLLER, 0);
+        addRequirements(drivetrainSubsystem);
+    }
+    @Override
+    public void initialize() {
+        sensor.setRangingMode(TimeOfFlight.RangingMode.Short, 24);
+        sensor.setRangeOfInterest(8, 8, 12, 12);
+        correctTimer.reset();
+        correctTimer.start();
+    }
+    @Override
+    public void execute() {
+        double range = sensor.getRange() / 1000.0;
+        if (!sensor.isRangeValid() || (sensor.getRangeSigma() > 15.0)) {
+            drivetrainSubsystem.stopMotion();
+            correctTimer.reset();
+            return;
+        }
+        double forwardSpeed = this.controller.calculate(range, setDistance);
+        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(forwardSpeed, 0, 0));
+        if (Math.abs(range - setDistance) >= 0.03) {
+            correctTimer.reset();
+        }
+    }
+    @Override
+    public boolean isFinished() {
+        return correctTimer.hasElapsed(0.2);
+    }
+    @Override
+    public void end(boolean interrupted) {
+
+    }
+}

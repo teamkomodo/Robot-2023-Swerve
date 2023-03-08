@@ -20,8 +20,6 @@ public class AutoLevelCommand extends CommandBase {
     public AutoLevelCommand(DrivetrainSubsystem drivetrainSubsystem) {
         addRequirements(drivetrainSubsystem);
         this.drivetrainSubsystem = drivetrainSubsystem;
-        // Shuffleboard.getTab("Autolevel X PID").add(x_pid);
-        // Shuffleboard.getTab("Autolevel Y PID").add(y_pid);
     }
 
     private double simAlpha = 0;
@@ -35,7 +33,7 @@ public class AutoLevelCommand extends CommandBase {
 
     private Rotation2d getCurrentRoll() {
         if (RobotBase.isReal()) {
-            return Rotation2d.fromDegrees(-this.drivetrainSubsystem.getNavx().getPitch());
+            return Rotation2d.fromDegrees(-this.drivetrainSubsystem.getNavx().getRoll());
         }
         double dPhi_x = Math.tan(simAlpha);
         double dPhi_L = Math.sin(getCurrentYaw().getRadians()) * dPhi_x;
@@ -44,7 +42,7 @@ public class AutoLevelCommand extends CommandBase {
 
     private Rotation2d getCurrentPitch() {
         if (RobotBase.isReal()) {
-            return Rotation2d.fromDegrees(this.drivetrainSubsystem.getNavx().getRoll());
+            return Rotation2d.fromDegrees(this.drivetrainSubsystem.getNavx().getPitch());
         }
         double dPhi_x = Math.tan(simAlpha);
         double dPhi_L = Math.cos(getCurrentYaw().getRadians()) * dPhi_x;
@@ -69,8 +67,8 @@ public class AutoLevelCommand extends CommandBase {
         ChassisSpeeds correction = new ChassisSpeeds(
                 x_pid.calculate(Math.tan(deadzone(getCurrentPitch().getRadians())), 0),
                 -y_pid.calculate(Math.tan(deadzone(getCurrentRoll().getRadians())), 0), 0);
-        // SmartDashboard.putNumber("GYRO ROLL", Math.toDegrees(deadzone(getCurrentRoll().getRadians())));
-        // SmartDashboard.putNumber("GYRO PITCH", Math.toDegrees(deadzone(getCurrentPitch().getRadians())));
+        // SmartDashboard.putNumber("GYRO ROLL", Math.toDegrees(getCurrentRoll().getRadians()));
+        // SmartDashboard.putNumber("GYRO PITCH", Math.toDegrees(getCurrentPitch().getRadians()));
         // SmartDashboard.putString("Calculated correction", "" + correction);
         if (RobotBase.isSimulation()) {
             simAlpha = (drivetrainSubsystem.getPoseMeters().getX() - 4) * 0.5;

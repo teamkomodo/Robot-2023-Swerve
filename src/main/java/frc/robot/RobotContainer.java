@@ -85,6 +85,7 @@ public class RobotContainer {
         // return autonomousController.chooser.getSelected().generateCommand();
         // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
         // return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
-        return new AlignToToF(drivetrainSubsystem, new TimeOfFlight(0));
+        // return new AlignToToF(drivetrainSubsystem, new TimeOfFlight(0));
+        return new AutoLevelCommand(drivetrainSubsystem);
     }
 }
