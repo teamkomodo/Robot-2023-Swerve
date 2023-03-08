@@ -179,7 +179,6 @@ public class RobotContainer {
         toggleSwitch3.onTrue(telescopeSubsystem.runEnableSlowModeCommand());
         toggleSwitch3.onFalse(telescopeSubsystem.runDisableSlowModeCommand());
 
-        
     }
 
     private int getSelectorState() {
@@ -197,6 +196,12 @@ public class RobotContainer {
         if(selector.getRawButton(5))
         return 5;
         return 0;
+    }
+
+    public void teleopInit() {
+        telescopeSubsystem.runHoldPositionCommand();
+        jointSubsystem.runHoldPositionCommand();
+        elevatorSubsystem.runHoldPositionCommand();
     }
 
     public Command getAutonomousCommand() {
