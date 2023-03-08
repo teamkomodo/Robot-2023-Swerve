@@ -33,7 +33,7 @@ public class FinetuneFieldPose extends CommandBase {
         ChassisSpeeds speeds = drivetrainSubsystem.getDriveController().calculate(drivetrainSubsystem.getPoseMeters(),
                 pose, 0,
                 pose.getRotation());
-        speeds = new ChassisSpeeds(-speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+        speeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
         drivetrainSubsystem.setChassisSpeeds(speeds);
     }
 

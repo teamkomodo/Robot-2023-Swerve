@@ -7,7 +7,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.auto.AutoLevelCommand;
+import frc.robot.commands.auto.FinetuneFieldPose;
+import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
 import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToReflectiveTape;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -17,9 +20,12 @@ import frc.robot.util.LimelightConnector;
 import frc.robot.util.VisionPipelineConnector;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -155,11 +161,12 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return null;
+        // return null;
         // autonomousController.initAutonomous();
         // return autonomousController.chooser.getSelected().generateCommand();
         // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
-        // return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
+        return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
         // return new AlignToToF(drivetrainSubsystem, new TimeOfFlight(0));
+        // return new FinetuneFieldPose(drivetrainSubsystem, new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(90)));
     }
 }
