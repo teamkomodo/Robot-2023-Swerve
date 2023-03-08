@@ -88,6 +88,8 @@ public final class Constants {
         public static final double TOF_LEAKY_COEFFICIENT = 0.85;
         public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(12);
         public static final double TOF_ANGULAR_VELOCITY = 1.2;
+        public static final double TOF_DISTANCE_TOLERANCE_METERS = 0.03;
+        public static final double TOF_DISTANCE_ELAPSED_SECONDS = 0.2;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 1.2;
         public static final double AUTO_LEVEL_K_I = 0.3;
