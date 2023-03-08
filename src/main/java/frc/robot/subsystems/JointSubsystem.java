@@ -2,12 +2,13 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxLimitSwitch.Type;
 
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -22,7 +23,7 @@ public class JointSubsystem extends SubsystemBase{
     private final CANSparkMax motor;
     private final SparkMaxPIDController pidController;
     private final RelativeEncoder encoder;
-    private final DigitalInput limitSwitch;
+    private final SparkMaxLimitSwitch reverseSwitch;
 
     private final ShuffleboardTab shuffleboardTab;
     private final GenericEntry lowNodePositionEntry;
@@ -69,6 +70,8 @@ public class JointSubsystem extends SubsystemBase{
         motor.setInverted(false);
         motor.setSmartCurrentLimit(holdingCurrentLimit, runningCurrentLimit);
 
+        reverseSwitch = motor.getReverseLimitSwitch(Type.kNormallyOpen);
+
         encoder = motor.getEncoder();
         encoder.setPosition(0);
 
@@ -77,8 +80,6 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setI(i);
         pidController.setD(d);
         pidController.setReference(encoder.getPosition(), ControlType.kPosition);
-
-        limitSwitch = new DigitalInput(JOINT_ZERO_SWITCH_CHANNEL);
         
         shuffleboardTab = Shuffleboard.getTab("Joint");
         ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
@@ -94,7 +95,7 @@ public class JointSubsystem extends SubsystemBase{
         motorList.addDouble("Motor %", () -> motor.get());
         motorList.addDouble("Motor Position", () -> encoder.getPosition());
 
-        shuffleboardTab.addBoolean("Limit Switch", () -> limitSwitch.get());
+        shuffleboardTab.addBoolean("Limit Switch", () -> reverseSwitch.isPressed());
         shuffleboardTab.addBoolean("Zeroed", () -> (zeroed));
         shuffleboardTab.addBoolean("At Min", () -> (atMinLimit));
         shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
@@ -105,7 +106,7 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public void checkLimitSwitch() {
-        if(limitSwitch.get()) {
+        if(reverseSwitch.isPressed()) {
             atLimitSwitch = false;
             return;
         }
