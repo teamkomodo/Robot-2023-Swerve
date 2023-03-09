@@ -22,32 +22,91 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+//Controls
     public static final int XBOX_CONTROLLER_PORT = 0;
     public static final double XBOX_JOYSTICK_THRESHOLD = 0.05D;
-
     public static final int JOYSTICK_PORT = 1;// HF Joystick
     public static final int BUTTONS_PORT = 2; // A-PAC Player 1
     public static final int SELECTOR_PORT = 3; // A-PAC Player 2
 
+//Telescope
     public static final int TELESCOPE_MOTOR_ID = 31;
     public static final int TELESCOPE_ZERO_SWITCH_CHANNEL = 0;
     public static final double TELESCOPE_SLOW_MODE_MULTIPLIER = 0.5;
-    
+
+    // Position in rotations of the motor shaft before gearbox
+    public static final double TELESCOPE_MAX_POSITION = 0; // Code stop
+    public static final double TELESCOPE_STOW_POSITION = 0;
+    public static final double TELESCOPE_GROUND_POSITION = 0;
+    public static final double TELESCOPE_LOW_POSITION = 0;
+    public static final double TELESCOPE_MID_POSITION = 0;
+    public static final double TELESCOPE_HIGH_POSITION = 0;
+    public static final double TELESCOPE_SHELF_POSITION = 0;
+    public static final double[] TELESCOPE_POSITIONS_ORDERED = { // Order in array corresponds to selector position
+        TELESCOPE_STOW_POSITION,
+        TELESCOPE_GROUND_POSITION,
+        TELESCOPE_SHELF_POSITION,
+        TELESCOPE_LOW_POSITION,
+        TELESCOPE_MID_POSITION,
+        TELESCOPE_HIGH_POSITION
+    };
+
+//Elevator
     public static final int ELEVATOR_MOTOR_ID = 30;
     public static final int ELEVATOR_ZERO_SWITCH_CHANNEL = 1;
     public static final double ELEVATOR_SLOW_MODE_MULTIPLIER = 0.5;
 
+    // Position in rotations of the motor shaft before gearbox
+    public static final double ELEVATOR_MAX_POSITION = 0; // Code stop
+    public static final double ELEVATOR_STOW_POSITION = 0;
+    public static final double ELEVATOR_GROUND_POSITION = 0;
+    public static final double ELEVATOR_LOW_POSITION = 0;
+    public static final double ELEVATOR_MID_POSITION = 0;
+    public static final double ELEVATOR_HIGH_POSITION = 0;
+    public static final double ELEVATOR_SHELF_POSITION = 0;
+    public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
+        ELEVATOR_STOW_POSITION,
+        ELEVATOR_GROUND_POSITION,
+        ELEVATOR_SHELF_POSITION,
+        ELEVATOR_LOW_POSITION,
+        ELEVATOR_MID_POSITION,
+        ELEVATOR_HIGH_POSITION
+    };
+
+//Claw
     public static final int CLAW_SOLENOID_FORWARD_CHANNEL = 0;
     public static final int CLAW_SOLENOID_REVERSE_CHANNEL = 1;
+    public static final int TOF_SENSOR_ID = 33;
+    public static final double TOF_OFFSET_MM = -13; // Distance = read() + TOF_OFFSET_MM
 
+//Joint
     public static final int JOINT_MOTOR_ID = 32;
     public static final int JOINT_ZERO_SWITCH_CHANNEL = 2;
-    public static final double JOINT_SLOWLMODE_MULTIPLIER = 0.5;
-    
+    public static final double JOINT_SLOW_MODE_MULTIPLIER = 0.5;
+
+    // Position in rotations of the motor shaft before gearbox
+    public static final double JOINT_MIN_POSITION = 0; // Code stop
+    public static final double JOINT_MAX_POSITION = 0; // Code stop
+    public static final double JOINT_STOW_POSITION = 0;
+    public static final double JOINT_GROUND_POSITION = 0;
+    public static final double JOINT_LOW_POSITION = 0;
+    public static final double JOINT_MID_POSITION = 0;
+    public static final double JOINT_HIGH_POSITION = 0;
+    public static final double JOINT_SHELF_POSITION = 0;
+    public static final double[] JOINT_POSITIONS_ORDERED = { // Order in array corresponds to selector position
+        JOINT_STOW_POSITION,
+        JOINT_GROUND_POSITION,
+        JOINT_SHELF_POSITION,
+        JOINT_LOW_POSITION,
+        JOINT_MID_POSITION,
+        JOINT_HIGH_POSITION
+    };
+
+//LED Strip
     public static final int LED_STRIP_PWM_CHANNEL = 0;
 
-    public static final int TOF_SENSOR_ID = 33;
-    
+//Auto
     public static class AutoConstants {
         // Trajectory following
         public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
@@ -105,6 +164,7 @@ public final class Constants {
         public static final double ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT = 0.9;
     }
 
+//Drivetrain
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.47625; // Width of robot in meters
     public static final double DRIVETRAIN_WHEELBASE_METERS = 0.67945; // Length of robot in meters
     public static final double DRIVETRAIN_SLOW_MODE_MODIFIER = 0.5D;
@@ -134,12 +194,4 @@ public final class Constants {
     public static final double SWERVE_STEER_P = 1.0;
     public static final double SWERVE_STEER_I = 1.0e-3;
     public static final double SWERVE_STEER_D = 0.1;
-
-    public static class OperatorConstants {
-        public static final int driverXBoxControllerPort = 1;
-        public static final int driverJoystickPort = 0;
-        public static final int driverButtonsPort = 2;
-    }
-
-    public static final double TOF_OFFSET_MM = -13; // Distance = read() + TOF_OFFSET_MM
 }

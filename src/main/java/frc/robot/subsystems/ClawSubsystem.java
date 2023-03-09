@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -23,7 +22,8 @@ public class ClawSubsystem extends SubsystemBase{
     private TimeOfFlight tofSensor = new TimeOfFlight(TOF_SENSOR_ID);
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Claw");
-    private GenericEntry distanceToGamePieceEntry = tab.add("Distance to Game Piece", 0).getEntry();
+
+    private boolean open = false;
 
     private double closeRange = 10;
     private boolean autoClose = false;
@@ -36,6 +36,9 @@ public class ClawSubsystem extends SubsystemBase{
         // Auto close claw when game piece is in range
         gamePieceInRangeTrigger = new Trigger(() -> (getDistanceToGamePiece() <= closeRange));
         gamePieceInRangeTrigger.and(() -> autoClose).onTrue(closeCommand());
+
+        tab.addBoolean("Open", () -> open);
+        tab.addDouble("Game Piece Distance", () -> tofSensor.getRange());
     }
 
     public Command disableCompressorCommand() {
@@ -47,19 +50,21 @@ public class ClawSubsystem extends SubsystemBase{
     }
 
     public Command openCommand() {
+        open = true;
         return this.runOnce(() -> solenoid.set(kReverse));
     }
 
     public Command closeCommand() {
+        open = false;
         return this.runOnce(() -> solenoid.set(kForward));
     }
 
     public Command toggleCommand() {
-        if(solenoid.get() == kForward) {
-            return openCommand();
-        }else {
+        if(open) {
             return closeCommand();
         }
+        
+        return openCommand();
     }
 
     /**
@@ -75,11 +80,6 @@ public class ClawSubsystem extends SubsystemBase{
 
     public TimeOfFlight getTOF() {
         return tofSensor;
-    }
-
-    @Override
-    public void periodic() {
-        distanceToGamePieceEntry.setDouble(getDistanceToGamePiece());
     }
 
 }

@@ -103,7 +103,7 @@ public class RobotContainer {
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getRightY()),
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
         //Action Button
-        yellowButton.whileTrue(Commands.run(() -> elevatorSubsystem.gotoSetPosition(getSelectorState())));
+        //yellowButton.whileTrue(Commands.run(() -> elevatorSubsystem.gotoSetPosition(getSelectorState())));
 
         //Limits toggle
         toggleSwitch2.onTrue(elevatorSubsystem.runDisableLimitsCommand());
@@ -135,6 +135,7 @@ public class RobotContainer {
         leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
 
     // Claw Commands
+    
         // XBox commands
         rightBumper.whileTrue(clawSubsystem.openCommand());
         leftBumper.whileTrue(clawSubsystem.closeCommand());
@@ -142,16 +143,19 @@ public class RobotContainer {
         // OC Commands
         whiteButton.onTrue(clawSubsystem.toggleCommand());
         
-
     // Joint Commands
+        
         // Joint Up
         rightTrigger.whileTrue(Commands.run(
             () -> jointSubsystem.setMotorPercent(-driverXBoxController.getRightTriggerAxis()),
-            jointSubsystem).andThen(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
+            jointSubsystem));
+        rightTrigger.onFalse(Commands.run(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
+
         // Joint Down
         leftTrigger.whileTrue(Commands.run(
             () -> jointSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
-            jointSubsystem).andThen(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
+            jointSubsystem));
+        leftTrigger.onFalse(Commands.run(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
 
         yellowButton.onTrue(Commands.runOnce(() -> jointSubsystem.gotoSetPosition(getSelectorState())));
 
@@ -169,7 +173,7 @@ public class RobotContainer {
             telescopeSubsystem));
 
         leftJoystickX.onFalse(Commands.runOnce(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
-        yellowButton.onTrue(Commands.runOnce(() -> telescopeSubsystem.gotoSetPosition(getSelectorState())));
+        //yellowButton.onTrue(Commands.runOnce(() -> telescopeSubsystem.gotoSetPosition(getSelectorState())));
 
         //Limits
         toggleSwitch2.onTrue(jointSubsystem.runDisableLimitsCommand());
@@ -199,9 +203,9 @@ public class RobotContainer {
     }
 
     public void teleopInit() {
-        telescopeSubsystem.runHoldPositionCommand();
-        jointSubsystem.runHoldPositionCommand();
-        elevatorSubsystem.runHoldPositionCommand();
+        telescopeSubsystem.teleopInit();
+        jointSubsystem.teleopInit();
+        elevatorSubsystem.teleopInit();
     }
 
     public Command getAutonomousCommand() {

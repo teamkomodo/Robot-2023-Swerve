@@ -6,7 +6,6 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -25,27 +24,10 @@ public class TelescopeSubsystem extends SubsystemBase{
     private final RelativeEncoder encoder;
 
     private final ShuffleboardTab shuffleboardTab;
-    private final GenericEntry lowNodePositionEntry;
-    private final GenericEntry midNodePositionEntry;
-    private final GenericEntry highNodePositionEntry;
-    private final GenericEntry shelfPositionEntry;
-    private final GenericEntry maxPositionEntry;
 
     private double p = 1.0;
     private double i = 1.0e-6;
     private double d = 0.7;
-    
-    private double stowPosition = 0;
-    private double groundPosition = 0;
-    private double lowNodePosition = 16;
-    private double midNodePosition = 32;
-    private double highNodePosition = 48;
-    private double shelfPosition = 64;
-
-    //Order of array corresponds to selector number
-    private double[] positions = {stowPosition, groundPosition, shelfPosition, lowNodePosition, midNodePosition, highNodePosition};
-
-    private double maxPosition = 70;
 
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
@@ -78,27 +60,27 @@ public class TelescopeSubsystem extends SubsystemBase{
         pidController.setReference(encoder.getPosition(), ControlType.kPosition);
         
         shuffleboardTab = Shuffleboard.getTab("Telescope");
-        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
-        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(4, 0);
-        lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
-        midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
-        highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
-        shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
-        maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
 
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
         motorList.addDouble("Motor RPM", () -> encoder.getVelocity());
         motorList.addDouble("Motor Current", () -> motor.getOutputCurrent());
         motorList.addDouble("Motor %", () -> motor.get());
         motorList.addDouble("Motor Position", () -> encoder.getPosition());
 
-        shuffleboardTab.addBoolean("Limit Switch", () -> zeroLimitSwitch.get());
-        shuffleboardTab.addBoolean("Zeroed", () -> (zeroed));
-        shuffleboardTab.addBoolean("At Zero", () -> (atMinLimit));
-        shuffleboardTab.addBoolean("At Max", () -> (atMaxLimit));
-        shuffleboardTab.addDouble("Commanded Position", () -> (commandedPosition));
+        ShuffleboardLayout controlList = shuffleboardTab.getLayout("Control", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
+        controlList.addBoolean("Limit Switch", () -> !zeroLimitSwitch.get());
+        controlList.addBoolean("Zeroed", () -> (zeroed));
+        controlList.addBoolean("At Zero", () -> (atMinLimit));
+        controlList.addBoolean("At Max", () -> (atMaxLimit));
+        controlList.addDouble("Commanded Position", () -> (commandedPosition));
 
         mainTab.getLayout("Zeroed", BuiltInLayouts.kList).addBoolean("Telescope", () -> zeroed);
 
+    }
+
+    public void teleopInit() {
+        runHoldPositionCommand();
+        zeroed = false;
     }
     
     public void checkMinLimit() {
@@ -119,7 +101,7 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public void checkMaxLimit() {
-        if(!useLimits || encoder.getPosition() < maxPosition) {
+        if(!useLimits || encoder.getPosition() < TELESCOPE_MAX_POSITION) {
             atMaxLimit = false;
             return;
         }
@@ -127,7 +109,7 @@ public class TelescopeSubsystem extends SubsystemBase{
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
-            pidController.setReference(maxPosition, ControlType.kPosition);
+            pidController.setReference(TELESCOPE_MAX_POSITION, ControlType.kPosition);
         }
     }
 
@@ -135,6 +117,8 @@ public class TelescopeSubsystem extends SubsystemBase{
      * Sets the controller's reference to a percent of the duty cycle.
      * <p>
      * Will not set a negative percent if atMinLimit is true and will not set a positive percent if atMaxLimit is true.
+     * <p>
+     * Will not set any position if the mechanism is not zeroed
      * <p>
      * Will set the motor's current limit to the running current limit
      * @param percent the duty cycle percentage (between -1 and 1) to be commanded
@@ -158,7 +142,7 @@ public class TelescopeSubsystem extends SubsystemBase{
      */
     public void setPosition(double position) {
         //position out of bounds
-        if(position < 0 || position > maxPosition)
+        if(position < 0 || position > TELESCOPE_MAX_POSITION)
             return;
 
         //not zeroed and moving away from limit switch
@@ -170,7 +154,7 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public void gotoSetPosition(int positionId) {
-        setPosition(positions[positionId]);
+        setPosition(TELESCOPE_POSITIONS_ORDERED[positionId]);
     }
 
     public Command runHoldPositionCommand() {
@@ -178,19 +162,23 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public Command runLowNodeCommand() {
-        return this.runOnce(() -> setPosition(lowNodePosition));
+        return this.runOnce(() -> setPosition(TELESCOPE_LOW_POSITION));
     }
 
     public Command runMidNodeCommand() {
-        return this.runOnce(() -> setPosition(midNodePosition));
+        return this.runOnce(() -> setPosition(TELESCOPE_MID_POSITION));
     }
 
     public Command runHighNodeCommand() {
-        return this.runOnce(() -> setPosition(highNodePosition));
+        return this.runOnce(() -> setPosition(TELESCOPE_HIGH_POSITION));
     }
 
     public Command runShelfCommand() {
-        return this.runOnce(() -> setPosition(shelfPosition));
+        return this.runOnce(() -> setPosition(TELESCOPE_SHELF_POSITION));
+    }
+
+    public Command runStowCommand() {
+        return this.runOnce(() -> setPosition(TELESCOPE_STOW_POSITION));
     }
 
     public Command runZeroCommand() {
@@ -215,28 +203,6 @@ public class TelescopeSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-
-        //Fetch values from shuffleboard
-        lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
-        midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
-        highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
-        shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
-
-        // long currentTimeMillis = System.currentTimeMillis();
-        // if(encoder.getVelocity() < holdingVelocityThreshold) {
-        //     holdingTimeMillis += currentTimeMillis - lastTimeMillis;
-        // }else {
-        //     holdingTimeMillis = 0;
-        // }
-
-        // if(holdingTimeMillis > minHoldingTime) {
-        //     useHoldingCurrentLimit();
-        // }else {
-        //     useRunningCurrentLimit();
-        // }
-        
-        // lastTimeMillis = System.currentTimeMillis();
-
         checkMinLimit();
         checkMaxLimit();
     }
@@ -249,30 +215,5 @@ public class TelescopeSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-    }
-
-    public void setLowNodePosition(double lowNodePosition) {
-        this.lowNodePosition = lowNodePosition;
-        lowNodePositionEntry.setDouble(lowNodePosition);
-    }
-
-    public void setMidNodePosition(double midNodePosition) {
-        this.midNodePosition = lowNodePosition;
-        midNodePositionEntry.setDouble(midNodePosition);
-    }
-
-    public void setHighNodePosition(double highNodePosition) {
-        this.highNodePosition = lowNodePosition;
-        highNodePositionEntry.setDouble(highNodePosition); 
-    }
-
-    public void setShelfPosition(double shelfPosition) {
-        this.shelfPosition = shelfPosition;
-        shelfPositionEntry.setDouble(shelfPosition);
-    }
-
-    public void setMaxPosition(double maxPosition) {
-        this.maxPosition = maxPosition;
-        maxPositionEntry.setDouble(maxPosition);
     }
 }
