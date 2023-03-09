@@ -11,7 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.robot.util.SwerveDrivePoseEstimatorImpl;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.SwerveModuleImpl;
 
@@ -43,6 +43,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public static final double MAX_VOLTAGE = 12.0;
     private double simGyroYawRadians = 0.0;
     private final HolonomicDriveController driveController;
+
+    private boolean slowMode = false;
 
     public HolonomicDriveController getDriveController() {
         return driveController;
@@ -159,9 +161,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
         };
     }
 
+    private Rotation2d gyroOffset = Rotation2d.fromRadians(0);
+
     public void zeroGyro() {
         if (RobotBase.isReal()) {
-            navx.zeroYaw();
+            gyroOffset = getGyroYawRaw();
             return;
         }
         simGyroYawRadians = 0.0;
@@ -172,6 +176,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
      * @return a {@link Rotation2d} object with the heading of the robot (clockwise positive)
      */
     public Rotation2d getGyroYaw() {
+        return getGyroYawRaw().minus(gyroOffset);
+    }
+    private Rotation2d getGyroYawRaw() {
         if (RobotBase.isReal()) {
             if (navx.isMagnetometerCalibrated()) {
                 return Rotation2d.fromDegrees(navx.getFusedHeading());
@@ -200,7 +207,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public void drive(double forward, double right, double rotation, boolean fieldRelative) {
-        ChassisSpeeds speeds = new ChassisSpeeds(forward, right, rotation);
+        ChassisSpeeds speeds = new ChassisSpeeds(forward * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1), right * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1), rotation * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1));
         if (fieldRelative) {
             setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw().times(-1)));
             return;
@@ -270,5 +277,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
         field2d.setRobotPose(this.getPoseMeters());
         // setChassisSpeeds(new ChassisSpeeds(2, 0, 1));
         drivePeriodic();
+    }
+
+    public Command runDisableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = false);
+    }
+
+    public Command runEnableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = true);
     }
 }

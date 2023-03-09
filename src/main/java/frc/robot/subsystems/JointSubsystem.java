@@ -6,7 +6,6 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -18,170 +17,211 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
 
 public class JointSubsystem extends SubsystemBase{
+    
     private final CANSparkMax motor;
-    private final DigitalInput zeroLimitSwitch;
     private final SparkMaxPIDController pidController;
     private final RelativeEncoder encoder;
+    private final DigitalInput reverseSwitch;
 
     private final ShuffleboardTab shuffleboardTab;
-    private final GenericEntry motorVelocityEntry;
-    private final GenericEntry motorPercentEntry;
-    private final GenericEntry motorPositionEntry;
-    private final GenericEntry limitSwitchEntry;
-    private final GenericEntry lowNodePositionEntry;
-    private final GenericEntry midNodePositionEntry;
-    private final GenericEntry highNodePositionEntry;
-    private final GenericEntry shelfPositionEntry;
-    private final GenericEntry maxPositionEntry;
-    private final GenericEntry minPositionEntry;
-    private final GenericEntry atZeroEntry;
-    private final GenericEntry atMaxEntry;
-    private final GenericEntry commandedPositionEntry;
 
-    private double p = 1.0;
-    private double i = 1.0e-6;
-    private double d = 1.0;
-    
-    // 25:1 reduction
-    private double lowNodePosition = 62.5;
-    private double midNodePosition = 50;
-    private double highNodePosition = 30;
-    private double shelfPosition = 50;
+    private double p = 1.0e-2;
+    private double i = 3.0e-6;
+    private double d = 2.0;
+    private double maxIAccum = 1.0e1;
 
-    private double minPosition = 0;
-    private double maxPosition = 70;
-
+    private boolean atLimitSwitch = false;
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
 
-    public JointSubsystem() {
+    private int holdingCurrentLimit = 30;
+    private int runningCurrentLimit = 60;
 
-        zeroLimitSwitch = new DigitalInput(JOINT_ZERO_SWITCH_CHANNEL);
+    private double commandedPosition = 0;
+
+    private boolean useLimits = true;
+    private boolean slowMode = false;
+
+    private boolean zeroed = false;
+
+    public JointSubsystem(ShuffleboardTab mainTab) {
 
         motor = new CANSparkMax(JOINT_MOTOR_ID, MotorType.kBrushless);
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
-        motor.setSmartCurrentLimit(30, 60);
+        motor.setSmartCurrentLimit(holdingCurrentLimit, runningCurrentLimit);
+
+        reverseSwitch = new DigitalInput(JOINT_ZERO_SWITCH_CHANNEL);
+
+        encoder = motor.getEncoder();
+        encoder.setPosition(0);
 
         pidController = motor.getPIDController();
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-
-        encoder = motor.getEncoder();
-        encoder.setPosition(0); //Zeros encoder on initialization
-
+        pidController.setIMaxAccum(maxIAccum, 0);
+        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
+        
         shuffleboardTab = Shuffleboard.getTab("Joint");
-        ShuffleboardLayout positionList = shuffleboardTab.getLayout("Positions", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0);
-        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(2, 0);
-        motorVelocityEntry = motorList.add("Motor RPM", 0).getEntry();
-        motorPercentEntry = motorList.add("Motor %", 0).getEntry();
-        motorPositionEntry = motorList.add("Motor Position", 0).getEntry();
-        atZeroEntry = shuffleboardTab.add("At Zero", false).getEntry();
-        atMaxEntry = shuffleboardTab.add("At Max", false).getEntry();
-        limitSwitchEntry = shuffleboardTab.add("Limit Switch", false).withPosition(4, 0).getEntry();
-        lowNodePositionEntry = positionList.add("Low Node Position", lowNodePosition).getEntry();
-        midNodePositionEntry = positionList.add("Mid Node Position", midNodePosition).getEntry();
-        highNodePositionEntry = positionList.add("High Node Position", highNodePosition).getEntry();
-        shelfPositionEntry = positionList.add("Shelf Position", shelfPosition).getEntry();
-        maxPositionEntry = positionList.add("Max Position", maxPosition).getEntry();
-        minPositionEntry = positionList.add("Min Position", minPosition).getEntry();
-        commandedPositionEntry = shuffleboardTab.add("Commanded Position", 0).getEntry();
+        
+        ShuffleboardLayout motorList = shuffleboardTab.getLayout("Motor", BuiltInLayouts.kList).withSize(2, 2).withPosition(0, 0);
+        motorList.addDouble("Motor RPM", () -> encoder.getVelocity());
+        motorList.addDouble("Motor Current", () -> motor.getOutputCurrent());
+        motorList.addDouble("Motor %", () -> motor.get());
+        motorList.addDouble("Motor Position", () -> encoder.getPosition());
+
+        ShuffleboardLayout controlList = shuffleboardTab.getLayout("Control", BuiltInLayouts.kList).withSize(2, 5).withPosition(2, 0);
+        controlList.addBoolean("Limit Switch", () -> !reverseSwitch.get());
+        controlList.addBoolean("Zeroed", () -> (zeroed));
+        controlList.addBoolean("At Zero", () -> (atMinLimit));
+        controlList.addBoolean("At Max", () -> (atMaxLimit));
+        controlList.addBoolean("At Min", () -> (atMinLimit));
+        controlList.addDouble("Commanded Position", () -> (commandedPosition));
+
+        mainTab.getLayout("Zeroed", BuiltInLayouts.kList).addBoolean("Joint", () -> zeroed);
+
+    }
+
+    public void teleopInit() {
+        runHoldPositionCommand();
+        zeroed = false;
+    }
+
+    public void checkLimitSwitch() {
+        if(reverseSwitch.get()) {
+            atLimitSwitch = false;
+            return;
+        }
+        
+        if(!atLimitSwitch) {
+            //stop motor and reset encoder position on rising edge
+            atLimitSwitch = true;
+            zeroed = true;
+            encoder.setPosition(0);
+            pidController.setReference(0, ControlType.kPosition);
+        }
+        
     }
     
     public void checkMinLimit() {
-        //true - switch is not active
-        if(zeroLimitSwitch.get())
+        if(encoder.getPosition() > JOINT_MIN_POSITION) {
             atMinLimit = false;
+            return;
+        }
 
-        //false - switch is active
         if(!atMinLimit) {
-            //stop motor and reset encoder position on rising edge
             atMinLimit = true;
-            encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kPosition);
+            pidController.setReference(JOINT_MIN_POSITION, ControlType.kPosition);
         }
     }
 
     public void checkMaxLimit() {
-        if(encoder.getPosition() < maxPosition)
+        if(encoder.getPosition() < JOINT_MAX_POSITION) {
             atMaxLimit = false;
+            return;
+        }
                 
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
-            pidController.setReference(maxPosition, ControlType.kPosition);
+            pidController.setReference(JOINT_MAX_POSITION, ControlType.kPosition);
         }
     }
 
     /**
-     * <p>Sets the controller's reference to a percent of the duty cycle.</p>
+     * Sets the controller's reference to a percent of the duty cycle.
+     * <p>
      * Will not set a negative percent if atMinLimit is true and will not set a positive percent if atMaxLimit is true.
+     * <p>
+     * Will not set any position if the mechanism is not zeroed
+     * <p>
+     * Will set the motor's current limit to the running current limit
      * @param percent the duty cycle percentage (between -1 and 1) to be commanded
      */
     public void setMotorPercent(double percent) {
-        //at min and attempting to decrease
-        if(atMinLimit && percent < 0)
+        //at min and attempting to decrease and zeroed (allow movement past limit if not yet zeroed)
+        if(atMinLimit && percent < 0 && zeroed && useLimits)
             return;
         
-        //at max and attempting to increase
-        if(atMaxLimit && percent > 0)
+        //at max or not yet zeroed and attempting to increase
+        if((atMaxLimit || !zeroed) && percent > 0 && useLimits)
             return;
-        pidController.setReference(percent, ControlType.kDutyCycle);
+        pidController.setReference(percent * (slowMode? JOINT_SLOW_MODE_MULTIPLIER : 1) * 0.1, ControlType.kDutyCycle);
     }
 
     /**
-     * Sets the controller's reference to a position, given the position is between minPosition and maxPosition
+     * Sets the controller's reference to a position, given the position is between 0 and maxPosition
+     * <p>
+     * Will set the motor's current limit to the running current limit
      * @param position the mechanism position to be commanded
      */
     public void setPosition(double position) {
-        if(position < minPosition || position > maxPosition)
+        //position out of bounds
+        if(position < JOINT_MIN_POSITION || position > JOINT_MAX_POSITION)
+            return;
+        
+        //not zeroed and moving away from limit switch
+        if(!zeroed & position > encoder.getPosition())
             return;
 
         pidController.setReference(position, ControlType.kPosition);
-        commandedPositionEntry.setDouble(position);
+        commandedPosition = position;
+    }
+
+    public void gotoSetPosition(int positionId) {
+        setPosition(JOINT_POSITIONS_ORDERED[positionId]);
+    }
+
+    public Command runHoldPositionCommand() {
+        return this.runOnce(() -> pidController.setReference(encoder.getPosition(), ControlType.kPosition));
     }
 
     public Command runLowNodeCommand() {
-        return this.runOnce(() -> setPosition(lowNodePosition));
+        return this.runOnce(() -> setPosition(JOINT_LOW_POSITION));
     }
 
     public Command runMidNodeCommand() {
-        return this.runOnce(() -> setPosition(midNodePosition));
+        return this.runOnce(() -> setPosition(JOINT_MID_POSITION));
     }
 
     public Command runHighNodeCommand() {
-        return this.runOnce(() -> setPosition(highNodePosition));
+        return this.runOnce(() -> setPosition(JOINT_HIGH_POSITION));
     }
 
     public Command runShelfCommand() {
-        return this.runOnce(() -> setPosition(shelfPosition));
+        return this.runOnce(() -> setPosition(JOINT_SHELF_POSITION));
+    }
+
+    public Command runStowCommand() {
+        return this.runOnce(() -> setPosition(ELEVATOR_STOW_POSITION));
     }
 
     public Command runZeroCommand() {
-        return this.runOnce(() -> setPosition(0));
+        return this.runOnce(() -> encoder.setPosition(0));
+    }
+
+    public Command runDisableLimitsCommand() {
+        return this.runOnce(() -> useLimits = false);
+    }
+
+    public Command runEnableLimitsCommand() {
+        return this.runOnce(() -> useLimits = true);
+    }
+
+    public Command runDisableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = false);
+    }
+
+    public Command runEnableSlowModeCommand() {
+        return this.runOnce(() -> slowMode = true);
     }
 
     @Override
     public void periodic() {
-        //Update shuffleboard values
-        motorVelocityEntry.setDouble(encoder.getVelocity());
-        motorPercentEntry.setDouble(motor.get());
-        motorPositionEntry.setDouble(encoder.getPosition());
-        atZeroEntry.setBoolean(atMinLimit);
-        atMaxEntry.setBoolean(atMaxLimit);
-        limitSwitchEntry.setBoolean(zeroLimitSwitch.get());
-        
-        //Fetch values from shuffleboard
-        lowNodePosition = lowNodePositionEntry.getDouble(lowNodePosition);
-        midNodePosition = midNodePositionEntry.getDouble(midNodePosition);
-        highNodePosition = highNodePositionEntry.getDouble(highNodePosition);
-        shelfPosition = shelfPositionEntry.getDouble(shelfPosition);
-        maxPosition = maxPositionEntry.getDouble(maxPosition);
-        minPosition = minPositionEntry.getDouble(minPosition);
-
         checkMinLimit();
         checkMaxLimit();
+        checkLimitSwitch();
     }
 
     public void setPID(double p, double i, double d) {
@@ -192,35 +232,5 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-    }
-
-    public void setLowNodePosition(double lowNodePosition) {
-        this.lowNodePosition = lowNodePosition;
-        lowNodePositionEntry.setDouble(lowNodePosition);
-    }
-
-    public void setMidNodePosition(double midNodePosition) {
-        this.midNodePosition = lowNodePosition;
-        midNodePositionEntry.setDouble(midNodePosition);
-    }
-
-    public void setHighNodePosition(double highNodePosition) {
-        this.highNodePosition = lowNodePosition;
-        highNodePositionEntry.setDouble(highNodePosition); 
-    }
-
-    public void setShelfPosition(double shelfPosition) {
-        this.shelfPosition = shelfPosition;
-        shelfPositionEntry.setDouble(shelfPosition);
-    }
-
-    public void setMaxPosition(double maxPosition) {
-        this.maxPosition = maxPosition;
-        maxPositionEntry.setDouble(maxPosition);
-    }
-
-    public void setMinPosition(double minPosition) {
-        this.minPosition = minPosition;
-        minPositionEntry.setDouble(minPosition);
     }
 }
