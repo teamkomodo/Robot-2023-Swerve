@@ -6,15 +6,16 @@ import frc.robot.subsystems.VisionPositioningSubsystem;
 public class WaitForVisionData extends CommandBase {
     private final VisionPositioningSubsystem vision;
 
-    private boolean gotVisionData = false;
+    private int gotVisionData = 0;
     public WaitForVisionData(VisionPositioningSubsystem vision) {
         this.vision = vision;
+        this.gotVisionData = 0;
         addRequirements(vision);
     }
     @Override
     public void initialize() {
         vision.setOnVisionData(() -> {
-            this.gotVisionData = true;
+            this.gotVisionData++;
         });
     }
     @Override
@@ -23,10 +24,10 @@ public class WaitForVisionData extends CommandBase {
     }
     @Override
     public boolean isFinished() {
-        return gotVisionData;
+        return gotVisionData >= 10;
     }
     @Override
     public void end(boolean interrupted) {
-
+        vision.setOnVisionData(null);
     }
 }

@@ -29,6 +29,13 @@ public class AlignToToF extends CommandBase {
 
     @Override
     public void initialize() {
+        range = 0.0;
+        weight = 0.0;
+        stage = 0;
+        count = 0;
+        prevRot = null;
+        bestRot = null;
+        bestRange = 0.0;
         this.sensor.setRangingMode(TimeOfFlight.RangingMode.Short, 24);
         this.sensor.setRangeOfInterest(8, 8, 12, 12);
     }
@@ -92,18 +99,12 @@ public class AlignToToF extends CommandBase {
                     if (Math.abs(drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians()) < Math
                             .toRadians(5)) {
                         stage++;
-                        for (int i = 0; i < 10; i++) {
-                            System.out.println("SDAKFJHMKSDJHFC " + bestRange);
-                        }
                         break;
                     }
                 }
                 if (offset <= -AutoConstants.TOF_HALF_SWEEP_ANGLE
                         && offset >= -(AutoConstants.TOF_HALF_SWEEP_ANGLE + (Math.PI * 0.5))) {
                     stage++;
-                    for (int i = 0; i < 10; i++) {
-                        System.out.println("SDAKFJHMKSDJHFC " + bestRange);
-                    }
                 }
             }
                 break;
@@ -111,7 +112,7 @@ public class AlignToToF extends CommandBase {
                 ChassisSpeeds speeds = drivetrainSubsystem.getDriveController().calculate(
                         drivetrainSubsystem.getPoseMeters(),
                         new Pose2d(drivetrainSubsystem.getPoseMeters().getTranslation(), bestRot), 0, bestRot);
-                drivetrainSubsystem.setChassisSpeeds(speeds);
+                drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond));
                 break;
         }
         // SmartDashboard.putNumber("Processed range", proc_range);
@@ -119,6 +120,14 @@ public class AlignToToF extends CommandBase {
 
     @Override
     public boolean isFinished() {
+        if (stage >= 3) {
+            Rotation2d current = drivetrainSubsystem.getPoseMeters().getRotation();
+            Rotation2d target = bestRot;
+            Rotation2d difference = target.minus(current);
+            if (Math.abs(difference.getRadians()) < Math.toRadians(2.5)) {
+                // return true;
+            }
+        }
         return false;
     }
 

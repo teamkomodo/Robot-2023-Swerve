@@ -9,9 +9,12 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.auto.FinetuneFieldPose;
+import frc.robot.commands.auto.GetToToFDistance;
+import frc.robot.commands.auto.WaitForVisionData;
 import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.commands.auto.AlignToReflectiveTape;
+import frc.robot.commands.auto.AlignToToF;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -24,8 +27,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -49,9 +55,9 @@ public class RobotContainer {
     public final ClawSubsystem clawSubsystem = new ClawSubsystem();
     //public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
-    public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
-    public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
-            null);
+    //public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
+    //public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
+    //        null);
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
     public final LimelightConnector limelight = new LimelightConnector("limelight");
@@ -85,8 +91,8 @@ public class RobotContainer {
         Trigger leftBumper = driverXBoxController.leftBumper();
         Trigger rightBumper = driverXBoxController.rightBumper();
 
-        Trigger leftJoystickX = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftX.value, XBOX_JOYSTICK_THRESHOLD)
-        .or(driverXBoxController.axisLessThan(XboxController.Axis.kLeftX.value, -XBOX_JOYSTICK_THRESHOLD));
+        Trigger leftJoystickY = driverXBoxController.axisGreaterThan(XboxController.Axis.kLeftY.value, XBOX_JOYSTICK_THRESHOLD)
+        .or(driverXBoxController.axisLessThan(XboxController.Axis.kLeftY.value, -XBOX_JOYSTICK_THRESHOLD));
 
         Trigger rightJoystickY = driverXBoxController.axisGreaterThan(XboxController.Axis.kRightY.value, XBOX_JOYSTICK_THRESHOLD)
         .or(driverXBoxController.axisLessThan(XboxController.Axis.kRightY.value, -XBOX_JOYSTICK_THRESHOLD));
@@ -109,7 +115,7 @@ public class RobotContainer {
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getRightY()),
                 elevatorSubsystem)).onFalse(elevatorSubsystem.runHoldPositionCommand());
         //Action Button
-        //yellowButton.whileTrue(Commands.run(() -> elevatorSubsystem.gotoSetPosition(getSelectorState())));
+        yellowButton.whileTrue(Commands.run(() -> elevatorSubsystem.gotoSetPosition(getSelectorState())));
 
         //Limits toggle
         toggleSwitch2.onTrue(elevatorSubsystem.runDisableLimitsCommand());
@@ -124,21 +130,22 @@ public class RobotContainer {
         drivetrainSubsystem.setDefaultCommand(
                 Commands.run(
                         () -> drivetrainSubsystem.drive(
-                                joystickCurve(-driverJoystick.getRawAxis(1))
+                                -driverJoystick.getRawAxis(1)
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                joystickCurve(-driverJoystick.getRawAxis(0))
+                                -driverJoystick.getRawAxis(0)
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                joystickCurve(driverJoystick.getRawAxis(2))
+                                driverJoystick.getRawAxis(2)
                                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                                 FIELD_RELATIVE_DRIVE),
                         drivetrainSubsystem));
 
         // Slow Mode
-        rightDriverJoystickButton.onTrue(drivetrainSubsystem.runEnableSlowModeCommand());
-        rightDriverJoystickButton.onFalse(drivetrainSubsystem.runDisableSlowModeCommand());
+        //rightDriverJoystickButton.onTrue(drivetrainSubsystem.runEnableSlowModeCommand());
+        //rightDriverJoystickButton.onFalse(drivetrainSubsystem.runDisableSlowModeCommand());
 
         // Zero Gyro (for field relative)
         leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
+        rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
 
     // Claw Commands
     
@@ -147,7 +154,7 @@ public class RobotContainer {
         leftBumper.whileTrue(clawSubsystem.closeCommand());
 
         // OC Commands
-        whiteButton.onTrue(clawSubsystem.toggleCommand());
+        //whiteButton.onTrue(Commands.runOnce(() -> clawSubsystem.toggle(), clawSubsystem));
         
     // Joint Commands
         
@@ -155,13 +162,13 @@ public class RobotContainer {
         rightTrigger.whileTrue(Commands.run(
             () -> jointSubsystem.setMotorPercent(-driverXBoxController.getRightTriggerAxis()),
             jointSubsystem));
-        rightTrigger.onFalse(Commands.run(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
+        rightTrigger.onFalse(jointSubsystem.runHoldPositionCommand());
 
         // Joint Down
         leftTrigger.whileTrue(Commands.run(
             () -> jointSubsystem.setMotorPercent(driverXBoxController.getLeftTriggerAxis()),
             jointSubsystem));
-        leftTrigger.onFalse(Commands.run(() -> jointSubsystem.setMotorPercent(0), jointSubsystem));
+        leftTrigger.onFalse(jointSubsystem.runHoldPositionCommand());
 
         yellowButton.onTrue(Commands.runOnce(() -> jointSubsystem.gotoSetPosition(getSelectorState())));
 
@@ -174,12 +181,12 @@ public class RobotContainer {
         toggleSwitch3.onFalse(jointSubsystem.runDisableSlowModeCommand());
         
     // Telescope Commands
-        leftJoystickX.whileTrue(Commands.run(
-            () -> telescopeSubsystem.setMotorPercent(driverXBoxController.getLeftX()),
+        leftJoystickY.whileTrue(Commands.run(
+            () -> telescopeSubsystem.setMotorPercent(-driverXBoxController.getLeftY()),
             telescopeSubsystem));
 
-        leftJoystickX.onFalse(Commands.runOnce(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
-        //yellowButton.onTrue(Commands.runOnce(() -> telescopeSubsystem.gotoSetPosition(getSelectorState())));
+        leftJoystickY.onFalse(Commands.runOnce(() -> telescopeSubsystem.setMotorPercent(0), telescopeSubsystem));
+        yellowButton.onTrue(Commands.runOnce(() -> telescopeSubsystem.gotoSetPosition(getSelectorState())));
 
         //Limits
         toggleSwitch2.onTrue(jointSubsystem.runDisableLimitsCommand());
@@ -188,6 +195,11 @@ public class RobotContainer {
         //Slow mode toggle
         toggleSwitch3.onTrue(telescopeSubsystem.runEnableSlowModeCommand());
         toggleSwitch3.onFalse(telescopeSubsystem.runDisableSlowModeCommand());
+
+    //Auto Commands
+        whiteButton.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()).andThen(
+            new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), 0.190),
+            clawSubsystem.closeCommand()));
 
     }
 
@@ -215,11 +227,31 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // return null;
+        return new SequentialCommandGroup(
+            new WaitForVisionData(vision),
+            new CommandBase() {
+                private final Timer timer = new Timer();
+                @Override
+                public void initialize() {
+                    timer.reset();
+                    timer.start();
+                    limelight.setLEDs(true);
+                }
+                @Override
+                public void execute() {}
+                @Override
+                public boolean isFinished() {
+                    return timer.hasElapsed(0.2);
+                }
+                @Override
+                public void end(boolean interrupted) {
+                    limelight.setLEDs(false);
+                }
+        });
         // autonomousController.initAutonomous();
         // return autonomousController.chooser.getSelected().generateCommand();
         // return new AlignToGamePiece(drivetrainSubsystem, detector, 0);
-        return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
+        //return new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE);
         // return new AlignToToF(drivetrainSubsystem, new TimeOfFlight(0));
         // return new FinetuneFieldPose(drivetrainSubsystem, new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(90)));
     }

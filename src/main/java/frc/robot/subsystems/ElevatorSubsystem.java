@@ -94,11 +94,11 @@ public class ElevatorSubsystem extends SubsystemBase{
             return;
         }
 
+        zeroed = true;
         //false - switch is active
         if(!atMinLimit) {
             //stop motor and reset encoder position on rising edge
             atMinLimit = true;
-            zeroed = true;
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }

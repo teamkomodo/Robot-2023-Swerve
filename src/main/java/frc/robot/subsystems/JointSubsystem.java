@@ -25,7 +25,7 @@ public class JointSubsystem extends SubsystemBase{
 
     private final ShuffleboardTab shuffleboardTab;
 
-    private double p = 1.0e-2;
+    private double p = 5.0e-2;
     private double i = 3.0e-6;
     private double d = 2.0;
     private double maxIAccum = 1.0e1;
@@ -93,11 +93,11 @@ public class JointSubsystem extends SubsystemBase{
             atLimitSwitch = false;
             return;
         }
-        
+
+        zeroed = true;
         if(!atLimitSwitch) {
             //stop motor and reset encoder position on rising edge
             atLimitSwitch = true;
-            zeroed = true;
             encoder.setPosition(0);
             pidController.setReference(0, ControlType.kPosition);
         }

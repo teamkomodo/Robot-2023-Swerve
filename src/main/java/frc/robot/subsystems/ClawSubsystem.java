@@ -37,7 +37,7 @@ public class ClawSubsystem extends SubsystemBase{
         gamePieceInRangeTrigger = new Trigger(() -> (getDistanceToGamePiece() <= closeRange));
         gamePieceInRangeTrigger.and(() -> autoClose).onTrue(closeCommand());
 
-        tab.addBoolean("Open", () -> open);
+        tab.addBoolean("Open", () -> (open));
         tab.addDouble("Game Piece Distance", () -> tofSensor.getRange());
     }
 
@@ -50,21 +50,25 @@ public class ClawSubsystem extends SubsystemBase{
     }
 
     public Command openCommand() {
-        open = true;
-        return this.runOnce(() -> solenoid.set(kReverse));
+        return this.runOnce(() -> {
+            open = true;
+            solenoid.set(kForward);
+        });
     }
 
     public Command closeCommand() {
-        open = false;
-        return this.runOnce(() -> solenoid.set(kForward));
+        return this.runOnce(() -> {
+            open = false;
+            solenoid.set(kReverse);
+        });
     }
 
-    public Command toggleCommand() {
+    public void toggle() {
         if(open) {
-            return closeCommand();
+            closeCommand();
+        }else {
+            openCommand();
         }
-        
-        return openCommand();
     }
 
     /**

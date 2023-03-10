@@ -7,9 +7,18 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class GetToToFDistance extends CommandBase {
+    // public static Command getTotalToFCommand(DrivetrainSubsystem drivetrainSubsystem, TimeOfFlight sensor, double setDistance_meters) {
+    //     return new SequentialCommandGroup(
+    //         // new AlignToToF(drivetrainSubsystem, sensor),
+    //         new GetToToFDistance(drivetrainSubsystem, sensor, setDistance_meters)
+    //     );
+    // }
+
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final TimeOfFlight sensor;
     private final PIDController controller;
