@@ -80,9 +80,9 @@ public class AutoLevelCommand extends CommandBase {
             // Simulate sliding:
             ChassisSpeeds fieldRelative = new ChassisSpeeds(4.0 * simAlpha, 0, 0);
             ChassisSpeeds rbtRel = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelative, getCurrentYaw());
-            // drivetrainSubsystem
-            //         .setChassisSpeeds(new ChassisSpeeds(rbtRel.vxMetersPerSecond + correction.vxMetersPerSecond,
-            //                 rbtRel.vyMetersPerSecond + correction.vyMetersPerSecond, correction.omegaRadiansPerSecond));
+            drivetrainSubsystem
+                    .setChassisSpeeds(new ChassisSpeeds(rbtRel.vxMetersPerSecond + correction.vxMetersPerSecond,
+                            rbtRel.vyMetersPerSecond + correction.vyMetersPerSecond, correction.omegaRadiansPerSecond));
         } else {
             drivetrainSubsystem.setChassisSpeeds(correction);
         }

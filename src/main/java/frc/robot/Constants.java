@@ -161,7 +161,7 @@ public final class Constants {
 
     public static class VisionConstants {
         public static final Transform3d rbt2cam = new Transform3d(
-                new Translation3d(0, 0, 0),
+                new Translation3d(0, 0.23, 0.66),
                 new Rotation3d(0, 0, 0));
         // 0 for no filtering, 1 for an integration over all of time. Don't do 1.
         public static final double ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT = 0.9;
