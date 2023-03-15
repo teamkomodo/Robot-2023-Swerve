@@ -18,6 +18,9 @@ import frc.robot.commands.SwerveControllerCommandFactory.SwerveControllerCommand
 
 public class TrajectorySequencer extends SubsystemBase {
     private final DrivetrainSubsystem drivetrainSubsystem;
+    public DrivetrainSubsystem getDrivetrainSubsystem() {
+        return drivetrainSubsystem;
+    }
     private final SwerveControllerCommandFactory controllerCommandFactory;
     private final Supplier<Pose2d> fieldPosTargetSupplier;
     private final Supplier<Transform2d> fieldVelTargetSupplier;

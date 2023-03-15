@@ -40,8 +40,8 @@ public final class Constants {
     public static final double TELESCOPE_STOW_POSITION = 0;
     public static final double TELESCOPE_GROUND_POSITION = 0;
     public static final double TELESCOPE_LOW_POSITION = 16;
-    public static final double TELESCOPE_MID_POSITION = 63;
-    public static final double TELESCOPE_HIGH_POSITION = 98;
+    public static final double TELESCOPE_MID_POSITION = 52;
+    public static final double TELESCOPE_HIGH_POSITION = 99;
     public static final double TELESCOPE_SHELF_POSITION = 2;
     public static final double[] TELESCOPE_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         TELESCOPE_STOW_POSITION,
@@ -60,10 +60,10 @@ public final class Constants {
     // Position in rotations of the motor shaft before gearbox
     public static final double ELEVATOR_MAX_POSITION = 38.2; // Code stop
     public static final double ELEVATOR_STOW_POSITION = 0;
-    public static final double ELEVATOR_GROUND_POSITION = 0;
+    public static final double ELEVATOR_GROUND_POSITION = 2.5;
     public static final double ELEVATOR_LOW_POSITION = 12;
-    public static final double ELEVATOR_MID_POSITION = 34;
-    public static final double ELEVATOR_HIGH_POSITION = 38;
+    public static final double ELEVATOR_MID_POSITION = 24.5;
+    public static final double ELEVATOR_HIGH_POSITION = 34.7;
     public static final double ELEVATOR_SHELF_POSITION = 33
     ;
     public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
@@ -90,10 +90,11 @@ public final class Constants {
     public static final double JOINT_MIN_POSITION = 5; // Code stop
     public static final double JOINT_MAX_POSITION = 60; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
-    public static final double JOINT_GROUND_POSITION = 56;
+    public static final double JOINT_GROUND_POSITION = 55.8;
     public static final double JOINT_LOW_POSITION = 56;
     public static final double JOINT_MID_POSITION = 46;
-    public static final double JOINT_HIGH_POSITION = 32;
+    public static final double JOINT_HIGH_POSITION = 40;
+
     public static final double JOINT_SHELF_POSITION = 42.5;
     public static final double[] JOINT_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         JOINT_STOW_POSITION,
@@ -110,8 +111,8 @@ public final class Constants {
 //Auto
     public static class AutoConstants {
         // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1;
-        public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 10;
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1.2;
+        public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 3;
         public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 3;
         public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 3;
         public static final double P_X_CONTROLLER = 1.2;
@@ -151,7 +152,7 @@ public final class Constants {
         public static final double TOF_LEAKY_COEFFICIENT = 0.85;
         public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(18);
         public static final double TOF_ANGULAR_VELOCITY = 2.2;
-        public static final double TOF_DISTANCE_TOLERANCE_METERS = 0.03;
+        public static final double TOF_DISTANCE_TOLERANCE_METERS = 0.024;
         public static final double TOF_DISTANCE_ELAPSED_SECONDS = 0.2;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 2.4;

@@ -1,5 +1,6 @@
 package frc.robot.commands.auto;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.VisionPositioningSubsystem;
 
@@ -24,7 +25,7 @@ public class WaitForVisionData extends CommandBase {
     }
     @Override
     public boolean isFinished() {
-        return gotVisionData >= 10;
+        return gotVisionData >= 20 || RobotBase.isSimulation();
     }
     @Override
     public void end(boolean interrupted) {

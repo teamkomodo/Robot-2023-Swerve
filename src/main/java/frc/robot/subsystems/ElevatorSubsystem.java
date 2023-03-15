@@ -185,6 +185,10 @@ public class ElevatorSubsystem extends SubsystemBase{
         return this.runOnce(() -> setPosition(ELEVATOR_STOW_POSITION));
     }
 
+    public Command runGroundCommand() {
+        return this.runOnce(() -> setPosition(ELEVATOR_GROUND_POSITION));
+    }
+
     public Command runZeroCommand() {
         return this.runOnce(() -> setPosition(0));
     }

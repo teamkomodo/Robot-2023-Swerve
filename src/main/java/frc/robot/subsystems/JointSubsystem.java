@@ -42,7 +42,7 @@ public class JointSubsystem extends SubsystemBase{
     private boolean useLimits = true;
     private boolean slowMode = false;
 
-    private boolean zeroed = false;
+    private boolean zeroed = true;
 
     public JointSubsystem(ShuffleboardTab mainTab) {
 
@@ -85,7 +85,7 @@ public class JointSubsystem extends SubsystemBase{
 
     public void teleopInit() {
         runHoldPositionCommand();
-        zeroed = false;
+        zeroed = true;
     }
 
     public void checkLimitSwitch() {
@@ -194,7 +194,11 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public Command runStowCommand() {
-        return this.runOnce(() -> setPosition(ELEVATOR_STOW_POSITION));
+        return this.runOnce(() -> setPosition(JOINT_STOW_POSITION));
+    }
+
+    public Command runGroundCommand() {
+        return this.runOnce(() -> setPosition(JOINT_GROUND_POSITION));
     }
 
     public Command runZeroCommand() {

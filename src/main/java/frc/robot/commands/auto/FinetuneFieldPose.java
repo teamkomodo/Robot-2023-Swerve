@@ -13,8 +13,8 @@ public class FinetuneFieldPose extends CommandBase {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final Pose2d pose;
 
-    public static Command getPositioningSequenceCommand(DrivetrainSubsystem d, TrajectorySequencer t, Pose2d pose) {
-        return new SequentialCommandGroup(new ApproximateFieldPose(t, pose), new FinetuneFieldPose(d, pose));
+    public static Command getPositioningCommand(TrajectorySequencer t, Pose2d pose) {
+        return new SequentialCommandGroup(new ApproximateFieldPose(t, pose), new FinetuneFieldPose(t.getDrivetrainSubsystem(), pose));
     }
 
     public FinetuneFieldPose(DrivetrainSubsystem drivetrainSubsystem, Pose2d pose) {

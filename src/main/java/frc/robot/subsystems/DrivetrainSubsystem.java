@@ -44,7 +44,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private double simGyroYawRadians = 0.0;
     private final HolonomicDriveController driveController;
 
-    private boolean slowMode = false;
+    private boolean slowMode = true;
 
     public HolonomicDriveController getDriveController() {
         return driveController;
@@ -162,13 +162,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     private Rotation2d gyroOffset = Rotation2d.fromRadians(0);
-
-    public void zeroGyro() {
+    public void resetGyro(Rotation2d offset) {
         if (RobotBase.isReal()) {
             gyroOffset = getGyroYawRaw();
+            gyroOffset = gyroOffset.plus(offset);
             return;
         }
         simGyroYawRadians = 0.0;
+    }
+    public void zeroGyro() {
+        resetGyro(Rotation2d.fromRadians(0));
     }
 
     /**
@@ -264,7 +267,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public void addVisionMeasurement(Pose2d pose) {
         odometry.addVisionMeasurement(pose, Timer.getFPGATimestamp());
     }
-
+    private Pose2d lastSimFieldPose = null;
     @Override
     public void periodic() {
         frontLeftModule.periodic();
@@ -274,8 +277,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         odometry.update(this.getGyroYaw(), getModulePositions());
         simGyroYawRadians += odometry.getOdometry().getLast_dtheta();
+        if (RobotBase.isSimulation()) {
+            if (lastSimFieldPose != null && !field2d.getRobotPose().equals(lastSimFieldPose)) {
+                resetOdometry(field2d.getRobotPose());
+            }
+        }
         field2d.setRobotPose(this.getPoseMeters());
-        // setChassisSpeeds(new ChassisSpeeds(2, 0, 1));
+        if (RobotBase.isSimulation()) {
+            lastSimFieldPose = field2d.getRobotPose();
+        }
         drivePeriodic();
     }
 

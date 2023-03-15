@@ -28,7 +28,7 @@ public class AutoLevelCommand extends CommandBase {
     private double simAlpha = 0;
 
     private double deadzone(double angle) {
-        if (Math.abs(angle) < Math.toRadians(10)) {
+        if (Math.abs(angle) < Math.toRadians(5)) {
             return 0;
         }
         return angle;

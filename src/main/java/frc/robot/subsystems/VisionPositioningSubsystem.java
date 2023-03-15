@@ -21,6 +21,8 @@ public class VisionPositioningSubsystem extends SubsystemBase {
     private PhotonPoseEstimator poseEstimator;
     private final DrivetrainSubsystem drive;
 
+    public boolean doOdometryUpdate = false;
+
     public void setCameraProcessingIdle(boolean state) {
         camera.setDriverMode(state);
     }
@@ -70,7 +72,7 @@ public class VisionPositioningSubsystem extends SubsystemBase {
             }
             pose = new Pose3d(accumulator.getTranslation().times(1.0 / accumulator_weight),
                     accumulator.getRotation().times(1.0 / accumulator_weight));
-            if (pose != null) {
+            if (pose != null && doOdometryUpdate) {
                 drive.addVisionMeasurement(pose.toPose2d());
                 if (onVisionData != null) {
                     onVisionData.run();

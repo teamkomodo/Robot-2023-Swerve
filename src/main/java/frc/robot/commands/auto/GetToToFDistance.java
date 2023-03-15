@@ -5,6 +5,7 @@ import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,7 +30,7 @@ public class GetToToFDistance extends CommandBase {
         this.sensor = sensor;
         this.setDistance = setDistance_meters;
         this.correctTimer = new Timer();
-        this.controller = new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_X_CONTROLLER, 0);
+        this.controller = new PIDController(2.4, 0.6, 0);
         addRequirements(drivetrainSubsystem);
     }
     @Override
@@ -42,6 +43,7 @@ public class GetToToFDistance extends CommandBase {
     @Override
     public void execute() {
         double range = sensor.getRange() / 1000.0;
+        SmartDashboard.putNumber("Range", range);
         if (!sensor.isRangeValid() || (sensor.getRangeSigma() > 15.0)) {
             drivetrainSubsystem.stopMotion();
             correctTimer.reset();
@@ -49,7 +51,7 @@ public class GetToToFDistance extends CommandBase {
         }
         double forwardSpeed = this.controller.calculate(range, setDistance);
         drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(forwardSpeed, 0, 0));
-        if (Math.abs(range - setDistance) >= AutoConstants.TOF_DISTANCE_TOLERANCE_METERS) {
+        if (range - setDistance > AutoConstants.TOF_DISTANCE_TOLERANCE_METERS) {
             correctTimer.reset();
         }
     }

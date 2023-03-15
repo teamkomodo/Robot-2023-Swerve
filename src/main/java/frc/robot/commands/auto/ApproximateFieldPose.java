@@ -31,6 +31,6 @@ public class ApproximateFieldPose extends CommandBase {
     }
     @Override
     public void end(boolean interrupted) {
-
+        seq.getDrivetrainSubsystem().stopMotion();
     }
 }

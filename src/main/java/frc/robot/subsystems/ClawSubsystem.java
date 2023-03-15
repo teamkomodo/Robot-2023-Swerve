@@ -25,7 +25,7 @@ public class ClawSubsystem extends SubsystemBase{
 
     private boolean open = false;
 
-    private double closeRange = 10;
+    private double closeRange = 145;
     private boolean autoClose = false;
     private Trigger gamePieceInRangeTrigger;
 
