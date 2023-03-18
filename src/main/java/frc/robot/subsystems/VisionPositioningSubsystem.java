@@ -10,6 +10,7 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -53,6 +54,11 @@ public class VisionPositioningSubsystem extends SubsystemBase {
 
     private Pose3d accumulator = new Pose3d();
     private double accumulator_weight = 0.0;
+    private boolean sampleRotation = false;
+
+    public void sampleRotation() {
+        sampleRotation = true;
+    }
 
     @Override
     public void periodic() {
@@ -73,7 +79,14 @@ public class VisionPositioningSubsystem extends SubsystemBase {
             pose = new Pose3d(accumulator.getTranslation().times(1.0 / accumulator_weight),
                     accumulator.getRotation().times(1.0 / accumulator_weight));
             if (pose != null && doOdometryUpdate) {
-                drive.addVisionMeasurement(pose.toPose2d());
+                Pose2d pose2d = pose.toPose2d();
+                if (sampleRotation) {
+                    // sampleRotation = false;
+                    drive.resetGyro(pose2d.getRotation());
+                } else {
+                    pose2d = new Pose2d(pose2d.getTranslation(), drive.getPoseMeters().getRotation());
+                }
+                drive.addVisionMeasurement(pose2d);
                 if (onVisionData != null) {
                     onVisionData.run();
                 }

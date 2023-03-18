@@ -95,14 +95,14 @@ public class SwerveDriveOdometryImpl {
 
         var twist = m_kinematics.toTwist2d(moduleDeltas);
         last_dtheta = twist.dtheta;
-        if (RobotBase.isReal() && !forgetGyro) {
+        if (!forgetGyro) {
             twist.dtheta = angle.minus(m_previousAngle).getRadians();
         }
 
         var newPose = m_poseMeters.exp(twist);
 
         m_previousAngle = angle;
-        m_poseMeters = new Pose2d(newPose.getTranslation(), (RobotBase.isReal() && !forgetGyro) ? angle : newPose.getRotation());
+        m_poseMeters = new Pose2d(newPose.getTranslation(), (!forgetGyro) ? angle : newPose.getRotation());
 
         return m_poseMeters;
     }

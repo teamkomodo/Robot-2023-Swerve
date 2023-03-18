@@ -53,5 +53,6 @@ public class AlignToReflectiveTape extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         this.limelight.setLEDs(false);
+        this.limelight.setPipeline(2);
     }
 }

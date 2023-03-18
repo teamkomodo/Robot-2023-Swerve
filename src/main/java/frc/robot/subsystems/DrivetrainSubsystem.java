@@ -165,7 +165,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public void resetGyro(Rotation2d offset) {
         if (RobotBase.isReal()) {
             gyroOffset = getGyroYawRaw();
-            gyroOffset = gyroOffset.plus(offset);
+            gyroOffset = gyroOffset.minus(offset);
             return;
         }
         simGyroYawRadians = 0.0;

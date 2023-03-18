@@ -111,7 +111,7 @@ public final class Constants {
 //Auto
     public static class AutoConstants {
         // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1.2;
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 0.5;
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 3;
         public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 3;
         public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 3;
@@ -124,8 +124,8 @@ public final class Constants {
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
-        public static final double MAX_RANDOM_LINEAR_TWEAKAGE_METERS = 0.03;
-        public static final double MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS = 0.0;
+        public static final double MAX_RANDOM_LINEAR_TWEAKAGE_METERS = 0.04;
+        public static final double MAX_RANDOM_ANGULAR_TWEAKAGE_RADIANS = 0.01;
         // Autonomous collision avoidance
         public static final double MINIMUM_ALLOWABLE_TARGET_INTERSEPT_SEPARATION = 2.5;
         public static final double TARGET_INTERCEPT_DIFFERENTIAL_SECONDS = 0.10;

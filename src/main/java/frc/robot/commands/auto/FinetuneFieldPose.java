@@ -1,5 +1,7 @@
 package frc.robot.commands.auto;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,10 +13,15 @@ import frc.robot.subsystems.TrajectorySequencer;
 
 public class FinetuneFieldPose extends CommandBase {
     private final DrivetrainSubsystem drivetrainSubsystem;
-    private final Pose2d pose;
+    private Pose2d pose;
+    private Supplier<Pose2d> supplier = null;
 
     public static Command getPositioningCommand(TrajectorySequencer t, Pose2d pose) {
         return new SequentialCommandGroup(new ApproximateFieldPose(t, pose), new FinetuneFieldPose(t.getDrivetrainSubsystem(), pose));
+    }
+
+    public static Command getPositioningCommand(TrajectorySequencer t, Supplier<Pose2d> supplier) {
+        return new SequentialCommandGroup(new ApproximateFieldPose(t, supplier), new FinetuneFieldPose(t.getDrivetrainSubsystem(), supplier));
     }
 
     public FinetuneFieldPose(DrivetrainSubsystem drivetrainSubsystem, Pose2d pose) {
@@ -23,9 +30,17 @@ public class FinetuneFieldPose extends CommandBase {
         addRequirements(drivetrainSubsystem);
     }
 
+    public FinetuneFieldPose(DrivetrainSubsystem drivetrainSubsystem, Supplier<Pose2d> pose) {
+        this.drivetrainSubsystem = drivetrainSubsystem;
+        this.supplier = pose;
+        addRequirements(drivetrainSubsystem);
+    }
+
     @Override
     public void initialize() {
-
+        if (supplier != null) {
+            this.pose = this.supplier.get();
+        }
     }
 
     @Override
