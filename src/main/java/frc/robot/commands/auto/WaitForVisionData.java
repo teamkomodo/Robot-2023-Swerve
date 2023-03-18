@@ -25,7 +25,7 @@ public class WaitForVisionData extends CommandBase {
     }
     @Override
     public boolean isFinished() {
-        return gotVisionData >= 20 || RobotBase.isSimulation();
+        return gotVisionData >= 2 || RobotBase.isSimulation();
     }
     @Override
     public void end(boolean interrupted) {

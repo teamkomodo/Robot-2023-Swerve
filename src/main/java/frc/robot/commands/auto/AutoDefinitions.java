@@ -40,150 +40,127 @@ public class AutoDefinitions {
 
     public AutoMode mode_drive_colorless = new AutoMode(() -> {
         return new Command[] {
-            new InstantCommand(() -> {
-                container.vision.doOdometryUpdate = false;
-                container.drivetrainSubsystem.zeroGyro();
-                container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
-            }),
-            new ApproximateFieldPose(container.trajectorySequencer, new Pose2d(2, 0, Rotation2d.fromRadians(0))),
-            new FinetuneFieldPose(container.drivetrainSubsystem, new Pose2d(2, 0, Rotation2d.fromRadians(0))),
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = false;
+                    container.drivetrainSubsystem.zeroGyro();
+                    container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
+                }),
+                new ApproximateFieldPose(container.trajectorySequencer, new Pose2d(2, 0, Rotation2d.fromRadians(0))),
+                new FinetuneFieldPose(container.drivetrainSubsystem, new Pose2d(2, 0, Rotation2d.fromRadians(0)), -1),
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = true;
+                }),
+                new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
         };
     });
 
     public AutoMode mode_balance_colorless = new AutoMode(() -> {
         return new Command[] {
-            new InstantCommand(() -> {
-                container.vision.doOdometryUpdate = false;
-                container.drivetrainSubsystem.zeroGyro();
-                container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
-            }),
-            new RunUntilNotLevel(container.drivetrainSubsystem, FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, new Pose2d(2, 0, Rotation2d.fromRadians(0)))),
-            new AutoLevelCommand(container.drivetrainSubsystem),
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = false;
+                    container.drivetrainSubsystem.zeroGyro();
+                    container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
+                }),
+                new RunUntilNotLevel(container.drivetrainSubsystem,
+                        new FinetuneFieldPose(container.drivetrainSubsystem,
+                                new Pose2d(2, 0, Rotation2d.fromRadians(0)), -1)),
+                new AutoLevelCommand(container.drivetrainSubsystem),
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = true;
+                }),
+                new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
         };
-    });
-
-    public AutoMode mode_mobility_balance_colorless = new AutoMode(() -> {
-        return new Command[] {
-            new InstantCommand(() -> {
-                container.vision.doOdometryUpdate = false;
-                container.drivetrainSubsystem.zeroGyro();
-                container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
-            }),
-            new ApproximateFieldPose(container.trajectorySequencer, new Pose2d(4.6, 0, Rotation2d.fromRadians(0))),
-            new RunUntilNotLevel(container.drivetrainSubsystem, FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, new Pose2d(2, 0, Rotation2d.fromRadians(0)))),
-            new AutoLevelCommand(container.drivetrainSubsystem),
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
-        };
-    });
-
-    public AutoMode mode_1_colorless = new AutoMode(() -> {
-        return new Command[] {
-            container.elevatorSubsystem.runHighNodeCommand(),
-            new SleepCommand(1),
-            container.telescopeSubsystem.runHighNodeCommand(),
-            container.jointSubsystem.runHighNodeCommand(),
-            new SleepCommand(1.5),
-            container.clawSubsystem.openCommand(),
-            new SleepCommand(1),
-            container.clawSubsystem.closeCommand(),
-            container.telescopeSubsystem.runStowCommand(),
-            container.jointSubsystem.runStowCommand(),
-            new SleepCommand(1),
-            container.elevatorSubsystem.runStowCommand()
-        };
-    });
-
-    public AutoMode mode_1_3_colorless = new AutoMode(() -> {
-        return new Command[] {
-            container.elevatorSubsystem.runHighNodeCommand(),
-            new SleepCommand(1),
-            container.telescopeSubsystem.runHighNodeCommand(),
-            container.jointSubsystem.runHighNodeCommand(),
-            new SleepCommand(1.5),
-            container.clawSubsystem.openCommand(),
-            new SleepCommand(1),
-            container.clawSubsystem.closeCommand(),
-            container.telescopeSubsystem.runStowCommand(),
-            container.jointSubsystem.runStowCommand(),
-            new SleepCommand(1),
-            container.elevatorSubsystem.runStowCommand(),
-            new SleepCommand(2),
-            new InstantCommand(() -> {
-                container.vision.doOdometryUpdate = false;
-                container.drivetrainSubsystem.zeroGyro();
-                container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
-            }),
-            new RunUntilNotLevel(container.drivetrainSubsystem, FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, new Pose2d(2.5, 0, Rotation2d.fromRadians(0)))),
-            new AutoLevelCommand(container.drivetrainSubsystem),
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
-        };
-    });
-
-    public AutoMode mode_1_2_3_colorless = new AutoMode(() -> {
-        return new Command[] {
-            container.elevatorSubsystem.runHighNodeCommand(),
-            new SleepCommand(1),
-            //container.telescopeSubsystem.runHighNodeCommand(),
-            container.jointSubsystem.runHighNodeCommand(),
-            new SleepCommand(1.5),
-            container.clawSubsystem.openCommand(),
-            new SleepCommand(1),
-            container.clawSubsystem.closeCommand(),
-            //container.telescopeSubsystem.runStowCommand(),
-            container.jointSubsystem.runStowCommand(),
-            new SleepCommand(1),
-            container.elevatorSubsystem.runStowCommand(),
-            new SleepCommand(2),
-            new InstantCommand(() -> {
-                container.vision.doOdometryUpdate = false;
-                container.drivetrainSubsystem.zeroGyro();
-                container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
-            }),
-            new ApproximateFieldPose(container.trajectorySequencer, new Pose2d(4.6, 0, Rotation2d.fromRadians(0))),
-            new RunUntilNotLevel(container.drivetrainSubsystem, FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, new Pose2d(2, 0, Rotation2d.fromRadians(0)))),
-            new AutoLevelCommand(container.drivetrainSubsystem),
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;})        };
     });
 
     public AutoMode mode_station_blue = new AutoMode(() -> {
-        Pose2d station = new Pose2d(3.63, 2.81, Rotation2d.fromDegrees(0));
-        Pose2d inFront = new Pose2d(5.68, 2.81, Rotation2d.fromDegrees(0));
+        Pose2d station = new Pose2d(3.63, 2.81, Rotation2d.fromDegrees(180));
+        Pose2d inFront = new Pose2d(5.68, 2.81, Rotation2d.fromDegrees(180));
         return new Command[] {
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new WaitForVisionData(container.vision),
-            new InstantCommand(() -> {container.vision.sampleRotation();}),
-            FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, () -> {return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(), inFront.getRotation());}),
-            FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, inFront),
-            new RunUntilNotLevel(container.drivetrainSubsystem, new ApproximateFieldPose(container.trajectorySequencer, station)),
-            new AutoLevelCommand(container.drivetrainSubsystem)
+                // Place cube
+                container.elevatorSubsystem.runHighNodeCommand(),
+                new SleepCommand(0.15),
+                container.telescopeSubsystem.runHighNodeCommand(),
+                new SleepCommand(0.5),
+                container.jointSubsystem.runHighNodeCommand(),
+                new SleepCommand(0.75),
+                container.clawSubsystem.openCommand(),
+                new SleepCommand(0.25),
+                container.clawSubsystem.closeCommand(),
+                container.telescopeSubsystem.runStowCommand(),
+                container.jointSubsystem.runStowCommand(),
+                new SleepCommand(0.4),
+                container.elevatorSubsystem.runStowCommand(),
+                // Charging station
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = true;
+                }),
+                new WaitForVisionData(container.vision),
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = false;
+                }),
+                new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
+                    return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
+                            inFront.getRotation());
+                }, 0.15),
+                new FinetuneFieldPose(container.drivetrainSubsystem, inFront, 0.15),
+                new RunUntilNotLevel(container.drivetrainSubsystem,
+                        new FinetuneFieldPose(container.drivetrainSubsystem, station, 0.15)),
+                new AutoLevelCommand(container.drivetrainSubsystem)
         };
     });
 
     public AutoMode mode_station_red = new AutoMode(() -> {
-        Pose2d station = new Pose2d(12.44, 2.81, Rotation2d.fromDegrees(180));
-        Pose2d inFront = new Pose2d(10.40, 2.81, Rotation2d.fromDegrees(180));
+        Pose2d station = new Pose2d(12.44, 2.81, Rotation2d.fromDegrees(0));
+        Pose2d inFront = new Pose2d(10.40, 2.81, Rotation2d.fromDegrees(0));
         return new Command[] {
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new WaitForVisionData(container.vision),
-            new InstantCommand(() -> {container.vision.sampleRotation();}),
-            new ApproximateFieldPose(container.trajectorySequencer, new Pose2d()),
-            FinetuneFieldPose.getPositioningCommand(container.trajectorySequencer, inFront),
-            new RunUntilNotLevel(container.drivetrainSubsystem, new ApproximateFieldPose(container.trajectorySequencer, station)),
-            new AutoLevelCommand(container.drivetrainSubsystem)
+                // Place cube
+                container.elevatorSubsystem.runHighNodeCommand(),
+                new SleepCommand(0.15),
+                container.telescopeSubsystem.runHighNodeCommand(),
+                new SleepCommand(0.5),
+                container.jointSubsystem.runHighNodeCommand(),
+                new SleepCommand(0.75),
+                container.clawSubsystem.openCommand(),
+                new SleepCommand(0.25),
+                container.clawSubsystem.closeCommand(),
+                container.telescopeSubsystem.runStowCommand(),
+                container.jointSubsystem.runStowCommand(),
+                new SleepCommand(0.4),
+                container.elevatorSubsystem.runStowCommand(),
+                // Charging station
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = true;
+                }),
+                new WaitForVisionData(container.vision),
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = false;
+                }),
+                new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
+                    return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
+                            inFront.getRotation());
+                }, 0.15),
+                new FinetuneFieldPose(container.drivetrainSubsystem, inFront, 0.15),
+                new RunUntilNotLevel(container.drivetrainSubsystem,
+                        new FinetuneFieldPose(container.drivetrainSubsystem, station, 0.15)),
+                new AutoLevelCommand(container.drivetrainSubsystem)
         };
     });
 
     public AutoMode test_mode = new AutoMode(() -> {
         return new Command[] {
-            new InstantCommand(() -> {container.vision.doOdometryUpdate = true;}),
-            new WaitForVisionData(container.vision),
-            new InstantCommand(() -> {container.vision.sampleRotation();}),
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = true;
+                }),
+                new WaitForVisionData(container.vision),
+                new InstantCommand(() -> {
+                    container.vision.doOdometryUpdate = false;
+                }),
+                // new InstantCommand(() -> {
+                // container.vision.sampleRotation();
+                // }),
+                new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
+                    return new Pose2d(3.63, 2.81, Rotation2d.fromDegrees(180));
+                }, -1),
         };
     });
 
@@ -191,10 +168,11 @@ public class AutoDefinitions {
         SmartDashboard.putData("Auto chooser", chooser);
         chooser.addOption("Charging station (blue)", mode_station_blue);
         chooser.addOption("Charging station (red)", mode_station_red);
-        chooser.addOption("Mode \"2-3\" (colorless)", mode_mobility_balance_colorless);
-        chooser.addOption("Mode \"1\" (colorless)", mode_1_colorless);
-        chooser.addOption("Mode \"1-3\" (colorless)", mode_1_3_colorless);
-        chooser.addOption("Mode \"1-2-3\" (colorless)", mode_1_2_3_colorless);
+        // chooser.addOption("Mode \"2-3\" (colorless)",
+        // mode_mobility_balance_colorless);
+        // chooser.addOption("Mode \"1\" (colorless)", mode_1_colorless);
+        // chooser.addOption("Mode \"1-3\" (colorless)", mode_1_3_colorless);
+        // chooser.addOption("Mode \"1-2-3\" (colorless)", mode_1_2_3_colorless);
         chooser.addOption("Mode \"3\" (colorless)", mode_balance_colorless);
         chooser.addOption("Mode \"2\" (colorless)", mode_drive_colorless);
         chooser.addOption("LKSAJDFXHLMKFD", test_mode);

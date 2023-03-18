@@ -111,14 +111,16 @@ public final class Constants {
 //Auto
     public static class AutoConstants {
         // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 0.5;
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1.5;
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 3;
-        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 3;
+        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 1;
         public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 3;
-        public static final double P_X_CONTROLLER = 1.2;
+        public static final double P_X_CONTROLLER = 6.5;
         public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
-        public static final double I_X_CONTROLLER = 0.25;
+        public static final double I_X_CONTROLLER = 0.45;
         public static final double I_Y_CONTROLLER = I_X_CONTROLLER;
+        public static final double D_X_CONTROLLER = 1.0;
+        public static final double D_Y_CONTROLLER = D_X_CONTROLLER;
         public static final double P_THETA_CONTROLLER = 5;
         public static final double I_THETA_CONTROLLER = 2.0;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
@@ -134,7 +136,7 @@ public final class Constants {
         public static final boolean ENABLE_TARGET_INTERCEPT_CHECK = false;
         // Field position lineup tolerances
         public static final double MAX_POSITIONING_ERROR_METERS = 0.06;
-        public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(5);
+        public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(7);
         // Game piece detector
         public static final double MAX_PIECE_OFFSET_RATIO = 0.6; // 1 would be "just within the hitbox", 0 would be
                                                                  // impossibly precise.

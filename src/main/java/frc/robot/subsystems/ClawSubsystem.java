@@ -52,14 +52,14 @@ public class ClawSubsystem extends SubsystemBase{
     public Command openCommand() {
         return this.runOnce(() -> {
             open = true;
-            solenoid.set(kForward);
+            solenoid.set(kReverse);
         });
     }
 
     public Command closeCommand() {
         return this.runOnce(() -> {
             open = false;
-            solenoid.set(kReverse);
+            solenoid.set(kForward);
         });
     }
 

@@ -23,6 +23,7 @@ public class LimelightConnector {
     public LimelightConnector(String table) {
         this.table = NetworkTableInstance.getDefault().getTable(table);
         this.setLEDs(false);
+        this.setPipeline(2);
     }
     public void setLEDs(boolean state) {
         DoublePublisher p = this.table.getDoubleTopic("ledMode").publish();

@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import frc.robot.util.SwerveDrivePoseEstimatorImpl;
+import frc.robot.util.SwerveDriveOdometryImpl;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -79,7 +79,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModuleImpl backRightModule;
     private final ShuffleboardTab tab;
 
-    private final SwerveDrivePoseEstimatorImpl odometry;
+    private final SwerveDriveOdometryImpl odometry;
     private final Field2d field2d;
 
     public DrivetrainSubsystem(Field2d field) {
@@ -137,9 +137,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 MAX_VELOCITY_METERS_PER_SECOND,
                 MAX_VOLTAGE);
 
-        odometry = new SwerveDrivePoseEstimatorImpl(
-                kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-        odometry.getOdometry().forgetGyro = false;
+        // odometry = new SwerveDriveOdometryImpl(
+        //         kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
+        // odometry.getOdometry().forgetGyro = false;
+        odometry = new SwerveDriveOdometryImpl(kinematics, getGyroYawRaw());
 
         ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.P_THETA_CONTROLLER,
                 AutoConstants.I_THETA_CONTROLLER, 0,
@@ -147,8 +148,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         this.driveController = new HolonomicDriveController(
-                new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_X_CONTROLLER, 0),
-                new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_Y_CONTROLLER, 0),
+                new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_X_CONTROLLER, AutoConstants.D_X_CONTROLLER),
+                new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_Y_CONTROLLER, AutoConstants.D_Y_CONTROLLER),
                 thetaController);
     }
 
@@ -158,6 +159,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 frontRightModule.getPosition(),
                 backLeftModule.getPosition(),
                 backRightModule.getPosition()
+        };
+    }
+
+    public SwerveModuleState[] getModuleStates() {
+        return new SwerveModuleState[] {
+                frontLeftModule.getState(),
+                frontRightModule.getState(),
+                backLeftModule.getState(),
+                backRightModule.getState()
         };
     }
 
@@ -257,15 +267,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
         );
     }
     public Pose2d getPoseMeters() {
-        return odometry.getEstimatedPosition();
+        // return odometry.getEstimatedPosition();
+        return odometry.getPoseMeters();
+    }
+    public Pose2d getClockwiseNegativePoseMeters() {
+        Pose2d pose = getPoseMeters();
+        return new Pose2d(pose.getTranslation(), pose.getRotation().unaryMinus());
     }
 
     public void resetOdometry(Pose2d pose) {
-        odometry.resetPosition(getGyroYaw(), getModulePositions(), pose);
+        odometry.resetPosition(pose, getGyroYawRaw());
     }
 
     public void addVisionMeasurement(Pose2d pose) {
-        odometry.addVisionMeasurement(pose, Timer.getFPGATimestamp());
+        // odometry.addVisionMeasurement(pose, Timer.getFPGATimestamp());
     }
     private Pose2d lastSimFieldPose = null;
     @Override
@@ -275,14 +290,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
         backLeftModule.periodic();
         backRightModule.periodic();
 
-        odometry.update(this.getGyroYaw(), getModulePositions());
-        simGyroYawRadians += odometry.getOdometry().getLast_dtheta();
+        odometry.update(this.getGyroYawRaw(), getModuleStates());
         if (RobotBase.isSimulation()) {
             if (lastSimFieldPose != null && !field2d.getRobotPose().equals(lastSimFieldPose)) {
                 resetOdometry(field2d.getRobotPose());
             }
         }
-        field2d.setRobotPose(this.getPoseMeters());
+        Pose2d pose = this.getPoseMeters();
+        field2d.setRobotPose(new Pose2d(pose.getTranslation(), pose.getRotation().unaryMinus()));
         if (RobotBase.isSimulation()) {
             lastSimFieldPose = field2d.getRobotPose();
         }

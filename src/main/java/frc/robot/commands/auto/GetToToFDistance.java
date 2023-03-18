@@ -8,9 +8,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class GetToToFDistance extends CommandBase {
     // public static Command getTotalToFCommand(DrivetrainSubsystem drivetrainSubsystem, TimeOfFlight sensor, double setDistance_meters) {
@@ -44,7 +42,7 @@ public class GetToToFDistance extends CommandBase {
     public void execute() {
         double range = sensor.getRange() / 1000.0;
         SmartDashboard.putNumber("Range", range);
-        if (!sensor.isRangeValid() || (sensor.getRangeSigma() > 15.0)) {
+        if (!sensor.isRangeValid() || (sensor.getRangeSigma() > 20.0)) {
             drivetrainSubsystem.stopMotion();
             correctTimer.reset();
             return;

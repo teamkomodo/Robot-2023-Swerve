@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
@@ -54,43 +55,37 @@ public class VisionPositioningSubsystem extends SubsystemBase {
 
     private Pose3d accumulator = new Pose3d();
     private double accumulator_weight = 0.0;
-    private boolean sampleRotation = false;
-
-    public void sampleRotation() {
-        sampleRotation = true;
-    }
 
     @Override
     public void periodic() {
         Optional<EstimatedRobotPose> est_pose_opt = poseEstimator.update();
         if (est_pose_opt.isPresent()) {
             Pose3d pose = est_pose_opt.get().estimatedPose;
-            accumulator = new Pose3d(
-                    accumulator.getTranslation().times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT)
-                            .plus(pose.getTranslation()),
-                    accumulator.getRotation().times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT)
-                            .plus(pose.getRotation()));
-            accumulator_weight *= VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT;
-            accumulator_weight += 1.0;
-            if (accumulator_weight <= 0) {
-                DriverStation.reportError("Accumulator weight is <= 0 somehow", true);
-                throw new RuntimeException("Accumulator weight is <= 0 somehow");
-            }
-            pose = new Pose3d(accumulator.getTranslation().times(1.0 / accumulator_weight),
-                    accumulator.getRotation().times(1.0 / accumulator_weight));
-            if (pose != null && doOdometryUpdate) {
+            // accumulator = new Pose3d(
+            // accumulator.getTranslation().times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT)
+            // .plus(pose.getTranslation()),
+            // accumulator.getRotation().times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT)
+            // .plus(pose.getRotation()));
+            // accumulator_weight *=
+            // VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT;
+            // accumulator_weight += 1.0;
+            // if (accumulator_weight <= 0) {
+            // DriverStation.reportError("Accumulator weight is <= 0 somehow", true);
+            // throw new RuntimeException("Accumulator weight is <= 0 somehow");
+            // }
+            // pose = new Pose3d(accumulator.getTranslation().times(1.0 /
+            // accumulator_weight),
+            // accumulator.getRotation().times(1.0 / accumulator_weight));
+            if (pose != null) {
                 Pose2d pose2d = pose.toPose2d();
-                if (sampleRotation) {
-                    // sampleRotation = false;
-                    drive.resetGyro(pose2d.getRotation());
-                } else {
-                    pose2d = new Pose2d(pose2d.getTranslation(), drive.getPoseMeters().getRotation());
+                pose2d = new Pose2d(pose2d.getTranslation(), pose2d.getRotation().unaryMinus());
+                if (doOdometryUpdate) {
+                    drive.resetOdometry(pose2d);
+                    if (onVisionData != null) {
+                        onVisionData.run();
+                    }
+                    lastString = "" + pose;
                 }
-                drive.addVisionMeasurement(pose2d);
-                if (onVisionData != null) {
-                    onVisionData.run();
-                }
-                lastString = "" + pose;
             }
         }
     }

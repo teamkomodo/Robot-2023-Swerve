@@ -257,10 +257,15 @@ public class RobotContainer {
         return 0;
     }
 
+    private Command autoCommand = null;
+
     public void teleopInit() {
         telescopeSubsystem.teleopInit();
         jointSubsystem.teleopInit();
         elevatorSubsystem.teleopInit();
+        if (autoCommand != null) {
+            autoCommand.end(true);
+        }
         drivetrainSubsystem.stopMotion();
         drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180));
     }
@@ -270,7 +275,8 @@ public class RobotContainer {
         if (mode == null) {
             return null;
         } else {
-            return mode.generateCommand();
+            autoCommand = mode.generateCommand();
+            return autoCommand;
         }
     }
 }
