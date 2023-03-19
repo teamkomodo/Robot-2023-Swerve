@@ -47,9 +47,9 @@ public class GetToToFDistance extends CommandBase {
             correctTimer.reset();
             return;
         }
-        double forwardSpeed = this.controller.calculate(range, setDistance);
+        double forwardSpeed = this.controller.calculate(range, setDistance - AutoConstants.TOF_DISTANCE_TOLERANCE_METERS);
         drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(forwardSpeed, 0, 0));
-        if (range - setDistance > AutoConstants.TOF_DISTANCE_TOLERANCE_METERS) {
+        if (range > setDistance) {
             correctTimer.reset();
         }
     }

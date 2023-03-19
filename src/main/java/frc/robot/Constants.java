@@ -40,7 +40,7 @@ public final class Constants {
     public static final double TELESCOPE_STOW_POSITION = 0;
     public static final double TELESCOPE_GROUND_POSITION = 0;
     public static final double TELESCOPE_LOW_POSITION = 16;
-    public static final double TELESCOPE_MID_POSITION = 52;
+    public static final double TELESCOPE_MID_POSITION = 52.55;
     public static final double TELESCOPE_HIGH_POSITION = 99;
     public static final double TELESCOPE_SHELF_POSITION = 2;
     public static final double[] TELESCOPE_POSITIONS_ORDERED = { // Order in array corresponds to selector position
@@ -62,8 +62,8 @@ public final class Constants {
     public static final double ELEVATOR_STOW_POSITION = 0;
     public static final double ELEVATOR_GROUND_POSITION = 2.5;
     public static final double ELEVATOR_LOW_POSITION = 12;
-    public static final double ELEVATOR_MID_POSITION = 24.5;
-    public static final double ELEVATOR_HIGH_POSITION = 34.7;
+    public static final double ELEVATOR_MID_POSITION = 31.89;
+    public static final double ELEVATOR_HIGH_POSITION = 38.2;
     public static final double ELEVATOR_SHELF_POSITION = 33
     ;
     public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
@@ -92,8 +92,8 @@ public final class Constants {
     public static final double JOINT_STOW_POSITION = 5;
     public static final double JOINT_GROUND_POSITION = 55.8;
     public static final double JOINT_LOW_POSITION = 56;
-    public static final double JOINT_MID_POSITION = 46;
-    public static final double JOINT_HIGH_POSITION = 40;
+    public static final double JOINT_MID_POSITION = 42.12;
+    public static final double JOINT_HIGH_POSITION = 30.12;
 
     public static final double JOINT_SHELF_POSITION = 42.5;
     public static final double[] JOINT_POSITIONS_ORDERED = { // Order in array corresponds to selector position
