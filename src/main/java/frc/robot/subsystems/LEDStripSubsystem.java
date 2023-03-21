@@ -6,11 +6,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
-public class LEDStripSubsystem extends SubsystemBase{
+public class LEDStripSubsystem extends SubsystemBase {
 
-    private final double IDLE_PATTERN = 0.37; //Sparkle, Color 1 on Color 2
-    private final double CONE_SIGNAL_PATTERN = 0.65; //Solid Color: Orange
-    private final double CUBE_SIGNAL_PATTERN = 0.91; //Solid Color: Violet
+    public static final double IDLE_PATTERN = 0.37; //Sparkle, Color 1 on Color 2
+    public static final double CONE_SIGNAL_PATTERN = 0.65; //Solid Color: Orange
+    public static final double CUBE_SIGNAL_PATTERN = 0.91; //Solid Color: Violet
 
     private Spark controller = new Spark(LED_STRIP_PWM_CHANNEL);
 
@@ -24,6 +24,11 @@ public class LEDStripSubsystem extends SubsystemBase{
 
     public Command idlePatternCommand() {
         return setPatternCommand(IDLE_PATTERN);
+    }
+    
+    public Command setSolidColor(int colorId) {
+        // Not including black
+        return this.run(() -> setPattern(0.57 + (0.02 * (colorId % 21))));
     }
 
     public Command coneSignalCommand() {

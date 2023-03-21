@@ -13,6 +13,7 @@ import frc.robot.commands.auto.SleepCommand;
 import frc.robot.commands.auto.AutoDefinitions.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
 import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToToF;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -82,6 +83,7 @@ public class RobotContainer {
         Trigger xButton = driverXBoxController.x();
         Trigger yButton = driverXBoxController.y();
 
+        Trigger leftJoystickDown = driverXBoxController.leftStick();
         Trigger rightJoystickDown = driverXBoxController.rightStick();
 
         Trigger backButton = driverXBoxController.back();
@@ -250,6 +252,7 @@ public class RobotContainer {
         rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
         blueTriButton.whileTrue(new AlignToGyroSetting(drivetrainSubsystem));
 
+        leftJoystickDown.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()));
     }
 
     private Command autoCommand = null;
@@ -261,6 +264,7 @@ public class RobotContainer {
         if (autoCommand != null) {
             autoCommand.end(true);
         }
+        ledStripSubsystem.setPattern(LEDStripSubsystem.IDLE_PATTERN);
         drivetrainSubsystem.stopMotion();
         drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180));
     }
@@ -270,7 +274,7 @@ public class RobotContainer {
         if (mode == null) {
             return null;
         } else {
-            autoCommand = mode.generateCommand();
+            autoCommand = mode.generateCommand(this);
             return autoCommand;
         }
     }

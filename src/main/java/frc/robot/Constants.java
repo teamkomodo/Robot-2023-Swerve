@@ -101,6 +101,7 @@ public final class Constants {
     public static final double JOINT_MIN_POSITION = 5; // Code stop
     public static final double JOINT_MAX_POSITION = 60; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
+
     public static final double JOINT_CONE_GROUND_POSITION = 42.2;
     public static final double JOINT_CUBE_GROUND_POSITION = 50.5;
     public static final double JOINT_CONE_LOW_POSITION = 56;
