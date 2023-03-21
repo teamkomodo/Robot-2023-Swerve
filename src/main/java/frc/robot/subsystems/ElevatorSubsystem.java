@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
+import java.util.function.BooleanSupplier;
+
 public class ElevatorSubsystem extends SubsystemBase{
     
     // 9:1 reduction
@@ -83,7 +85,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        runHoldPositionCommand();
+        holdPositionCommand();
         zeroed = false;
     }
     
@@ -161,51 +163,51 @@ public class ElevatorSubsystem extends SubsystemBase{
         setPosition(ELEVATOR_POSITIONS_ORDERED[positionId]);
     }
 
-    public Command runHoldPositionCommand() {
+    public Command holdPositionCommand() {
         return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
-    public Command runLowNodeCommand() {
+    public Command lowNodeCommand() {
         return this.runOnce(() -> setPosition(ELEVATOR_LOW_POSITION));
     }
 
-    public Command runMidNodeCommand() {
-        return this.runOnce(() -> setPosition(ELEVATOR_MID_POSITION));
+    public Command midNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? ELEVATOR_CUBE_MID_POSITION: ELEVATOR_CONE_MID_POSITION));
     }
 
-    public Command runHighNodeCommand() {
-        return this.runOnce(() -> setPosition(ELEVATOR_HIGH_POSITION));
+    public Command highNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? ELEVATOR_CUBE_HIGH_POSITION: ELEVATOR_CONE_HIGH_POSITION));
     }
 
-    public Command runShelfCommand() {
-        return this.runOnce(() -> setPosition(ELEVATOR_SHELF_POSITION));
+    public Command shelfCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? ELEVATOR_CUBE_SHELF_POSITION: ELEVATOR_CONE_SHELF_POSITION));
     }
 
-    public Command runStowCommand() {
+    public Command stowCommand() {
         return this.runOnce(() -> setPosition(ELEVATOR_STOW_POSITION));
     }
 
-    public Command runGroundCommand() {
+    public Command groundCommand() {
         return this.runOnce(() -> setPosition(ELEVATOR_GROUND_POSITION));
     }
 
-    public Command runZeroCommand() {
+    public Command zeroCommand() {
         return this.runOnce(() -> setPosition(0));
     }
 
-    public Command runDisableLimitsCommand() {
+    public Command disableLimitsCommand() {
         return this.runOnce(() -> useLimits = false);
     }
 
-    public Command runEnableLimitsCommand() {
+    public Command enableLimitsCommand() {
         return this.runOnce(() -> useLimits = true);
     }
 
-    public Command runDisableSlowModeCommand() {
+    public Command disableSlowModeCommand() {
         return this.runOnce(() -> slowMode = false);
     }
 
-    public Command runEnableSlowModeCommand() {
+    public Command enableSlowModeCommand() {
         return this.runOnce(() -> slowMode = true);
     }
 

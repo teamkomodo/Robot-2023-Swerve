@@ -40,16 +40,20 @@ public final class Constants {
     public static final double TELESCOPE_STOW_POSITION = 0;
     public static final double TELESCOPE_GROUND_POSITION = 0;
     public static final double TELESCOPE_LOW_POSITION = 16;
-    public static final double TELESCOPE_MID_POSITION = 52.55;
-    public static final double TELESCOPE_HIGH_POSITION = 99;
-    public static final double TELESCOPE_SHELF_POSITION = 2;
+    public static final double TELESCOPE_CONE_MID_POSITION = 52.55;
+    public static final double TELESCOPE_CUBE_MID_POSITION = 52.55;
+    public static final double TELESCOPE_CONE_HIGH_POSITION = 99;
+    public static final double TELESCOPE_CUBE_HIGH_POSITION = 99;
+    public static final double TELESCOPE_CONE_SHELF_POSITION = 0;
+    public static final double TELESCOPE_CUBE_SHELF_POSITION = 0;
+
     public static final double[] TELESCOPE_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         TELESCOPE_STOW_POSITION,
         TELESCOPE_GROUND_POSITION,
-        TELESCOPE_SHELF_POSITION,
+        TELESCOPE_CONE_SHELF_POSITION,
         TELESCOPE_LOW_POSITION,
-        TELESCOPE_MID_POSITION,
-        TELESCOPE_HIGH_POSITION
+        TELESCOPE_CONE_MID_POSITION,
+        TELESCOPE_CONE_HIGH_POSITION
     };
 
 //Elevator
@@ -62,17 +66,20 @@ public final class Constants {
     public static final double ELEVATOR_STOW_POSITION = 0;
     public static final double ELEVATOR_GROUND_POSITION = 2.5;
     public static final double ELEVATOR_LOW_POSITION = 12;
-    public static final double ELEVATOR_MID_POSITION = 31.89;
-    public static final double ELEVATOR_HIGH_POSITION = 38.2;
-    public static final double ELEVATOR_SHELF_POSITION = 33
-    ;
+    public static final double ELEVATOR_CONE_MID_POSITION = 31.89;
+    public static final double ELEVATOR_CUBE_MID_POSITION = 31.89;
+    public static final double ELEVATOR_CONE_HIGH_POSITION = 38.2;
+    public static final double ELEVATOR_CUBE_HIGH_POSITION = 38.2;
+    public static final double ELEVATOR_CONE_SHELF_POSITION = 33;
+    public static final double ELEVATOR_CUBE_SHELF_POSITION = 33;
+
     public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         ELEVATOR_STOW_POSITION,
         ELEVATOR_GROUND_POSITION,
-        ELEVATOR_SHELF_POSITION,
+        ELEVATOR_CONE_SHELF_POSITION,
         ELEVATOR_LOW_POSITION,
-        ELEVATOR_MID_POSITION,
-        ELEVATOR_HIGH_POSITION
+        ELEVATOR_CONE_MID_POSITION,
+        ELEVATOR_CONE_HIGH_POSITION
     };
 
 //Claw
@@ -92,17 +99,20 @@ public final class Constants {
     public static final double JOINT_STOW_POSITION = 5;
     public static final double JOINT_GROUND_POSITION = 55.8;
     public static final double JOINT_LOW_POSITION = 56;
-    public static final double JOINT_MID_POSITION = 42.12;
-    public static final double JOINT_HIGH_POSITION = 30.12;
+    public static final double JOINT_CONE_MID_POSITION = 42.12;
+    public static final double JOINT_CUBE_MID_POSITION = 42.12;
+    public static final double JOINT_CONE_HIGH_POSITION = 30.12;
+    public static final double JOINT_CUBE_HIGH_POSITION = 30.12;
+    public static final double JOINT_CONE_SHELF_POSITION = 42.5;
+    public static final double JOINT_CUBE_SHELF_POSITION = 42.5;
 
-    public static final double JOINT_SHELF_POSITION = 42.5;
     public static final double[] JOINT_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         JOINT_STOW_POSITION,
         JOINT_GROUND_POSITION,
-        JOINT_SHELF_POSITION,
+        JOINT_CONE_SHELF_POSITION,
         JOINT_LOW_POSITION,
-        JOINT_MID_POSITION,
-        JOINT_HIGH_POSITION
+        JOINT_CONE_MID_POSITION,
+        JOINT_CONE_HIGH_POSITION
     };
 
 //LED Strip

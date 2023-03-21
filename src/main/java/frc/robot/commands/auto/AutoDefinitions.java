@@ -77,19 +77,19 @@ public class AutoDefinitions {
         Pose2d inFront = new Pose2d(5.68, 2.81, Rotation2d.fromDegrees(180));
         return new Command[] {
                 // Place cube
-                container.elevatorSubsystem.runHighNodeCommand(),
+                container.elevatorSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.15),
-                container.telescopeSubsystem.runHighNodeCommand(),
+                container.telescopeSubsystem.highNodeCommand(),
                 new SleepCommand(0.5),
-                container.jointSubsystem.runHighNodeCommand(),
+                container.jointSubsystem.highNodeCommand(),
                 new SleepCommand(0.75),
                 container.clawSubsystem.openCommand(),
                 new SleepCommand(0.25),
                 container.clawSubsystem.closeCommand(),
-                container.telescopeSubsystem.runStowCommand(),
-                container.jointSubsystem.runStowCommand(),
+                container.telescopeSubsystem.stowCommand(),
+                container.jointSubsystem.stowCommand(),
                 new SleepCommand(0.4),
-                container.elevatorSubsystem.runStowCommand(),
+                container.elevatorSubsystem.stowCommand(),
                 // Charging station
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = true;
@@ -114,19 +114,19 @@ public class AutoDefinitions {
         Pose2d inFront = new Pose2d(10.40, 2.81, Rotation2d.fromDegrees(0));
         return new Command[] {
                 // Place cube
-                container.elevatorSubsystem.runHighNodeCommand(),
+                container.elevatorSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.15),
-                container.telescopeSubsystem.runHighNodeCommand(),
+                container.telescopeSubsystem.highNodeCommand(),
                 new SleepCommand(0.5),
-                container.jointSubsystem.runHighNodeCommand(),
+                container.jointSubsystem.highNodeCommand(),
                 new SleepCommand(0.75),
                 container.clawSubsystem.openCommand(),
                 new SleepCommand(0.25),
                 container.clawSubsystem.closeCommand(),
-                container.telescopeSubsystem.runStowCommand(),
-                container.jointSubsystem.runStowCommand(),
+                container.telescopeSubsystem.stowCommand(),
+                container.jointSubsystem.stowCommand(),
                 new SleepCommand(0.4),
-                container.elevatorSubsystem.runStowCommand(),
+                container.elevatorSubsystem.stowCommand(),
                 // Charging station
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = true;
