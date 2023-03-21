@@ -167,8 +167,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
-    public Command lowNodeCommand() {
-        return this.runOnce(() -> setPosition(ELEVATOR_LOW_POSITION));
+    public Command lowNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? ELEVATOR_CUBE_LOW_POSITION: ELEVATOR_CONE_LOW_POSITION));
     }
 
     public Command midNodeCommand(BooleanSupplier cubeMode) {

@@ -135,10 +135,10 @@ public class RobotContainer {
         ));
 
         bButton.onTrue(new SequentialCommandGroup(
-            telescopeSubsystem.lowNodeCommand(),
-            jointSubsystem.lowNodeCommand(),
+            telescopeSubsystem.lowNodeCommand(cubeMode),
+            jointSubsystem.lowNodeCommand(cubeMode),
             new SleepCommand(0.3),
-            elevatorSubsystem.lowNodeCommand()
+            elevatorSubsystem.lowNodeCommand(cubeMode)
         ));
 
         xButton.onTrue(new SequentialCommandGroup(

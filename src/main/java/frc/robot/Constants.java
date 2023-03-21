@@ -40,11 +40,12 @@ public final class Constants {
     public static final double TELESCOPE_STOW_POSITION = 0;
     public static final double TELESCOPE_CONE_GROUND_POSITION = 0;
     public static final double TELESCOPE_CUBE_GROUND_POSITION = 0;
-    public static final double TELESCOPE_LOW_POSITION = 16;
+    public static final double TELESCOPE_CONE_LOW_POSITION = 16;
+    public static final double TELESCOPE_CUBE_LOW_POSITION = 7.1;
     public static final double TELESCOPE_CONE_MID_POSITION = 52.55;
     public static final double TELESCOPE_CUBE_MID_POSITION = 52.55;
     public static final double TELESCOPE_CONE_HIGH_POSITION = 99;
-    public static final double TELESCOPE_CUBE_HIGH_POSITION = 99;
+    public static final double TELESCOPE_CUBE_HIGH_POSITION = 99.8;
     public static final double TELESCOPE_CONE_SHELF_POSITION = 0;
     public static final double TELESCOPE_CUBE_SHELF_POSITION = 0;
 
@@ -52,7 +53,7 @@ public final class Constants {
         TELESCOPE_STOW_POSITION,
         TELESCOPE_CONE_GROUND_POSITION,
         TELESCOPE_CONE_SHELF_POSITION,
-        TELESCOPE_LOW_POSITION,
+        TELESCOPE_CONE_LOW_POSITION,
         TELESCOPE_CONE_MID_POSITION,
         TELESCOPE_CONE_HIGH_POSITION
     };
@@ -66,12 +67,13 @@ public final class Constants {
     public static final double ELEVATOR_MAX_POSITION = 38.2; // Code stop
     public static final double ELEVATOR_STOW_POSITION = 0;
     public static final double ELEVATOR_CONE_GROUND_POSITION = 2.5;
-    public static final double ELEVATOR_CUBE_GROUND_POSITION = 2.5;
-    public static final double ELEVATOR_LOW_POSITION = 12;
+    public static final double ELEVATOR_CUBE_GROUND_POSITION = 0;
+    public static final double ELEVATOR_CONE_LOW_POSITION = 12;
+    public static final double ELEVATOR_CUBE_LOW_POSITION = 2.4;
     public static final double ELEVATOR_CONE_MID_POSITION = 31.89;
-    public static final double ELEVATOR_CUBE_MID_POSITION = 29.89;
+    public static final double ELEVATOR_CUBE_MID_POSITION = 23.8;
     public static final double ELEVATOR_CONE_HIGH_POSITION = 38.2;
-    public static final double ELEVATOR_CUBE_HIGH_POSITION = 26.2;
+    public static final double ELEVATOR_CUBE_HIGH_POSITION = 36.1;
     public static final double ELEVATOR_CONE_SHELF_POSITION = 33;
     public static final double ELEVATOR_CUBE_SHELF_POSITION = 31;
 
@@ -79,7 +81,7 @@ public final class Constants {
         ELEVATOR_STOW_POSITION,
         ELEVATOR_CONE_GROUND_POSITION,
         ELEVATOR_CONE_SHELF_POSITION,
-        ELEVATOR_LOW_POSITION,
+        ELEVATOR_CONE_LOW_POSITION,
         ELEVATOR_CONE_MID_POSITION,
         ELEVATOR_CONE_HIGH_POSITION
     };
@@ -99,14 +101,15 @@ public final class Constants {
     public static final double JOINT_MIN_POSITION = 5; // Code stop
     public static final double JOINT_MAX_POSITION = 60; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
-    public static final double JOINT_CONE_GROUND_POSITION = 55.8;
-    public static final double JOINT_CUBE_GROUND_POSITION = 55.8;
-    public static final double JOINT_LOW_POSITION = 56;
+    public static final double JOINT_CONE_GROUND_POSITION = 42.2;
+    public static final double JOINT_CUBE_GROUND_POSITION = 50.5;
+    public static final double JOINT_CONE_LOW_POSITION = 56;
+    public static final double JOINT_CUBE_LOW_POSITION = 43.0;
     public static final double JOINT_CONE_MID_POSITION = 42.12;
-    public static final double JOINT_CUBE_MID_POSITION = 42.12;
+    public static final double JOINT_CUBE_MID_POSITION = 42.2;
     public static final double JOINT_CONE_HIGH_POSITION = 30.12;
-    public static final double JOINT_CUBE_HIGH_POSITION = 30.12;
-    public static final double JOINT_CONE_SHELF_POSITION = 42.5;
+    public static final double JOINT_CUBE_HIGH_POSITION = 42.6;
+    public static final double JOINT_CONE_SHELF_POSITION = 49.8;
     public static final double JOINT_CUBE_SHELF_POSITION = 42.5;
 
     public static final double TOF_DISTANCE_METERS_CONE = 0;
@@ -116,7 +119,7 @@ public final class Constants {
         JOINT_STOW_POSITION,
         JOINT_CONE_GROUND_POSITION,
         JOINT_CONE_SHELF_POSITION,
-        JOINT_LOW_POSITION,
+        JOINT_CUBE_LOW_POSITION,
         JOINT_CONE_MID_POSITION,
         JOINT_CONE_HIGH_POSITION
     };

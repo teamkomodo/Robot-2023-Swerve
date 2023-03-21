@@ -163,8 +163,8 @@ public class TelescopeSubsystem extends SubsystemBase{
         return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
-    public Command lowNodeCommand() {
-        return this.runOnce(() -> setPosition(TELESCOPE_LOW_POSITION));
+    public Command lowNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? TELESCOPE_CUBE_LOW_POSITION: TELESCOPE_CONE_LOW_POSITION));
     }
 
     public Command midNodeCommand(BooleanSupplier cubeMode) {

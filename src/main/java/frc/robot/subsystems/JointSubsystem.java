@@ -178,8 +178,8 @@ public class JointSubsystem extends SubsystemBase{
         return this.runOnce(() -> pidController.setReference(encoder.getPosition(), ControlType.kPosition));
     }
 
-    public Command lowNodeCommand() {
-        return this.runOnce(() -> setPosition(JOINT_LOW_POSITION));
+    public Command lowNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_LOW_POSITION: JOINT_CONE_LOW_POSITION));
     }
 
     public Command midNodeCommand(BooleanSupplier cubeMode) {
