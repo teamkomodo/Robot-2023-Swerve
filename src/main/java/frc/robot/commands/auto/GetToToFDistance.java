@@ -23,6 +23,9 @@ public class GetToToFDistance extends CommandBase {
     private final PIDController controller;
     private final double setDistance;
     private final Timer correctTimer;
+
+    private double range_accumulator;
+    private double accumulator;
     public GetToToFDistance(DrivetrainSubsystem drivetrainSubsystem, TimeOfFlight sensor, double setDistance_meters) {
         this.drivetrainSubsystem = drivetrainSubsystem;
         this.sensor = sensor;
@@ -37,6 +40,8 @@ public class GetToToFDistance extends CommandBase {
         sensor.setRangeOfInterest(8, 8, 12, 12);
         correctTimer.reset();
         correctTimer.start();
+        this.range_accumulator = 0.0;
+        this.accumulator = 0.0;
     }
     @Override
     public void execute() {
@@ -47,6 +52,11 @@ public class GetToToFDistance extends CommandBase {
             correctTimer.reset();
             return;
         }
+        this.range_accumulator += range;
+        this.accumulator += 1.0;
+        this.range_accumulator *= AutoConstants.TOF_LEAKY_COEFFICIENT;
+        this.accumulator *= AutoConstants.TOF_LEAKY_COEFFICIENT;
+        range = this.range_accumulator / this.accumulator;
         double forwardSpeed = this.controller.calculate(range, setDistance - AutoConstants.TOF_DISTANCE_TOLERANCE_METERS);
         drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(forwardSpeed, 0, 0));
         if (range > setDistance) {

@@ -1,5 +1,6 @@
 package frc.robot.commands.auto;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,8 +27,14 @@ public class AutoDefinitions {
             this.factory = factory;
         }
 
-        public SequentialCommandGroup generateCommand() {
-            return new SequentialCommandGroup(factory.get());
+        public SequentialCommandGroup generateCommand(RobotContainer container) {
+            ArrayList<Command> commands = new ArrayList<Command>();
+            Command[] source = factory.get();
+            for (int i = 0; i < source.length; i++) {
+                commands.add(container.ledStripSubsystem.setSolidColor(i));
+                commands.add(source[i]);
+            }
+            return new SequentialCommandGroup(commands.toArray(new Command[commands.size()]));
         }
     }
 

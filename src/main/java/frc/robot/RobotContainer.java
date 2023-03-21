@@ -13,6 +13,7 @@ import frc.robot.commands.auto.SleepCommand;
 import frc.robot.commands.auto.AutoDefinitions.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
 import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToToF;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -32,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
+import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
@@ -46,7 +48,7 @@ public class RobotContainer {
     public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem(mainTab);
     public final JointSubsystem jointSubsystem = new JointSubsystem(mainTab);
     public final ClawSubsystem clawSubsystem = new ClawSubsystem();
-    // public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
+    public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
     public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
@@ -78,6 +80,9 @@ public class RobotContainer {
         Trigger bButton = driverXBoxController.b();
         Trigger xButton = driverXBoxController.x();
         Trigger yButton = driverXBoxController.y();
+
+        Trigger leftJoystickDown = driverXBoxController.leftStick();
+        Trigger rightJoystickDown = driverXBoxController.rightStick();
 
         Trigger backButton = driverXBoxController.back();
         Trigger startButton = driverXBoxController.start();
@@ -266,6 +271,7 @@ public class RobotContainer {
         rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
         blueTriButton.whileTrue(new AlignToGyroSetting(drivetrainSubsystem));
 
+        leftJoystickDown.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()));
     }
 
     private int getSelectorState() {
@@ -294,6 +300,7 @@ public class RobotContainer {
         if (autoCommand != null) {
             autoCommand.end(true);
         }
+        ledStripSubsystem.setPattern(LEDStripSubsystem.IDLE_PATTERN);
         drivetrainSubsystem.stopMotion();
         drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180));
     }
@@ -303,7 +310,7 @@ public class RobotContainer {
         if (mode == null) {
             return null;
         } else {
-            autoCommand = mode.generateCommand();
+            autoCommand = mode.generateCommand(this);
             return autoCommand;
         }
     }

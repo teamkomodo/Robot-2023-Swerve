@@ -60,7 +60,7 @@ public final class Constants {
     // Position in rotations of the motor shaft before gearbox
     public static final double ELEVATOR_MAX_POSITION = 38.2; // Code stop
     public static final double ELEVATOR_STOW_POSITION = 0;
-    public static final double ELEVATOR_GROUND_POSITION = 2.5;
+    public static final double ELEVATOR_GROUND_POSITION = 0;
     public static final double ELEVATOR_LOW_POSITION = 12;
     public static final double ELEVATOR_MID_POSITION = 31.89;
     public static final double ELEVATOR_HIGH_POSITION = 38.2;
@@ -90,7 +90,7 @@ public final class Constants {
     public static final double JOINT_MIN_POSITION = 5; // Code stop
     public static final double JOINT_MAX_POSITION = 60; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
-    public static final double JOINT_GROUND_POSITION = 55.8;
+    public static final double JOINT_GROUND_POSITION = 50.5;
     public static final double JOINT_LOW_POSITION = 56;
     public static final double JOINT_MID_POSITION = 42.12;
     public static final double JOINT_HIGH_POSITION = 30.12;
