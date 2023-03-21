@@ -18,20 +18,20 @@ public class LEDStripSubsystem extends SubsystemBase{
         controller.set(pattern);
     }
 
-    public Command runSetPatternCommand(double pattern) {
+    public Command setPatternCommand(double pattern) {
         return this.run(() -> setPattern(pattern));
     }
 
-    public Command runIdlePatternCommand() {
-        return runSetPatternCommand(IDLE_PATTERN);
+    public Command idlePatternCommand() {
+        return setPatternCommand(IDLE_PATTERN);
     }
 
-    public Command runConeSignalCommand() {
-        return runSetPatternCommand(CONE_SIGNAL_PATTERN).andThen(runIdlePatternCommand());
+    public Command coneSignalCommand() {
+        return setPatternCommand(CONE_SIGNAL_PATTERN);
     }
 
-    public Command runCubeSignalCommand() {
-        return runSetPatternCommand(CUBE_SIGNAL_PATTERN).andThen(runIdlePatternCommand());
+    public Command cubeSignalCommand() {
+        return setPatternCommand(CUBE_SIGNAL_PATTERN);
     }
 
 }

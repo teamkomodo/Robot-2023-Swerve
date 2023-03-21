@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
+import java.util.function.BooleanSupplier;
+
 public class JointSubsystem extends SubsystemBase{
     
     private final CANSparkMax motor;
@@ -180,24 +182,24 @@ public class JointSubsystem extends SubsystemBase{
         return this.runOnce(() -> setPosition(JOINT_LOW_POSITION));
     }
 
-    public Command midNodeCommand() {
-        return this.runOnce(() -> setPosition(JOINT_CONE_MID_POSITION));
+    public Command midNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_MID_POSITION: JOINT_CONE_MID_POSITION));
     }
 
-    public Command highNodeCommand() {
-        return this.runOnce(() -> setPosition(JOINT_CONE_HIGH_POSITION));
+    public Command highNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_HIGH_POSITION: JOINT_CONE_HIGH_POSITION));
     }
 
-    public Command shelfCommand() {
-        return this.runOnce(() -> setPosition(JOINT_CONE_SHELF_POSITION));
+    public Command shelfCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_SHELF_POSITION: JOINT_CONE_SHELF_POSITION));
     }
 
     public Command stowCommand() {
         return this.runOnce(() -> setPosition(JOINT_STOW_POSITION));
     }
 
-    public Command runGroundCommand() {
-        return this.runOnce(() -> setPosition(JOINT_GROUND_POSITION));
+    public Command groundCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_GROUND_POSITION: JOINT_CONE_GROUND_POSITION));
     }
 
     public Command zeroCommand() {

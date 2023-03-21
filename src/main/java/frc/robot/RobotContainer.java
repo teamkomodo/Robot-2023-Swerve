@@ -32,9 +32,12 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
+import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
+
+import java.util.function.BooleanSupplier;
 
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
@@ -46,7 +49,7 @@ public class RobotContainer {
     public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem(mainTab);
     public final JointSubsystem jointSubsystem = new JointSubsystem(mainTab);
     public final ClawSubsystem clawSubsystem = new ClawSubsystem();
-    // public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
+    public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
     public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
@@ -79,6 +82,8 @@ public class RobotContainer {
         Trigger xButton = driverXBoxController.x();
         Trigger yButton = driverXBoxController.y();
 
+        Trigger rightJoystickDown = driverXBoxController.rightStick();
+
         Trigger backButton = driverXBoxController.back();
         Trigger startButton = driverXBoxController.start();
 
@@ -110,40 +115,53 @@ public class RobotContainer {
 
         // Position Commands
 
+        BooleanSupplier cubeMode = () -> toggleSwitch1.getAsBoolean();
+        toggleSwitch1.onTrue(ledStripSubsystem.cubeSignalCommand());
+        toggleSwitch1.onFalse(ledStripSubsystem.coneSignalCommand());
+
         aButton.onTrue(new SequentialCommandGroup(
             telescopeSubsystem.stowCommand(),
             jointSubsystem.stowCommand(),
             clawSubsystem.closeCommand(),
-            new SleepCommand(1),
+            new SleepCommand(0.3),
             elevatorSubsystem.stowCommand()
         ));
 
+        rightJoystickDown.onTrue(new SequentialCommandGroup(
+            telescopeSubsystem.groundCommand(cubeMode),
+            jointSubsystem.groundCommand(cubeMode),
+            new SleepCommand(0.3),
+            elevatorSubsystem.groundCommand(cubeMode)
+        ));
+
         bButton.onTrue(new SequentialCommandGroup(
-            elevatorSubsystem.lowNodeCommand(),
-            new SleepCommand(1),
             telescopeSubsystem.lowNodeCommand(),
-            jointSubsystem.lowNodeCommand()
+            jointSubsystem.lowNodeCommand(),
+            new SleepCommand(0.3),
+            elevatorSubsystem.lowNodeCommand()
         ));
 
         xButton.onTrue(new SequentialCommandGroup(
-            elevatorSubsystem.midNodeCommand(() -> toggleSwitch1.getAsBoolean()),
-            new SleepCommand(1),
-            telescopeSubsystem.midNodeCommand(),
-            jointSubsystem.midNodeCommand()
+            elevatorSubsystem.midNodeCommand(cubeMode),
+            new SleepCommand(0.2),
+            jointSubsystem.midNodeCommand(cubeMode),
+            new SleepCommand(0.3),
+            telescopeSubsystem.midNodeCommand(cubeMode)
         ));
         
         yButton.onTrue(new SequentialCommandGroup(
-            elevatorSubsystem.highNodeCommand(() -> toggleSwitch1.getAsBoolean()),
-            new SleepCommand(1),
-            telescopeSubsystem.highNodeCommand(),
-            jointSubsystem.highNodeCommand()
+            elevatorSubsystem.highNodeCommand(cubeMode),
+            new SleepCommand(0.2),
+            jointSubsystem.highNodeCommand(cubeMode),
+            new SleepCommand(0.3),
+            telescopeSubsystem.highNodeCommand(cubeMode)
         ));
 
         startButton.onTrue(new SequentialCommandGroup(
-            elevatorSubsystem.shelfCommand(() -> toggleSwitch1.getAsBoolean()),
+            elevatorSubsystem.shelfCommand(cubeMode),
             new SleepCommand(1),
-            telescopeSubsystem.shelfCommand(),
-            jointSubsystem.shelfCommand()
+            telescopeSubsystem.shelfCommand(cubeMode),
+            jointSubsystem.shelfCommand(cubeMode)
         ));
 
         // Elevator Commands
@@ -223,8 +241,11 @@ public class RobotContainer {
         toggleSwitch3.onFalse(telescopeSubsystem.disableSlowModeCommand());
 
         // Auto Commands
-        backButton.whileTrue(new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), 0.195).andThen(
+        backButton.and(cubeMode).whileTrue(new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), TOF_DISTANCE_METERS_CUBE).andThen(
                 clawSubsystem.closeCommand()));
+
+        backButton.and(() -> !cubeMode.getAsBoolean()).whileTrue(new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), TOF_DISTANCE_METERS_CONE).andThen(
+            clawSubsystem.closeCommand()));
 
         rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
         blueTriButton.whileTrue(new AlignToGyroSetting(drivetrainSubsystem));

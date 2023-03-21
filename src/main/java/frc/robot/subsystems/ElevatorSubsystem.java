@@ -187,8 +187,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         return this.runOnce(() -> setPosition(ELEVATOR_STOW_POSITION));
     }
 
-    public Command groundCommand() {
-        return this.runOnce(() -> setPosition(ELEVATOR_GROUND_POSITION));
+    public Command groundCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? ELEVATOR_CUBE_GROUND_POSITION: ELEVATOR_CONE_GROUND_POSITION));
     }
 
     public Command zeroCommand() {
