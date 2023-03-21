@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
+import java.util.function.BooleanSupplier;
+
 public class TelescopeSubsystem extends SubsystemBase{
     
     private final CANSparkMax motor;
@@ -79,7 +81,7 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        runHoldPositionCommand();
+        holdPositionCommand();
         zeroed = false;
     }
     
@@ -157,51 +159,51 @@ public class TelescopeSubsystem extends SubsystemBase{
         setPosition(TELESCOPE_POSITIONS_ORDERED[positionId]);
     }
 
-    public Command runHoldPositionCommand() {
+    public Command holdPositionCommand() {
         return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
-    public Command runLowNodeCommand() {
-        return this.runOnce(() -> setPosition(TELESCOPE_LOW_POSITION));
+    public Command lowNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? TELESCOPE_CUBE_LOW_POSITION: TELESCOPE_CONE_LOW_POSITION));
     }
 
-    public Command runMidNodeCommand() {
-        return this.runOnce(() -> setPosition(TELESCOPE_MID_POSITION));
+    public Command midNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? TELESCOPE_CUBE_MID_POSITION: TELESCOPE_CONE_MID_POSITION));
     }
 
-    public Command runHighNodeCommand() {
-        return this.runOnce(() -> setPosition(TELESCOPE_HIGH_POSITION));
+    public Command highNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? TELESCOPE_CUBE_HIGH_POSITION: TELESCOPE_CONE_HIGH_POSITION));
     }
 
-    public Command runShelfCommand() {
-        return this.runOnce(() -> setPosition(TELESCOPE_SHELF_POSITION));
+    public Command shelfCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? TELESCOPE_CUBE_SHELF_POSITION: TELESCOPE_CONE_SHELF_POSITION));
     }
 
-    public Command runStowCommand() {
+    public Command stowCommand() {
         return this.runOnce(() -> setPosition(TELESCOPE_STOW_POSITION));
     }
 
-    public Command runGroundCommand() {
-        return this.runOnce(() -> setPosition(TELESCOPE_GROUND_POSITION));
+    public Command groundCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? TELESCOPE_CUBE_GROUND_POSITION: TELESCOPE_CONE_GROUND_POSITION));
     }
 
-    public Command runZeroCommand() {
+    public Command zeroCommand() {
         return this.runOnce(() -> setPosition(0));
     }
 
-    public Command runDisableLimitsCommand() {
+    public Command disableLimitsCommand() {
         return this.runOnce(() -> useLimits = false);
     }
 
-    public Command runEnableLimitsCommand() {
+    public Command enableLimitsCommand() {
         return this.runOnce(() -> useLimits = true);
     }
 
-    public Command runDisableSlowModeCommand() {
+    public Command disableSlowModeCommand() {
         return this.runOnce(() -> slowMode = false);
     }
 
-    public Command runEnableSlowModeCommand() {
+    public Command enableSlowModeCommand() {
         return this.runOnce(() -> slowMode = true);
     }
 

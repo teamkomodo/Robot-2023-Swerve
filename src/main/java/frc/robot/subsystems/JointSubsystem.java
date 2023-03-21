@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
+import java.util.function.BooleanSupplier;
+
 public class JointSubsystem extends SubsystemBase{
     
     private final CANSparkMax motor;
@@ -42,7 +44,7 @@ public class JointSubsystem extends SubsystemBase{
     private boolean useLimits = true;
     private boolean slowMode = false;
 
-    private boolean zeroed = true;
+    private boolean zeroed = false;
 
     public JointSubsystem(ShuffleboardTab mainTab) {
 
@@ -61,7 +63,7 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setI(i);
         pidController.setD(d);
         pidController.setIMaxAccum(maxIAccum, 0);
-        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
+        pidController.setReference(0, ControlType.kDutyCycle);
         
         shuffleboardTab = Shuffleboard.getTab("Joint");
         
@@ -74,7 +76,6 @@ public class JointSubsystem extends SubsystemBase{
         ShuffleboardLayout controlList = shuffleboardTab.getLayout("Control", BuiltInLayouts.kList).withSize(2, 5).withPosition(2, 0);
         controlList.addBoolean("Limit Switch", () -> !reverseSwitch.get());
         controlList.addBoolean("Zeroed", () -> (zeroed));
-        controlList.addBoolean("At Zero", () -> (atMinLimit));
         controlList.addBoolean("At Max", () -> (atMaxLimit));
         controlList.addBoolean("At Min", () -> (atMinLimit));
         controlList.addDouble("Commanded Position", () -> (commandedPosition));
@@ -84,7 +85,7 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        runHoldPositionCommand();
+        holdPositionCommand();
         zeroed = true;
     }
 
@@ -173,51 +174,51 @@ public class JointSubsystem extends SubsystemBase{
         setPosition(JOINT_POSITIONS_ORDERED[positionId]);
     }
 
-    public Command runHoldPositionCommand() {
+    public Command holdPositionCommand() {
         return this.runOnce(() -> pidController.setReference(encoder.getPosition(), ControlType.kPosition));
     }
 
-    public Command runLowNodeCommand() {
-        return this.runOnce(() -> setPosition(JOINT_LOW_POSITION));
+    public Command lowNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_LOW_POSITION: JOINT_CONE_LOW_POSITION));
     }
 
-    public Command runMidNodeCommand() {
-        return this.runOnce(() -> setPosition(JOINT_MID_POSITION));
+    public Command midNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_MID_POSITION: JOINT_CONE_MID_POSITION));
     }
 
-    public Command runHighNodeCommand() {
-        return this.runOnce(() -> setPosition(JOINT_HIGH_POSITION));
+    public Command highNodeCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_HIGH_POSITION: JOINT_CONE_HIGH_POSITION));
     }
 
-    public Command runShelfCommand() {
-        return this.runOnce(() -> setPosition(JOINT_SHELF_POSITION));
+    public Command shelfCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_SHELF_POSITION: JOINT_CONE_SHELF_POSITION));
     }
 
-    public Command runStowCommand() {
+    public Command stowCommand() {
         return this.runOnce(() -> setPosition(JOINT_STOW_POSITION));
     }
 
-    public Command runGroundCommand() {
-        return this.runOnce(() -> setPosition(JOINT_GROUND_POSITION));
+    public Command groundCommand(BooleanSupplier cubeMode) {
+        return this.runOnce(() -> setPosition(cubeMode.getAsBoolean()? JOINT_CUBE_GROUND_POSITION: JOINT_CONE_GROUND_POSITION));
     }
 
-    public Command runZeroCommand() {
+    public Command zeroCommand() {
         return this.runOnce(() -> encoder.setPosition(0));
     }
 
-    public Command runDisableLimitsCommand() {
+    public Command disableLimitsCommand() {
         return this.runOnce(() -> useLimits = false);
     }
 
-    public Command runEnableLimitsCommand() {
+    public Command enableLimitsCommand() {
         return this.runOnce(() -> useLimits = true);
     }
 
-    public Command runDisableSlowModeCommand() {
+    public Command disableSlowModeCommand() {
         return this.runOnce(() -> slowMode = false);
     }
 
-    public Command runEnableSlowModeCommand() {
+    public Command enableSlowModeCommand() {
         return this.runOnce(() -> slowMode = true);
     }
 

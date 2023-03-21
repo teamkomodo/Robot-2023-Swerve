@@ -18,25 +18,25 @@ public class LEDStripSubsystem extends SubsystemBase {
         controller.set(pattern);
     }
 
-    public Command runSetPatternCommand(double pattern) {
+    public Command setPatternCommand(double pattern) {
         return this.run(() -> setPattern(pattern));
     }
 
+    public Command idlePatternCommand() {
+        return setPatternCommand(IDLE_PATTERN);
+    }
+    
     public Command setSolidColor(int colorId) {
         // Not including black
         return this.run(() -> setPattern(0.57 + (0.02 * (colorId % 21))));
     }
 
-    public Command runIdlePatternCommand() {
-        return runSetPatternCommand(IDLE_PATTERN);
+    public Command coneSignalCommand() {
+        return setPatternCommand(CONE_SIGNAL_PATTERN);
     }
 
-    public Command runConeSignalCommand() {
-        return runSetPatternCommand(CONE_SIGNAL_PATTERN).andThen(runIdlePatternCommand());
-    }
-
-    public Command runCubeSignalCommand() {
-        return runSetPatternCommand(CUBE_SIGNAL_PATTERN).andThen(runIdlePatternCommand());
+    public Command cubeSignalCommand() {
+        return setPatternCommand(CUBE_SIGNAL_PATTERN);
     }
 
 }
