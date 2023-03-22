@@ -86,7 +86,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public void teleopInit() {
         holdPositionCommand();
-        zeroed = false;
+        // zeroed = false;
     }
     
     public void checkMinLimit() {
