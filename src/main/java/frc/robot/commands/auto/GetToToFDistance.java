@@ -4,6 +4,7 @@ import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
@@ -18,11 +19,25 @@ public class GetToToFDistance extends CommandBase {
     //     );
     // }
 
+    private double clamp(double val, double mag) {
+        if (val > mag) {
+            return mag;
+        }
+        if (val < -mag) {
+            return -mag;
+        }
+        return val;
+    }
+
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final TimeOfFlight sensor;
     private final PIDController controller;
     private final double setDistance;
     private final Timer correctTimer;
+
+    private double getFPGATimestamp() {
+        return RobotController.getFPGATime() / 1000000.0;
+    }
 
     private double range_accumulator;
     private double accumulator;
@@ -31,7 +46,7 @@ public class GetToToFDistance extends CommandBase {
         this.sensor = sensor;
         this.setDistance = setDistance_meters;
         this.correctTimer = new Timer();
-        this.controller = new PIDController(2.4, 0.6, 0);
+        this.controller = new PIDController(3.5, 1.0, 0);
         addRequirements(drivetrainSubsystem);
     }
     @Override
@@ -52,12 +67,14 @@ public class GetToToFDistance extends CommandBase {
             correctTimer.reset();
             return;
         }
+        
         this.range_accumulator += range;
         this.accumulator += 1.0;
         this.range_accumulator *= AutoConstants.TOF_LEAKY_COEFFICIENT;
         this.accumulator *= AutoConstants.TOF_LEAKY_COEFFICIENT;
         range = this.range_accumulator / this.accumulator;
         double forwardSpeed = this.controller.calculate(range, setDistance - AutoConstants.TOF_DISTANCE_TOLERANCE_METERS);
+        forwardSpeed = clamp(forwardSpeed, 0.45);
         drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(forwardSpeed, 0, 0));
         if (range > setDistance) {
             correctTimer.reset();

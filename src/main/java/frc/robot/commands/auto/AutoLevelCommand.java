@@ -69,7 +69,7 @@ public class AutoLevelCommand extends CommandBase {
     public void execute() {
         ChassisSpeeds correction = new ChassisSpeeds(
                 x_pid.calculate(Math.tan(deadzone(getCurrentPitch().getRadians())), 0),
-                -y_pid.calculate(Math.tan(deadzone(getCurrentRoll().getRadians())), 0), 0);
+                y_pid.calculate(Math.tan(deadzone(getCurrentRoll().getRadians())), 0), 0);
         // SmartDashboard.putNumber("GYRO ROLL", Math.toDegrees(deadzone(getCurrentRoll().getRadians())));
         // SmartDashboard.putNumber("GYRO PITCH", Math.toDegrees(deadzone(getCurrentPitch().getRadians())));
         // SmartDashboard.putString("Calculated correction", "" + correction);

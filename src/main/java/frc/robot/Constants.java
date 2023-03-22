@@ -66,7 +66,7 @@ public final class Constants {
     // Position in rotations of the motor shaft before gearbox
     public static final double ELEVATOR_MAX_POSITION = 38.2; // Code stop
     public static final double ELEVATOR_STOW_POSITION = 0;
-    public static final double ELEVATOR_CONE_GROUND_POSITION = 2.5;
+    public static final double ELEVATOR_CONE_GROUND_POSITION = 0;
     public static final double ELEVATOR_CUBE_GROUND_POSITION = 0;
     public static final double ELEVATOR_CONE_LOW_POSITION = 12;
     public static final double ELEVATOR_CUBE_LOW_POSITION = 2.4;
@@ -74,8 +74,8 @@ public final class Constants {
     public static final double ELEVATOR_CUBE_MID_POSITION = 23.8;
     public static final double ELEVATOR_CONE_HIGH_POSITION = 38.2;
     public static final double ELEVATOR_CUBE_HIGH_POSITION = 36.1;
-    public static final double ELEVATOR_CONE_SHELF_POSITION = 33;
-    public static final double ELEVATOR_CUBE_SHELF_POSITION = 31;
+    public static final double ELEVATOR_CONE_SHELF_POSITION = 38.2;
+    public static final double ELEVATOR_CUBE_SHELF_POSITION = 31.8;
 
     public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         ELEVATOR_STOW_POSITION,
@@ -102,7 +102,7 @@ public final class Constants {
     public static final double JOINT_MAX_POSITION = 60; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
 
-    public static final double JOINT_CONE_GROUND_POSITION = 42.2;
+    public static final double JOINT_CONE_GROUND_POSITION = 45.2;
     public static final double JOINT_CUBE_GROUND_POSITION = 50.5;
     public static final double JOINT_CONE_LOW_POSITION = 56;
     public static final double JOINT_CUBE_LOW_POSITION = 43.0;
@@ -113,8 +113,8 @@ public final class Constants {
     public static final double JOINT_CONE_SHELF_POSITION = 49.8;
     public static final double JOINT_CUBE_SHELF_POSITION = 42.5;
 
-    public static final double TOF_DISTANCE_METERS_CONE = 0;
-    public static final double TOF_DISTANCE_METERS_CUBE = 0;
+    public static final double TOF_DISTANCE_METERS_CONE = 0.195;
+    public static final double TOF_DISTANCE_METERS_CUBE = 0.120;
 
     public static final double[] JOINT_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         JOINT_STOW_POSITION,
@@ -142,7 +142,7 @@ public final class Constants {
         public static final double D_X_CONTROLLER = 1.0;
         public static final double D_Y_CONTROLLER = D_X_CONTROLLER;
         public static final double P_THETA_CONTROLLER = 5;
-        public static final double I_THETA_CONTROLLER = 2.0;
+        public static final double I_THETA_CONTROLLER = 1.5;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
@@ -171,11 +171,11 @@ public final class Constants {
         public static final double I_REFL_LINEUP = 3.0;
         public static final double D_REFL_LINEUP = 0.2;
         // ToF constants
-        public static final double TOF_LEAKY_COEFFICIENT = 0.85;
-        public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(18);
-        public static final double TOF_ANGULAR_VELOCITY = 2.2;
+        public static final double TOF_LEAKY_COEFFICIENT = 0.5;
+        public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(12);
+        public static final double TOF_ANGULAR_VELOCITY = 1.2;
         public static final double TOF_DISTANCE_TOLERANCE_METERS = 0.024;
-        public static final double TOF_DISTANCE_ELAPSED_SECONDS = 0.2;
+        public static final double TOF_DISTANCE_ELAPSED_SECONDS = 0.1;
         // Auto leveling system
         public static final double AUTO_LEVEL_K_P = 2.4;
         public static final double AUTO_LEVEL_K_I = 0.0;

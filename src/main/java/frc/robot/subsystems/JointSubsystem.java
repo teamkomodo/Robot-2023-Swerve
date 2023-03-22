@@ -86,7 +86,7 @@ public class JointSubsystem extends SubsystemBase{
 
     public void teleopInit() {
         holdPositionCommand();
-        zeroed = true;
+        zeroed = false;
     }
 
     public void checkLimitSwitch() {

@@ -8,7 +8,7 @@ import static frc.robot.Constants.*;
 
 public class LEDStripSubsystem extends SubsystemBase {
 
-    public static final double IDLE_PATTERN = 0.37; //Sparkle, Color 1 on Color 2
+    public static final double IDLE_PATTERN = 0.43; //Sparkle, Color 1 on Color 2
     public static final double CONE_SIGNAL_PATTERN = 0.65; //Solid Color: Orange
     public static final double CUBE_SIGNAL_PATTERN = 0.91; //Solid Color: Violet
 

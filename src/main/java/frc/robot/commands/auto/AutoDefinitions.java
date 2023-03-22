@@ -28,13 +28,14 @@ public class AutoDefinitions {
         }
 
         public SequentialCommandGroup generateCommand(RobotContainer container) {
-            ArrayList<Command> commands = new ArrayList<Command>();
-            Command[] source = factory.get();
-            for (int i = 0; i < source.length; i++) {
-                commands.add(container.ledStripSubsystem.setSolidColor(i));
-                commands.add(source[i]);
-            }
-            return new SequentialCommandGroup(commands.toArray(new Command[commands.size()]));
+            // ArrayList<Command> commands = new ArrayList<Command>();
+            // Command[] source = factory.get();
+            // for (int i = 0; i < source.length; i++) {
+            //     commands.add(container.ledStripSubsystem.setSolidColor(i));
+            //     commands.add(source[i]);
+            // }
+            // return new SequentialCommandGroup(commands.toArray(new Command[commands.size()]));
+            return new SequentialCommandGroup(factory.get());
         }
     }
 
@@ -47,22 +48,51 @@ public class AutoDefinitions {
 
     public AutoMode mode_drive_colorless = new AutoMode(() -> {
         return new Command[] {
+                // Place cube
+                container.elevatorSubsystem.highNodeCommand(() -> true),
+                new SleepCommand(0.15),
+                container.telescopeSubsystem.highNodeCommand(() -> true),
+                new SleepCommand(0.5),
+                container.jointSubsystem.highNodeCommand(() -> true),
+                new SleepCommand(0.75),
+                container.clawSubsystem.openCommand(),
+                new SleepCommand(0.25),
+                container.clawSubsystem.closeCommand(),
+                container.telescopeSubsystem.stowCommand(),
+                container.jointSubsystem.stowCommand(),
+                new SleepCommand(0.4),
+                container.elevatorSubsystem.stowCommand(),
+                // Drive
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                     container.drivetrainSubsystem.zeroGyro();
                     container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
                 }),
-                new ApproximateFieldPose(container.trajectorySequencer, new Pose2d(2, 0, Rotation2d.fromRadians(0))),
-                new FinetuneFieldPose(container.drivetrainSubsystem, new Pose2d(2, 0, Rotation2d.fromRadians(0)), -1),
+                new FinetuneFieldPose(container.drivetrainSubsystem, new Pose2d(-4.136, 0, Rotation2d.fromRadians(0)),
+                        -1),
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = true;
                 }),
-                new InstantCommand(() -> container.drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180)))
         };
     });
 
     public AutoMode mode_balance_colorless = new AutoMode(() -> {
         return new Command[] {
+                // Place cube
+                container.elevatorSubsystem.highNodeCommand(() -> true),
+                new SleepCommand(0.15),
+                container.telescopeSubsystem.highNodeCommand(() -> true),
+                new SleepCommand(0.5),
+                container.jointSubsystem.highNodeCommand(() -> true),
+                new SleepCommand(0.75),
+                container.clawSubsystem.openCommand(),
+                new SleepCommand(0.25),
+                container.clawSubsystem.closeCommand(),
+                container.telescopeSubsystem.stowCommand(),
+                container.jointSubsystem.stowCommand(),
+                new SleepCommand(0.4),
+                container.elevatorSubsystem.stowCommand(),
+                // Charging station
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                     container.drivetrainSubsystem.zeroGyro();
@@ -70,7 +100,7 @@ public class AutoDefinitions {
                 }),
                 new RunUntilNotLevel(container.drivetrainSubsystem,
                         new FinetuneFieldPose(container.drivetrainSubsystem,
-                                new Pose2d(2, 0, Rotation2d.fromRadians(0)), -1)),
+                                new Pose2d(-2, 0, Rotation2d.fromRadians(0)), -1)),
                 new AutoLevelCommand(container.drivetrainSubsystem),
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = true;
@@ -86,9 +116,9 @@ public class AutoDefinitions {
                 // Place cube
                 container.elevatorSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.15),
-                container.telescopeSubsystem.highNodeCommand(),
+                container.telescopeSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.5),
-                container.jointSubsystem.highNodeCommand(),
+                container.jointSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.75),
                 container.clawSubsystem.openCommand(),
                 new SleepCommand(0.25),
@@ -105,6 +135,7 @@ public class AutoDefinitions {
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                 }),
+                // new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_BLUE),
                 new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
                     return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
                             inFront.getRotation());
@@ -123,9 +154,9 @@ public class AutoDefinitions {
                 // Place cube
                 container.elevatorSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.15),
-                container.telescopeSubsystem.highNodeCommand(),
+                container.telescopeSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.5),
-                container.jointSubsystem.highNodeCommand(),
+                container.jointSubsystem.highNodeCommand(() -> true),
                 new SleepCommand(0.75),
                 container.clawSubsystem.openCommand(),
                 new SleepCommand(0.25),
@@ -142,6 +173,7 @@ public class AutoDefinitions {
                 new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                 }),
+                // new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_RED),
                 new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
                     return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
                             inFront.getRotation());
@@ -173,16 +205,11 @@ public class AutoDefinitions {
 
     public void initAutonomous() {
         SmartDashboard.putData("Auto chooser", chooser);
-        chooser.addOption("Charging station (blue)", mode_station_blue);
-        chooser.addOption("Charging station (red)", mode_station_red);
-        // chooser.addOption("Mode \"2-3\" (colorless)",
-        // mode_mobility_balance_colorless);
-        // chooser.addOption("Mode \"1\" (colorless)", mode_1_colorless);
-        // chooser.addOption("Mode \"1-3\" (colorless)", mode_1_3_colorless);
-        // chooser.addOption("Mode \"1-2-3\" (colorless)", mode_1_2_3_colorless);
-        chooser.addOption("Mode \"3\" (colorless)", mode_balance_colorless);
-        chooser.addOption("Mode \"2\" (colorless)", mode_drive_colorless);
-        chooser.addOption("LKSAJDFXHLMKFD", test_mode);
+        chooser.addOption("Cube mobility balance (1,3) (blue)", mode_station_blue);
+        chooser.addOption("Cube mobility balance (1,3) (red)", mode_station_red);
+        chooser.addOption("Cube balance (2) (colorless)", mode_balance_colorless);
+        chooser.addOption("Cube mobility (1,3) (colorless)", mode_drive_colorless);
+        chooser.addOption("Testing mode (DO_NOT_SELECT)", test_mode);
         chooser.setDefaultOption("No autonomous", null);
     }
 }

@@ -10,9 +10,11 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto.AutoLevelCommand;
 import frc.robot.commands.auto.GetToToFDistance;
 import frc.robot.commands.auto.SleepCommand;
+import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
 import frc.robot.commands.auto.AutoDefinitions.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
 import frc.robot.commands.SwerveControllerCommandFactory;
+import frc.robot.commands.auto.AlignToReflectiveTape;
 import frc.robot.commands.auto.AlignToToF;
 import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
@@ -163,7 +165,9 @@ public class RobotContainer {
             elevatorSubsystem.shelfCommand(cubeMode),
             new SleepCommand(1),
             telescopeSubsystem.shelfCommand(cubeMode),
-            jointSubsystem.shelfCommand(cubeMode)
+            jointSubsystem.shelfCommand(cubeMode),
+            new SleepCommand(0.5),
+            clawSubsystem.openCommand()
         ));
 
         // Elevator Commands
@@ -253,6 +257,8 @@ public class RobotContainer {
         blueTriButton.whileTrue(new AlignToGyroSetting(drivetrainSubsystem));
 
         leftJoystickDown.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()));
+
+        yellowButton.whileTrue(new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE));
     }
 
     private Command autoCommand = null;
