@@ -291,6 +291,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         backRightModule.periodic();
 
         odometry.update(this.getGyroYawRaw(), getModuleStates());
+        simGyroYawRadians += odometry.getLast_dTheta();
         if (RobotBase.isSimulation()) {
             if (lastSimFieldPose != null && !field2d.getRobotPose().equals(lastSimFieldPose)) {
                 resetOdometry(field2d.getRobotPose());
