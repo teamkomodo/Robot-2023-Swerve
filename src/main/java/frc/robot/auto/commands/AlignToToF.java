@@ -1,15 +1,15 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class AlignToToF extends CommandBase {
+public class AlignToToF extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final TimeOfFlight sensor;
 
@@ -125,7 +125,7 @@ public class AlignToToF extends CommandBase {
             Rotation2d target = bestRot;
             Rotation2d difference = target.minus(current);
             if (Math.abs(difference.getRadians()) < Math.toRadians(2.5)) {
-                // return true;
+                return true;
             }
         }
         return false;

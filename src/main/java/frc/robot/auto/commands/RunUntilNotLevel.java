@@ -1,13 +1,12 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class RunUntilNotLevel extends CommandBase {
+public class RunUntilNotLevel extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
-    private final Command command;
-    public RunUntilNotLevel(DrivetrainSubsystem drivetrainSubsystem, Command command) {
+    private final AutoCommand command;
+    public RunUntilNotLevel(DrivetrainSubsystem drivetrainSubsystem, AutoCommand command) {
         this.drivetrainSubsystem = drivetrainSubsystem;
         this.command = command;
         addRequirements(drivetrainSubsystem);
@@ -31,6 +30,10 @@ public class RunUntilNotLevel extends CommandBase {
     @Override
     public boolean isFinished() {
         return this.command.isFinished() || endedEarly;
+    }
+    @Override
+    public boolean didSucceed() {
+        return this.command.didSucceed() || endedEarly;
     }
     @Override
     public void end(boolean interrupted) {

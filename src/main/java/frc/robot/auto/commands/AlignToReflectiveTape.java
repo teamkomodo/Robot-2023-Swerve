@@ -1,15 +1,15 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.util.LimelightConnector;
 import frc.robot.util.LimelightConnector.LimelightResult;
 
-public class AlignToReflectiveTape extends CommandBase {
+public class AlignToReflectiveTape extends AutoCommand {
     public static enum TapeLevel {
         LOW_TAPE,
         HIGH_TAPE
@@ -54,5 +54,6 @@ public class AlignToReflectiveTape extends CommandBase {
     public void end(boolean interrupted) {
         this.limelight.setLEDs(false);
         this.limelight.setPipeline(2);
+        this.correctTime.stop();
     }
 }

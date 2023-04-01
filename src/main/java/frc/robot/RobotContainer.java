@@ -7,16 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import frc.robot.commands.auto.AutoLevelCommand;
-import frc.robot.commands.auto.GetToToFDistance;
-import frc.robot.commands.auto.SleepCommand;
-import frc.robot.commands.auto.AlignToReflectiveTape.TapeLevel;
-import frc.robot.commands.auto.AutoDefinitions.AutoMode;
+import frc.robot.auto.commands.AlignToReflectiveTape;
+import frc.robot.auto.commands.AlignToToF;
+import frc.robot.auto.commands.AutoLevelCommand;
+import frc.robot.auto.commands.GetToToFDistance;
+import frc.robot.auto.commands.SleepCommand;
+import frc.robot.auto.commands.AlignToReflectiveTape.TapeLevel;
+import frc.robot.auto.definitions.AutoDefinitions;
+import frc.robot.auto.util.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
 import frc.robot.commands.SwerveControllerCommandFactory;
-import frc.robot.commands.auto.AlignToReflectiveTape;
-import frc.robot.commands.auto.AlignToToF;
-import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
@@ -280,7 +280,7 @@ public class RobotContainer {
         if (mode == null) {
             return null;
         } else {
-            autoCommand = mode.generateCommand(this);
+            autoCommand = mode.generateAutonomousEngine(this);
             return autoCommand;
         }
     }

@@ -1,4 +1,4 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -6,14 +6,14 @@ import java.util.Comparator;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.VisionPositioningSubsystem;
 import frc.robot.util.VisionPipelineConnector;
 import frc.robot.util.VisionPipelineConnector.Target;
 
-public class AlignToGamePiece extends CommandBase {
+public class AlignToGamePiece extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final VisionPipelineConnector detector;
     private final Timer correctTime = new Timer();

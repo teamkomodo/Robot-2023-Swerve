@@ -1,9 +1,10 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class CommandTemplate extends CommandBase {
+public class CommandTemplate extends AutoCommand {
+    @SuppressWarnings("unused")
     private final DrivetrainSubsystem drivetrainSubsystem;
     public CommandTemplate(DrivetrainSubsystem drivetrainSubsystem) {
         this.drivetrainSubsystem = drivetrainSubsystem;

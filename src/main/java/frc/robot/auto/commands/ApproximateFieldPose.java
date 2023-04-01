@@ -1,6 +1,5 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -9,11 +8,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.TrajectorySequencer;
 
-public class ApproximateFieldPose extends CommandBase {
+public class ApproximateFieldPose extends AutoCommand {
     private final TrajectorySequencer seq;
     private Pose2d pose;
     private Pose2d fromPose;
@@ -34,7 +33,6 @@ public class ApproximateFieldPose extends CommandBase {
         addRequirements(seq.getDrivetrainSubsystem());
     }
 
-    private boolean finished = false;
     private double multiplier = 0.0;
 
     @Override
@@ -80,7 +78,7 @@ public class ApproximateFieldPose extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return false;// timer.hasElapsed(1.0 / multiplier);
+        return timer.hasElapsed(1.0 / multiplier);
     }
 
     @Override
