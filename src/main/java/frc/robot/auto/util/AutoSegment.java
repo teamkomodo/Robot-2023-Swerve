@@ -34,17 +34,17 @@ public class AutoSegment {
 
     public AutoSegment onSuccess(AutoSegment segment) {
         this.onSuccess = segment;
-        return this;
+        return segment;
     }
 
     public AutoSegment onFailure(AutoSegment segment) {
         this.onFailure = segment;
-        return this;
+        return segment;
     }
 
     public AutoSegment onSuccessOrFailure(AutoSegment segment) {
         this.onSuccess = segment;
         this.onFailure = segment;
-        return this;
+        return segment;
     }
 }

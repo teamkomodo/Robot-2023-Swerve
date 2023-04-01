@@ -42,6 +42,7 @@ import static frc.robot.Constants.*;
 
 import java.util.function.BooleanSupplier;
 
+@SuppressWarnings("unused")
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
 

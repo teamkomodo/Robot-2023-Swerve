@@ -36,7 +36,8 @@ public class VisionPositioningSubsystem extends SubsystemBase {
                     .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
             poseEstimator = new PhotonPoseEstimator(
                     fieldLayout,
-                    PoseStrategy.AVERAGE_BEST_TARGETS, camera, VisionConstants.rbt2cam);
+                    PoseStrategy.MULTI_TAG_PNP, camera, VisionConstants.rbt2cam);
+            poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
@@ -46,6 +47,10 @@ public class VisionPositioningSubsystem extends SubsystemBase {
     private String lastString = "Not set yet";
 
     private Runnable onVisionData = null;
+
+    public Runnable getOnVisionData(){
+        return onVisionData;
+    }
 
     public void setOnVisionData(Runnable r) {
         onVisionData = r;

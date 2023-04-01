@@ -22,6 +22,8 @@ public class AutoSegments {
     public AutoSegments(RobotContainer container) {
         this.container = container;
     }
+
+    
     
     public AutoTemplate place_cube_high = new AutoTemplate(() -> {
         return new AutoCommand[] {
@@ -80,11 +82,11 @@ public class AutoSegments {
                 AutoCommand.wrap(new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = true;
                 })),
-                new WaitForVisionData(container.vision),
+                new WaitForVisionData(container.vision, 1.5),
                 AutoCommand.wrap(new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                 })),
-                new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_BLUE),
+                new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_BLUE, false),
                 new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
                     return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
                             inFront.getRotation());
@@ -103,11 +105,11 @@ public class AutoSegments {
             AutoCommand.wrap(new InstantCommand(() -> {
                 container.vision.doOdometryUpdate = true;
             })),
-            new WaitForVisionData(container.vision),
+            new WaitForVisionData(container.vision, 1.5),
             AutoCommand.wrap(new InstantCommand(() -> {
                 container.vision.doOdometryUpdate = false;
             })),
-            new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_RED),
+            new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_RED, false),
             new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
                 return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
                         inFront.getRotation());
