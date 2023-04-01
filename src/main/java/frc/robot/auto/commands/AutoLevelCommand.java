@@ -1,16 +1,15 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 
-public class AutoLevelCommand extends CommandBase {
+public class AutoLevelCommand extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
 
     PIDController x_pid = new PIDController(AutoConstants.AUTO_LEVEL_K_P, AutoConstants.AUTO_LEVEL_K_I,
@@ -96,5 +95,10 @@ public class AutoLevelCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         return false;
+    }
+
+    @Override
+    public boolean didSucceed() {
+        return true;
     }
 }

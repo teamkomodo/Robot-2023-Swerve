@@ -1,17 +1,14 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.TrajectorySequencer;
 
-public class FinetuneFieldPose extends CommandBase {
+public class FinetuneFieldPose extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private Pose2d pose;
     private Supplier<Pose2d> supplier = null;
@@ -72,6 +69,7 @@ public class FinetuneFieldPose extends CommandBase {
         speeds = new ChassisSpeeds(clamp(-speeds.vxMetersPerSecond, AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND),
                 clamp(-speeds.vyMetersPerSecond, AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND),
                 clamp(speeds.omegaRadiansPerSecond, AutoConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND));
+        System.out.println(speeds);
         drivetrainSubsystem.setChassisSpeeds(speeds);
     }
 
