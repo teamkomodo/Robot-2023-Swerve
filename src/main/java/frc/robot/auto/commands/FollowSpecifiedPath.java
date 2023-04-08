@@ -3,13 +3,11 @@ package frc.robot.auto.commands;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.auto.util.AutoCommand;
-import frc.robot.auto.util.SequentialAutoCommandGroup;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.DrivetrainSubsystem;
 

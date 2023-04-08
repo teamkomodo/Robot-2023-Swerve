@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.Consumer;
@@ -280,6 +281,16 @@ public class SwerveControllerCommandImpl extends CommandBase {
         m_timer.start();
     }
 
+    private double clamp(double val, double mag) {
+        if (val > mag) {
+            return mag;
+        }
+        if (val < -mag) {
+            return -mag;
+        }
+        return val;
+    }
+
     @Override
     public void execute() {
         if (paused) {
@@ -290,10 +301,13 @@ public class SwerveControllerCommandImpl extends CommandBase {
         Rotation2d desiredRotation = desiredState.poseMeters.getRotation();
         ChassisSpeeds targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState.poseMeters,
                 desiredState.velocityMetersPerSecond, desiredRotation);
-        targetChassisSpeeds.vxMetersPerSecond = -targetChassisSpeeds.vxMetersPerSecond;
-        targetChassisSpeeds.vyMetersPerSecond = -targetChassisSpeeds.vyMetersPerSecond;
+        targetChassisSpeeds.vxMetersPerSecond = clamp(-targetChassisSpeeds.vxMetersPerSecond,
+                AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND);
+        targetChassisSpeeds.vyMetersPerSecond = clamp(-targetChassisSpeeds.vyMetersPerSecond,
+                AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND);
         if (!RobotBase.isSimulation()) {
-            targetChassisSpeeds.omegaRadiansPerSecond = -targetChassisSpeeds.omegaRadiansPerSecond;
+            targetChassisSpeeds.omegaRadiansPerSecond = clamp(-targetChassisSpeeds.omegaRadiansPerSecond,
+                    AutoConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND);
         }
         // System.out.println(desiredState.poseMeters);
         // System.out.println(targetChassisSpeeds);
@@ -311,7 +325,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return m_timer.hasElapsed(m_trajectory.getTotalTimeSeconds());
+        return false;// m_timer.hasElapsed(m_trajectory.getTotalTimeSeconds());
     }
 
     public Timer getTimer() {

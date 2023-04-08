@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import frc.robot.auto.commands.AlignToGamePiece;
 import frc.robot.auto.commands.AlignToReflectiveTape;
 import frc.robot.auto.commands.AlignToToF;
 import frc.robot.auto.commands.AutoLevelCommand;
@@ -257,6 +258,7 @@ public class RobotContainer {
         leftJoystickDown.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()));
 
         yellowButton.whileTrue(new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE));
+        whiteButton.whileTrue(new AlignToGamePiece(drivetrainSubsystem, vision, detector, 0));
     }
 
     private Command autoCommand = null;

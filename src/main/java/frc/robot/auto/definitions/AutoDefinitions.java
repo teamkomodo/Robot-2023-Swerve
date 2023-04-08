@@ -1,5 +1,7 @@
 package frc.robot.auto.definitions;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -51,14 +53,22 @@ public class AutoDefinitions {
     private AutoMode test_mode = new AutoMode(() -> {
         return new AutoSegment(new AutoTemplate(() -> {
             return new AutoCommand[] {
+                    // AutoCommand.wrap(new InstantCommand(() -> {
+                    // container.vision.doOdometryUpdate = false;
+                    // container.drivetrainSubsystem.zeroGyro();
+                    // container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0,
+                    // Rotation2d.fromRadians(0)));
+                    // })),
                     AutoCommand.wrap(new InstantCommand(() -> {
                         container.vision.doOdometryUpdate = true;
+                        container.vision.resetAccumulators();
                     })),
                     new WaitForVisionData(container.vision, 1.5),
                     AutoCommand.wrap(new InstantCommand(() -> {
                         container.vision.doOdometryUpdate = false;
                     })),
-                    FollowSpecifiedPath.generatePathCommand(container.drivetrainSubsystem, container.sccf, false, "testpath")
+                    FollowSpecifiedPath.generatePathCommand(container.drivetrainSubsystem, container.sccf, false,
+                            "testpath")
             };
         }));
     });

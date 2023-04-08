@@ -6,6 +6,8 @@ import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.VisionPositioningSubsystem;
 
 public class WaitForVisionData extends AutoCommand {
+    public static final int NUM_UPDATES = 15;
+
     private final VisionPositioningSubsystem vision;
     private final Timer timer = new Timer();
     private final double timeout;
@@ -43,12 +45,12 @@ public class WaitForVisionData extends AutoCommand {
                 return true;
             }
         }
-        return gotVisionData >= 3 || RobotBase.isSimulation();
+        return gotVisionData >= NUM_UPDATES || RobotBase.isSimulation();
     }
 
     @Override
     public boolean didSucceed() {
-        return gotVisionData >= 3 || RobotBase.isSimulation();
+        return gotVisionData >= NUM_UPDATES || RobotBase.isSimulation();
     }
 
     @Override

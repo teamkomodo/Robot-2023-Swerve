@@ -38,7 +38,7 @@ public class AlignToGyroSetting extends CommandBase {
         double omega = thetaController.calculate(this.drivetrainSubsystem.getGyroYaw().getRadians(),
                 targetRotation.getRadians());
         
-        ChassisSpeeds speeds = new ChassisSpeeds(0, 0, clamp(omega, 1.5));
+        ChassisSpeeds speeds = new ChassisSpeeds(0, 0, clamp(omega, 2.5));
         drivetrainSubsystem.setChassisSpeeds(speeds);
     }
 
