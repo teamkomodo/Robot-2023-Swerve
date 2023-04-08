@@ -1,17 +1,16 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class GetToToFDistance extends CommandBase {
+public class GetToToFDistance extends AutoCommand {
     // public static Command getTotalToFCommand(DrivetrainSubsystem drivetrainSubsystem, TimeOfFlight sensor, double setDistance_meters) {
     //     return new SequentialCommandGroup(
     //         // new AlignToToF(drivetrainSubsystem, sensor),
@@ -35,9 +34,9 @@ public class GetToToFDistance extends CommandBase {
     private final double setDistance;
     private final Timer correctTimer;
 
-    private double getFPGATimestamp() {
-        return RobotController.getFPGATime() / 1000000.0;
-    }
+    // private double getFPGATimestamp() {
+    //     return RobotController.getFPGATime() / 1000000.0;
+    // }
 
     private double range_accumulator;
     private double accumulator;
@@ -87,5 +86,6 @@ public class GetToToFDistance extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         drivetrainSubsystem.stopMotion();
+        correctTimer.stop();
     }
 }

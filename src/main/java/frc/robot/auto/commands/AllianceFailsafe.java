@@ -1,9 +1,10 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.auto.util.AutoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class AllianceFailsafe extends CommandBase {
+public class AllianceFailsafe extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final Alliance alliance;
     public static enum Alliance {
@@ -21,8 +22,16 @@ public class AllianceFailsafe extends CommandBase {
         switch (alliance) {
         case ALLIANCE_BLUE:
             this.isOk = this.drivetrainSubsystem.getPoseMeters().getX() < 8.00;
+            break;
         case ALLIANCE_RED:
             this.isOk = this.drivetrainSubsystem.getPoseMeters().getX() > 8.00;
+            break;
+        }
+        if (!this.isOk) {
+            DriverStation.reportError("Fatal: Failed alliance check. Not running autonomous.", false);
+            System.err.println("Fatal: Failed alliance check. Not running autonomous.");
+        } else {
+            System.out.println("Debug: Passed alliance safety check.");
         }
     }
     @Override

@@ -18,12 +18,17 @@ import frc.robot.commands.positions.LowNodeCommand;
 import frc.robot.commands.positions.MidNodeCommand;
 import frc.robot.commands.positions.ShelfCommand;
 import frc.robot.commands.positions.StowCommand;
+import frc.robot.auto.commands.AlignToReflectiveTape;
+import frc.robot.auto.commands.AlignToToF;
+import frc.robot.auto.commands.AutoLevelCommand;
+import frc.robot.auto.commands.GetToToFDistance;
+import frc.robot.auto.commands.SleepCommand;
+import frc.robot.auto.commands.AlignToReflectiveTape.TapeLevel;
+import frc.robot.auto.definitions.AutoDefinitions;
+import frc.robot.auto.util.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
 import frc.robot.commands.PositionCommands;
 import frc.robot.commands.SwerveControllerCommandFactory;
-import frc.robot.commands.auto.AlignToReflectiveTape;
-import frc.robot.commands.auto.AlignToToF;
-import frc.robot.commands.auto.AutoDefinitions;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.TrajectorySequencer;
@@ -239,7 +244,7 @@ public class RobotContainer {
         if (mode == null) {
             return null;
         } else {
-            autoCommand = mode.generateCommand(this);
+            autoCommand = mode.generateAutonomousEngine(this);
             return autoCommand;
         }
     }

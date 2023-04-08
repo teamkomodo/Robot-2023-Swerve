@@ -1,9 +1,9 @@
-package frc.robot.commands.auto;
+package frc.robot.auto.commands;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.auto.util.AutoCommand;
 
-public class SleepCommand extends CommandBase {
+public class SleepCommand extends AutoCommand {
     private final Timer timer = new Timer();
     private final double seconds;
     public SleepCommand(double seconds) {

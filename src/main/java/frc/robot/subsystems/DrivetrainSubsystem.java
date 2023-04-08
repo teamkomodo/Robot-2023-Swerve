@@ -30,7 +30,6 @@ import com.swervedrivespecialties.swervelib.rev.NeoSteerControllerFactoryBuilder
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -268,7 +267,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
     public Pose2d getPoseMeters() {
         // return odometry.getEstimatedPosition();
-        return odometry.getPoseMeters();
+        Pose2d p = odometry.getPoseMeters();
+        return new Pose2d(p.getTranslation(), p.getRotation().unaryMinus());
     }
     public Pose2d getClockwiseNegativePoseMeters() {
         Pose2d pose = getPoseMeters();
@@ -290,7 +290,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         backLeftModule.periodic();
         backRightModule.periodic();
 
-        odometry.update(this.getGyroYawRaw(), getModuleStates());
+        odometry.update(this.getGyroYawRaw().unaryMinus(), getModuleStates());
+        simGyroYawRadians += odometry.getLast_dTheta();
         if (RobotBase.isSimulation()) {
             if (lastSimFieldPose != null && !field2d.getRobotPose().equals(lastSimFieldPose)) {
                 resetOdometry(field2d.getRobotPose());

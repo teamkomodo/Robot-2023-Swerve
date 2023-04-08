@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * Class for swerve drive odometry. Odometry allows you to track the robot's
@@ -33,6 +34,8 @@ public class SwerveDriveOdometryImpl {
 
     private Rotation2d m_gyroOffset;
     private Rotation2d m_previousAngle;
+
+    private double m_prev_dTheta = 0.0;
 
     /**
      * Constructs a SwerveDriveOdometry object.
@@ -113,16 +116,24 @@ public class SwerveDriveOdometryImpl {
         var angle = gyroAngle.plus(m_gyroOffset);
 
         var chassisState = m_kinematics.toChassisSpeeds(moduleStates);
+        m_prev_dTheta = angle.minus(m_previousAngle).getRadians();
+        if (RobotBase.isSimulation()) {
+            m_prev_dTheta = chassisState.omegaRadiansPerSecond * period;
+        }
         Twist2d twist = new Twist2d(
                 -chassisState.vxMetersPerSecond * period,
                 -chassisState.vyMetersPerSecond * period,
-                angle.minus(m_previousAngle).getRadians());
+                m_prev_dTheta);
         var newPose = m_poseMeters.exp(twist);
 
         m_previousAngle = angle;
         m_poseMeters = newPose;// new Pose2d(newPose.getTranslation(), angle);
 
         return m_poseMeters;
+    }
+
+    public double getLast_dTheta() {
+        return m_prev_dTheta;
     }
 
     /**

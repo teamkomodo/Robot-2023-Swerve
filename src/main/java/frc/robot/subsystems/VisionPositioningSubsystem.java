@@ -12,9 +12,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
@@ -53,8 +51,8 @@ public class VisionPositioningSubsystem extends SubsystemBase {
         onVisionData = r;
     }
 
-    private Pose3d accumulator = new Pose3d();
-    private double accumulator_weight = 0.0;
+    // private Pose3d accumulator = new Pose3d();
+    // private double accumulator_weight = 0.0;
 
     @Override
     public void periodic() {
