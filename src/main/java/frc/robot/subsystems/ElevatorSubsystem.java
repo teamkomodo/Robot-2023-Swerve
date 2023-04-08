@@ -226,4 +226,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setI(i);
         pidController.setD(d);
     }
+
+    public double getMotorPosition() {
+        return encoder.getPosition();
+    }
 }
