@@ -13,6 +13,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
@@ -82,7 +83,8 @@ public class VisionPositioningSubsystem extends SubsystemBase {
                 // accumulator.getRotation().times(1.0 / accumulator_weight));
                 if (pose != null) {
                     Pose2d pose2d = pose.toPose2d();
-                    pose2d = new Pose2d(pose2d.getTranslation(), pose2d.getRotation().unaryMinus());
+                    pose2d = new Pose2d(pose2d.getTranslation(), pose2d.getRotation());
+                    SmartDashboard.putString("Stop", "" + pose2d);
                     if (doOdometryUpdate) {
                         drive.resetOdometry(pose2d);
                         if (onVisionData != null) {

@@ -15,9 +15,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -50,6 +53,8 @@ public class SwerveControllerCommandImpl extends CommandBase {
     private final SwerveDriveKinematics m_kinematics;
     private final HolonomicDriveController m_controller;
     private final Consumer<SwerveModuleState[]> m_outputModuleStates;
+    private final DrivetrainSubsystem m_drivetrainSubsystem;
+    @SuppressWarnings("unused")
     private final Supplier<Rotation2d> m_desiredRotation;
 
     private boolean paused;
@@ -95,6 +100,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
             ProfiledPIDController thetaController,
             Supplier<Rotation2d> desiredRotation,
             Consumer<SwerveModuleState[]> outputModuleStates,
+            DrivetrainSubsystem drivetrainSubsystem,
             Subsystem... requirements) {
         this(
                 trajectory,
@@ -106,6 +112,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
                         requireNonNullParam(thetaController, "thetaController", "SwerveControllerCommand")),
                 desiredRotation,
                 outputModuleStates,
+                drivetrainSubsystem,
                 requirements);
     }
 
@@ -154,6 +161,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
             PIDController yController,
             ProfiledPIDController thetaController,
             Consumer<SwerveModuleState[]> outputModuleStates,
+            DrivetrainSubsystem drivetrainSubsystem,
             Subsystem... requirements) {
         this(
                 trajectory,
@@ -164,6 +172,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
                 thetaController,
                 () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
                 outputModuleStates,
+                drivetrainSubsystem,
                 requirements);
     }
 
@@ -205,6 +214,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
             SwerveDriveKinematics kinematics,
             HolonomicDriveController controller,
             Consumer<SwerveModuleState[]> outputModuleStates,
+            DrivetrainSubsystem drivetrainSubsystem,
             Subsystem... requirements) {
         this(
                 trajectory,
@@ -213,6 +223,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
                 controller,
                 () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
                 outputModuleStates,
+                drivetrainSubsystem,
                 requirements);
     }
 
@@ -249,12 +260,13 @@ public class SwerveControllerCommandImpl extends CommandBase {
             HolonomicDriveController controller,
             Supplier<Rotation2d> desiredRotation,
             Consumer<SwerveModuleState[]> outputModuleStates,
+            DrivetrainSubsystem drivetrainSubsystem,
             Subsystem... requirements) {
         m_trajectory = requireNonNullParam(trajectory, "trajectory", "SwerveControllerCommand");
         m_pose = requireNonNullParam(pose, "pose", "SwerveControllerCommand");
         m_kinematics = requireNonNullParam(kinematics, "kinematics", "SwerveControllerCommand");
         m_controller = requireNonNullParam(controller, "controller", "SwerveControllerCommand");
-
+        m_drivetrainSubsystem = drivetrainSubsystem;
         m_desiredRotation = requireNonNullParam(desiredRotation, "desiredRotation", "SwerveControllerCommand");
 
         m_outputModuleStates = requireNonNullParam(outputModuleStates, "outputModuleStates", "SwerveControllerCommand");
@@ -274,12 +286,22 @@ public class SwerveControllerCommandImpl extends CommandBase {
             return;
         }
         double curTime = m_timer.get();
-        var desiredState = m_trajectory.sample(curTime);
+        State desiredState = m_trajectory.sample(curTime);
+        Rotation2d desiredRotation = desiredState.poseMeters.getRotation();
+        ChassisSpeeds targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState.poseMeters,
+                desiredState.velocityMetersPerSecond, desiredRotation);
+        targetChassisSpeeds.vxMetersPerSecond = -targetChassisSpeeds.vxMetersPerSecond;
+        targetChassisSpeeds.vyMetersPerSecond = -targetChassisSpeeds.vyMetersPerSecond;
+        if (!RobotBase.isSimulation()) {
+            targetChassisSpeeds.omegaRadiansPerSecond = -targetChassisSpeeds.omegaRadiansPerSecond;
+        }
+        // System.out.println(desiredState.poseMeters);
+        // System.out.println(targetChassisSpeeds);
+        m_drivetrainSubsystem.setChassisSpeeds(targetChassisSpeeds);
+        // SwerveModuleState[] targetModuleStates =
+        // m_kinematics.toSwerveModuleStates(targetChassisSpeeds);
 
-        var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.get());
-        var targetModuleStates = m_kinematics.toSwerveModuleStates(targetChassisSpeeds);
-
-        m_outputModuleStates.accept(targetModuleStates);
+        // m_outputModuleStates.accept(targetModuleStates);
     }
 
     @Override

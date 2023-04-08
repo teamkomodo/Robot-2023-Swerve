@@ -19,7 +19,6 @@ import frc.robot.commands.AlignToGyroSetting;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
 import frc.robot.util.LimelightConnector;
 import frc.robot.util.VisionPipelineConnector;
@@ -56,8 +55,6 @@ public class RobotContainer {
     public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
-    public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
-            null);
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
     public final LimelightConnector limelight = new LimelightConnector("limelight");
@@ -80,7 +77,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-
+    
         Trigger aButton = driverXBoxController.a();
         Trigger bButton = driverXBoxController.b();
         Trigger xButton = driverXBoxController.x();

@@ -6,6 +6,11 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public abstract class AutoCommand extends CommandBase {
     public static AutoCommand wrap(Command baseCommand) {
         return new AutoCommand() {
+
+            { // It's... uh... what?
+                this.getRequirements().addAll(baseCommand.getRequirements());
+            }
+
             @Override
             public boolean didSucceed() {
                 return true;

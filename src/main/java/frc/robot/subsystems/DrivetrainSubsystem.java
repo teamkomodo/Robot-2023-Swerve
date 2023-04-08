@@ -142,13 +142,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
         odometry = new SwerveDriveOdometryImpl(kinematics, getGyroYawRaw());
 
         ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.P_THETA_CONTROLLER,
-                AutoConstants.I_THETA_CONTROLLER, 0,
+                AutoConstants.I_THETA_CONTROLLER, AutoConstants.D_THETA_CONTROLLER,
                 AutoConstants.THETA_PID_CONTROLLER_CONSTRAINTS);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         this.driveController = new HolonomicDriveController(
                 new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_X_CONTROLLER, AutoConstants.D_X_CONTROLLER),
-                new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_Y_CONTROLLER, AutoConstants.D_Y_CONTROLLER),
+                new PIDController(AutoConstants.P_Y_CONTROLLER, AutoConstants.I_Y_CONTROLLER, AutoConstants.D_Y_CONTROLLER),
                 thetaController);
     }
 
@@ -276,7 +276,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
-        odometry.resetPosition(pose, getGyroYawRaw());
+        odometry.resetPosition(pose, getGyroYawRaw().unaryMinus());
     }
 
     public void addVisionMeasurement(Pose2d pose) {

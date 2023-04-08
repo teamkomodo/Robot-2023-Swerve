@@ -10,27 +10,25 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.auto.util.AutoCommand;
-import frc.robot.subsystems.TrajectorySequencer;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class ApproximateFieldPose extends AutoCommand {
-    private final TrajectorySequencer seq;
+    private final DrivetrainSubsystem drive;
     private Pose2d pose;
     private Pose2d fromPose;
     private Supplier<Pose2d> supplier = null;
     private Timer timer = new Timer();
 
-    public ApproximateFieldPose(TrajectorySequencer seq, Pose2d pose) {
+    public ApproximateFieldPose(DrivetrainSubsystem drive, Pose2d pose) {
         this.pose = pose;
-        this.seq = seq;
-        addRequirements(seq);
-        addRequirements(seq.getDrivetrainSubsystem());
+        this.drive = drive;
+        addRequirements(drive);
     }
 
-    public ApproximateFieldPose(TrajectorySequencer seq, Supplier<Pose2d> pose) {
-        this.seq = seq;
+    public ApproximateFieldPose(DrivetrainSubsystem drive, Supplier<Pose2d> pose) {
         this.supplier = pose;
-        addRequirements(seq);
-        addRequirements(seq.getDrivetrainSubsystem());
+        this.drive = drive;
+        addRequirements(drive);
     }
 
     private double multiplier = 0.0;
@@ -43,7 +41,7 @@ public class ApproximateFieldPose extends AutoCommand {
         // seq.startNonRelativeTrajectory(List.of(), pose, () -> {
         // this.finished = true;
         // });
-        this.fromPose = seq.getDrivetrainSubsystem().getPoseMeters();
+        this.fromPose = this.drive.getPoseMeters();
         double distance = this.pose.getTranslation().getDistance(this.fromPose.getTranslation());
         double totalTime = distance / AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND;
         totalTime += 0.5; // To account for whatever
@@ -69,11 +67,11 @@ public class ApproximateFieldPose extends AutoCommand {
         Rotation2d targetRotation = this.fromPose.getRotation().interpolate(this.pose.getRotation(), timer.get() * multiplier);
         Pose2d target = new Pose2d(targetTranslation, targetRotation);
         SmartDashboard.putString("Target pose", "" + target);
-        ChassisSpeeds speeds = this.seq.getDrivetrainSubsystem().getDriveController()
-                .calculate(this.seq.getDrivetrainSubsystem().getPoseMeters(), target, 0, target.getRotation());
+        ChassisSpeeds speeds = this.drive.getDriveController()
+                .calculate(this.drive.getPoseMeters(), target, 0, target.getRotation());
         speeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond,
                 clamp(speeds.omegaRadiansPerSecond, AutoConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND));
-        this.seq.getDrivetrainSubsystem().setChassisSpeeds(speeds);
+        this.drive.setChassisSpeeds(speeds);
     }
 
     @Override
@@ -83,6 +81,6 @@ public class ApproximateFieldPose extends AutoCommand {
 
     @Override
     public void end(boolean interrupted) {
-        seq.getDrivetrainSubsystem().stopMotion();
+        this.drive.stopMotion();
     }
 }

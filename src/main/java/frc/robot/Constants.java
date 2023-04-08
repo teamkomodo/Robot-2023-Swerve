@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -135,14 +136,15 @@ public final class Constants {
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 3;
         public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 5;
         public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 3;
-        public static final double P_X_CONTROLLER = 6.5;
+        public static final double P_X_CONTROLLER = RobotBase.isSimulation() ? 20.0 : 1.8;
         public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
-        public static final double I_X_CONTROLLER = 0.45;
+        public static final double I_X_CONTROLLER = RobotBase.isSimulation() ? 0.00 : 0.9;
         public static final double I_Y_CONTROLLER = I_X_CONTROLLER;
-        public static final double D_X_CONTROLLER = 1.0;
+        public static final double D_X_CONTROLLER = RobotBase.isSimulation() ? 0.00 : 0.4;
         public static final double D_Y_CONTROLLER = D_X_CONTROLLER;
-        public static final double P_THETA_CONTROLLER = 5;
-        public static final double I_THETA_CONTROLLER = 1.5;
+        public static final double P_THETA_CONTROLLER = RobotBase.isSimulation() ? 5.00 : 1.0;
+        public static final double I_THETA_CONTROLLER = 0.22;
+        public static final double D_THETA_CONTROLLER = 0.15;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
