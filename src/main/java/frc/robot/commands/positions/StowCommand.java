@@ -1,7 +1,7 @@
 package frc.robot.commands.positions;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.auto.SleepCommand;
+import frc.robot.auto.commands.SleepCommand;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
