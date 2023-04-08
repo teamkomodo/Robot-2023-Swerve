@@ -16,6 +16,7 @@ import frc.robot.auto.commands.AlignToReflectiveTape.TapeLevel;
 import frc.robot.auto.definitions.AutoDefinitions;
 import frc.robot.auto.util.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
+import frc.robot.commands.IntakePieceCommand;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -34,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.JointSubsystem;
 import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
@@ -52,6 +54,7 @@ public class RobotContainer {
     public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem(mainTab);
     public final JointSubsystem jointSubsystem = new JointSubsystem(mainTab);
     public final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
@@ -206,8 +209,10 @@ public class RobotContainer {
 
         // Claw Commands
 
-        rightBumper.whileTrue(clawSubsystem.openCommand());
-        leftBumper.whileTrue(clawSubsystem.closeCommand());
+        //rightBumper.whileTrue(clawSubsystem.openCommand());
+        //leftBumper.whileTrue(clawSubsystem.closeCommand());
+
+        rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem));
 
         // Joint Commands
 

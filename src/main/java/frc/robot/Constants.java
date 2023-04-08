@@ -30,6 +30,10 @@ public final class Constants {
     public static final int BUTTONS_PORT = 2; // A-PAC Player 1
     public static final int SELECTOR_PORT = 3; // A-PAC Player 2
 
+//Intake
+    public static final int INTAKE_MOTOR_ID = 34;
+    public static final int INTAKE_THRESHOLD_VELOCITY = 1000;
+
 //Telescope
     public static final int TELESCOPE_MOTOR_ID = 31;
     public static final int TELESCOPE_ZERO_SWITCH_CHANNEL = 0;
