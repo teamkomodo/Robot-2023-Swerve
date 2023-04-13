@@ -120,11 +120,16 @@ public class RobotContainer {
         Trigger blueButton = new JoystickButton(driverButtons, 7);
         Trigger blueTriButton = new JoystickButton(driverButtons, 6);
 
-        // Position Commands
-
         BooleanSupplier cubeMode = () -> toggleSwitch1.getAsBoolean();
-        toggleSwitch1.onTrue(ledStripSubsystem.cubeSignalCommand());
-        toggleSwitch1.onFalse(ledStripSubsystem.coneSignalCommand());
+        ledStripSubsystem.setDefaultCommand(Commands.run(() -> {
+            if(toggleSwitch1.getAsBoolean()) {
+                ledStripSubsystem.setPattern(LEDStripSubsystem.CUBE_SIGNAL_PATTERN);
+            }else {
+                ledStripSubsystem.setPattern(LEDStripSubsystem.CONE_SIGNAL_PATTERN);
+            }
+        }, ledStripSubsystem));
+
+        // Position Commands
 
         aButton.onTrue(new SequentialCommandGroup(
             telescopeSubsystem.stowCommand(),
@@ -212,7 +217,18 @@ public class RobotContainer {
         //rightBumper.whileTrue(clawSubsystem.openCommand());
         //leftBumper.whileTrue(clawSubsystem.closeCommand());
 
-        rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem));
+        // Intake Commands
+
+        // Intake
+        rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem, ledStripSubsystem));
+
+        // Eject
+        leftBumper.whileTrue(Commands.runEnd(() -> {
+            ledStripSubsystem.setPattern(-0.01); // Color 1 Larson Scanner
+            intakeSubsystem.setMotorDutyCycle(0.2);
+        }, () -> {
+            intakeSubsystem.setMotorDutyCycle(0);
+        }, intakeSubsystem, ledStripSubsystem));
 
         // Joint Commands
 
