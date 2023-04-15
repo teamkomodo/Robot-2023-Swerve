@@ -5,9 +5,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
+import frc.robot.auto.commands.AlignToGamePiece;
 import frc.robot.auto.commands.AllianceFailsafe;
 import frc.robot.auto.commands.AutoLevelCommand;
 import frc.robot.auto.commands.FinetuneFieldPose;
+import frc.robot.auto.commands.PickUpGamePiece;
 import frc.robot.auto.commands.RunUntilNotLevel;
 import frc.robot.auto.commands.SleepCommand;
 import frc.robot.auto.commands.WaitForVisionData;
@@ -118,6 +120,13 @@ public class AutoSegments {
             new RunUntilNotLevel(container.drivetrainSubsystem,
                     new FinetuneFieldPose(container.drivetrainSubsystem, station, 0.15)),
             new AutoLevelCommand(container.drivetrainSubsystem)
+        };
+    });
+
+    public AutoTemplate pickup_piece = new AutoTemplate(() -> {
+        return new AutoCommand[] {
+            new AlignToGamePiece(container.drivetrainSubsystem, container.vision, container.detector, 0),
+            new PickUpGamePiece(container.drivetrainSubsystem, container.intakeSubsystem, container.jointSubsystem)
         };
     });
 }

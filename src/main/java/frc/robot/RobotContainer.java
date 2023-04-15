@@ -18,6 +18,7 @@ import frc.robot.auto.commands.AlignToReflectiveTape;
 import frc.robot.auto.commands.AlignToToF;
 import frc.robot.auto.commands.AutoLevelCommand;
 import frc.robot.auto.commands.GetToToFDistance;
+import frc.robot.auto.commands.PickUpGamePiece;
 import frc.robot.auto.commands.SleepCommand;
 import frc.robot.auto.commands.AlignToReflectiveTape.TapeLevel;
 import frc.robot.auto.definitions.AutoDefinitions;
@@ -88,7 +89,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-    
+
         Trigger aButton = driverXBoxController.a();
         Trigger bButton = driverXBoxController.b();
         Trigger xButton = driverXBoxController.x();
@@ -129,22 +130,23 @@ public class RobotContainer {
         BooleanSupplier cubeMode = () -> toggleSwitch1.getAsBoolean();
 
         ledStripSubsystem.setDefaultCommand(Commands.run(() -> {
-            if(toggleSwitch1.getAsBoolean()) {
+            if (toggleSwitch1.getAsBoolean()) {
                 ledStripSubsystem.setPattern(LEDStripSubsystem.CUBE_SIGNAL_PATTERN);
-            }else {
+            } else {
                 ledStripSubsystem.setPattern(LEDStripSubsystem.CONE_SIGNAL_PATTERN);
             }
         }, ledStripSubsystem));
-        
+
         toggleSwitch1.onTrue(ledStripSubsystem.cubeSignalCommand()).onFalse(ledStripSubsystem.coneSignalCommand());
 
         aButton.onTrue(new StowCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem));
         bButton.onTrue(new LowNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
         xButton.onTrue(new MidNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
         yButton.onTrue(new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
-        startButton.onTrue(new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem, cubeMode));
+        startButton.onTrue(
+                new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem, cubeMode));
         rightJoystickDown.onTrue(new GroundCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
-        
+
         // Elevator Commands
         rightJoystickY.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getRightY()),
@@ -154,7 +156,8 @@ public class RobotContainer {
         toggleSwitch2.onTrue(elevatorSubsystem.disableLimitsCommand()).onFalse(elevatorSubsystem.enableLimitsCommand());
 
         // Slow mode toggle
-        toggleSwitch3.onTrue(elevatorSubsystem.enableSlowModeCommand()).onFalse(elevatorSubsystem.disableSlowModeCommand());
+        toggleSwitch3.onTrue(elevatorSubsystem.enableSlowModeCommand())
+                .onFalse(elevatorSubsystem.disableSlowModeCommand());
 
         // Drivetrain Commands
         // Drive command
@@ -171,15 +174,16 @@ public class RobotContainer {
                         drivetrainSubsystem));
 
         // Slow Mode
-        blueButton.onTrue(drivetrainSubsystem.runDisableSlowModeCommand()).onFalse(drivetrainSubsystem.runEnableSlowModeCommand());
+        blueButton.onTrue(drivetrainSubsystem.runDisableSlowModeCommand())
+                .onFalse(drivetrainSubsystem.runEnableSlowModeCommand());
 
-        //Zero Gyro
+        // Zero Gyro
         leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
 
         // Claw Commands
 
-        //rightBumper.whileTrue(clawSubsystem.openCommand());
-        //leftBumper.whileTrue(clawSubsystem.closeCommand());
+        // rightBumper.whileTrue(clawSubsystem.openCommand());
+        // leftBumper.whileTrue(clawSubsystem.closeCommand());
 
         // Intake Commands
 
@@ -197,7 +201,8 @@ public class RobotContainer {
         // Joint Commands
 
         jointSubsystem.setDefaultCommand(Commands.run(() -> {
-            if(elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
+            if (elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD
+                    && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
                 jointSubsystem.setPosition(JOINT_DANGER_POSITION);
             }
         }, jointSubsystem));
@@ -231,14 +236,17 @@ public class RobotContainer {
         toggleSwitch2.onTrue(jointSubsystem.disableLimitsCommand()).onFalse(jointSubsystem.enableLimitsCommand());
 
         // Slow mode toggle
-        toggleSwitch3.onTrue(telescopeSubsystem.enableSlowModeCommand()).onFalse(telescopeSubsystem.disableSlowModeCommand());
+        toggleSwitch3.onTrue(telescopeSubsystem.enableSlowModeCommand())
+                .onFalse(telescopeSubsystem.disableSlowModeCommand());
 
         // Auto Commands
-        backButton.and(cubeMode).whileTrue(new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), TOF_DISTANCE_METERS_CUBE).andThen(
-                clawSubsystem.closeCommand()));
+        backButton.and(cubeMode).whileTrue(
+                new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), TOF_DISTANCE_METERS_CUBE).andThen(
+                        clawSubsystem.closeCommand()));
 
-        backButton.and(() -> !cubeMode.getAsBoolean()).whileTrue(new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), TOF_DISTANCE_METERS_CONE).andThen(
-            clawSubsystem.closeCommand()));
+        backButton.and(() -> !cubeMode.getAsBoolean()).whileTrue(
+                new GetToToFDistance(drivetrainSubsystem, clawSubsystem.getTOF(), TOF_DISTANCE_METERS_CONE).andThen(
+                        clawSubsystem.closeCommand()));
 
         rightDriverJoystickButton.whileTrue(new AutoLevelCommand(drivetrainSubsystem));
         blueTriButton.whileTrue(new AlignToGyroSetting(drivetrainSubsystem));
@@ -246,7 +254,8 @@ public class RobotContainer {
         leftJoystickDown.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()));
 
         yellowButton.whileTrue(new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE));
-        whiteButton.whileTrue(new AlignToGamePiece(drivetrainSubsystem, vision, detector, 0));
+        whiteButton.whileTrue(new SequentialCommandGroup(new AlignToGamePiece(drivetrainSubsystem, vision, detector, 0),
+                new PickUpGamePiece(drivetrainSubsystem, intakeSubsystem, jointSubsystem)));
     }
 
     private Command autoCommand = null;
