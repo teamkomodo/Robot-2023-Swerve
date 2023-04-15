@@ -78,7 +78,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         ShuffleboardLayout controlList = shuffleboardTab.getLayout("Control", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
         controlList.addBoolean("Limit Switch", () -> !zeroLimitSwitch.get());
         controlList.addBoolean("Zeroed", () -> (zeroed));
-        controlList.addBoolean("At Zero", () -> (atMinLimit));
+        controlList.addBoolean("At Zero", () -> (atLimitSwitch));
+        controlList.addBoolean("At Min", () -> (atMinLimit));
         controlList.addBoolean("At Max", () -> (atMaxLimit));
         controlList.addDouble("Commanded Position", () -> (commandedPosition));
 
@@ -102,7 +103,7 @@ public class ElevatorSubsystem extends SubsystemBase{
             //stop motor and reset encoder position on rising edge
             atLimitSwitch = true;
             encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kPosition);
+            pidController.setReference(0, ControlType.kDutyCycle);
         }
         
     }
@@ -117,7 +118,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMinLimit) {
             //stop motor on rising edge
             atMinLimit = true;
-            pidController.setReference(0, ControlType.kPosition);
+            pidController.setReference(ELEVATOR_MIN_POSITION, ControlType.kPosition);
         }
     }
 
