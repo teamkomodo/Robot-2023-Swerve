@@ -35,6 +35,13 @@ public class ElevatorSubsystem extends SubsystemBase{
     private double i = 1.0e-6;
     private double d = 0.7;
 
+    private double SmartMotionMaxVel = 2000;
+    private double SmartMotionMaxAccl = 1000;
+    private double SmartMotionMinVel = 0;
+    private double SmartMotionAllowedClosedLoopError = 1;
+
+    private ControlType commadingControlType = ControlType.kSmartMotion;
+
     private boolean atLimitSwitch = false;
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
@@ -65,7 +72,11 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
+        pidController.setReference(encoder.getPosition(), commadingControlType);
+        pidController.setSmartMotionMaxVelocity(SmartMotionMaxVel,0);
+        pidController.setSmartMotionMaxAccel(SmartMotionMaxAccl, 0);
+        pidController.setSmartMotionMinOutputVelocity(SmartMotionMinVel,0);
+        pidController.setSmartMotionAllowedClosedLoopError(SmartMotionAllowedClosedLoopError, 0);
 
         shuffleboardTab = Shuffleboard.getTab("Elevator");
         
@@ -87,7 +98,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
+        pidController.setReference(encoder.getPosition(), commadingControlType);
         // zeroed = false;
     }
 
@@ -103,7 +114,7 @@ public class ElevatorSubsystem extends SubsystemBase{
             //stop motor and reset encoder position on rising edge
             atLimitSwitch = true;
             encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kDutyCycle);
+            pidController.setReference(0, commadingControlType);
         }
         
     }
@@ -118,7 +129,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMinLimit) {
             //stop motor on rising edge
             atMinLimit = true;
-            pidController.setReference(ELEVATOR_MIN_POSITION, ControlType.kPosition);
+            pidController.setReference(0, commadingControlType);
         }
     }
 
@@ -132,7 +143,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
-            pidController.setReference(ELEVATOR_MAX_POSITION, ControlType.kPosition);
+            pidController.setReference(ELEVATOR_MAX_POSITION, commadingControlType);
         }
     }
 
@@ -172,7 +183,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!zeroed && position > encoder.getPosition())
             return;
 
-        pidController.setReference(position, ControlType.kPosition);
+        pidController.setReference(position, commadingControlType);
         commandedPosition = position;
     }
 
