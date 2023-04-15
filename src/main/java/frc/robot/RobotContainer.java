@@ -220,17 +220,23 @@ public class RobotContainer {
         // Intake Commands
 
         // Intake
-        rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem, ledStripSubsystem));
+        rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem, jointSubsystem, ledStripSubsystem));
 
         // Eject
         leftBumper.whileTrue(Commands.runEnd(() -> {
             ledStripSubsystem.setPattern(-0.01); // Color 1 Larson Scanner
-            intakeSubsystem.setMotorDutyCycle(0.2);
+            intakeSubsystem.setMotorDutyCycle(1.0);
         }, () -> {
             intakeSubsystem.setMotorDutyCycle(0);
         }, intakeSubsystem, ledStripSubsystem));
 
         // Joint Commands
+
+        jointSubsystem.setDefaultCommand(Commands.run(() -> {
+            if(elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
+                jointSubsystem.setPosition(JOINT_DANGER_POSITION);
+            }
+        }, jointSubsystem));
 
         // Joint Up
         rightTrigger.whileTrue(Commands.run(

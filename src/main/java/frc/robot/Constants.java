@@ -32,7 +32,8 @@ public final class Constants {
 
 //Intake
     public static final int INTAKE_MOTOR_ID = 34;
-    public static final int INTAKE_THRESHOLD_VELOCITY = 1000;
+    public static final int INTAKE_THRESHOLD_CURRENT = 20; // Amps
+    public static final int DISTANCE_SENSOR_PORT = 3;
 
 //Telescope
     public static final int TELESCOPE_MOTOR_ID = 31;
@@ -49,7 +50,7 @@ public final class Constants {
     public static final double TELESCOPE_CONE_MID_POSITION = 52.55;
     public static final double TELESCOPE_CUBE_MID_POSITION = 52.55;
     public static final double TELESCOPE_CONE_HIGH_POSITION = 99;
-    public static final double TELESCOPE_CUBE_HIGH_POSITION = 99.8;
+    public static final double TELESCOPE_CUBE_HIGH_POSITION = 66.88;
     public static final double TELESCOPE_CONE_SHELF_POSITION = 0;
     public static final double TELESCOPE_CUBE_SHELF_POSITION = 0;
 
@@ -68,10 +69,11 @@ public final class Constants {
     public static final double ELEVATOR_SLOW_MODE_MULTIPLIER = 0.5;
 
     // Position in rotations of the motor shaft before gearbox
+    public static final double ELEVATOR_MIN_POSITION = 1;
     public static final double ELEVATOR_MAX_POSITION = 38.2; // Code stop
-    public static final double ELEVATOR_STOW_POSITION = 0;
-    public static final double ELEVATOR_CONE_GROUND_POSITION = 0;
-    public static final double ELEVATOR_CUBE_GROUND_POSITION = 0;
+    public static final double ELEVATOR_STOW_POSITION = 1;
+    public static final double ELEVATOR_CONE_GROUND_POSITION = 1;
+    public static final double ELEVATOR_CUBE_GROUND_POSITION = 1;
     public static final double ELEVATOR_CONE_LOW_POSITION = 12;
     public static final double ELEVATOR_CUBE_LOW_POSITION = 2.4;
     public static final double ELEVATOR_CONE_MID_POSITION = 31.89;
@@ -80,6 +82,7 @@ public final class Constants {
     public static final double ELEVATOR_CUBE_HIGH_POSITION = 36.1;
     public static final double ELEVATOR_CONE_SHELF_POSITION = 38.2;
     public static final double ELEVATOR_CUBE_SHELF_POSITION = 31.8;
+    public static final double ELEVATOR_JOINT_DANGER_THRESHOLD = 15; // Position when joint will avoid limelight mount
 
     public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         ELEVATOR_STOW_POSITION,
@@ -105,17 +108,19 @@ public final class Constants {
     public static final double JOINT_MIN_POSITION = 5; // Code stop
     public static final double JOINT_MAX_POSITION = 60; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
+    public static final double JOINT_DANGER_POSITION = 15; // Min position where joint doesn't hit limelight mount
 
-    public static final double JOINT_CONE_GROUND_POSITION = 45.2;
-    public static final double JOINT_CUBE_GROUND_POSITION = 50.5;
+    public static final double JOINT_CONE_GROUND_POSITION = 36;
+    public static final double JOINT_CUBE_GROUND_POSITION = 35.5;
     public static final double JOINT_CONE_LOW_POSITION = 56;
     public static final double JOINT_CUBE_LOW_POSITION = 43.0;
     public static final double JOINT_CONE_MID_POSITION = 42.12;
     public static final double JOINT_CUBE_MID_POSITION = 42.2;
     public static final double JOINT_CONE_HIGH_POSITION = 30.12;
     public static final double JOINT_CUBE_HIGH_POSITION = 42.6;
-    public static final double JOINT_CONE_SHELF_POSITION = 49.8;
-    public static final double JOINT_CUBE_SHELF_POSITION = 42.5;
+    public static final double JOINT_CONE_SHELF_POSITION = 36;
+    public static final double JOINT_CUBE_SHELF_POSITION = 35.5;
+    public static final double JOINT_CLAMP_POSITION = 58.0;
 
     public static final double TOF_DISTANCE_METERS_CONE = 0.195;
     public static final double TOF_DISTANCE_METERS_CUBE = 0.120;

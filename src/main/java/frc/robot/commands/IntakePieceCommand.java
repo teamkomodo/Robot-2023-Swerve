@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.JointSubsystem;
 import frc.robot.subsystems.LEDStripSubsystem;
 
 import static frc.robot.Constants.*;
@@ -9,41 +11,50 @@ import static frc.robot.Constants.*;
 public class IntakePieceCommand extends CommandBase{
 
     private final IntakeSubsystem intakeSubsystem;
+    private final JointSubsystem jointSubsystem;
     private final LEDStripSubsystem ledStripSubsystem;
 
-    private boolean atSpeed = false;
+    private boolean holdingPiece;
+    private long startTime;
 
-    private boolean finished = false;
-
-    public IntakePieceCommand(IntakeSubsystem intakeSubsystem, LEDStripSubsystem ledStripSubsystem) {
+    public IntakePieceCommand(IntakeSubsystem intakeSubsystem, JointSubsystem jointSubsystem, LEDStripSubsystem ledStripSubsystem) {
         this.intakeSubsystem = intakeSubsystem;
+        this.jointSubsystem = jointSubsystem;
         this.ledStripSubsystem = ledStripSubsystem;
 
-        addRequirements(intakeSubsystem, ledStripSubsystem);
+        addRequirements(intakeSubsystem, jointSubsystem, ledStripSubsystem);
     }
 
     @Override
     public void initialize() {
-        atSpeed = false;
+        holdingPiece = false;
+        startTime = RobotController.getFPGATime();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        if(!holdingPiece)
+            intakeSubsystem.setMotorDutyCycle(0);
     }
 
     @Override
     public void execute() {
-        if(finished) {
+        if(holdingPiece) {
             ledStripSubsystem.setPattern(0.75); // Solid Color Dark Green
             return;
         }
 
         ledStripSubsystem.setPattern(0.19); // Color 2 Larson Scanner
-        intakeSubsystem.setMotorDutyCycle(-0.2);
-        
-        if(Math.abs(intakeSubsystem.getEncoder().getVelocity()) > INTAKE_THRESHOLD_VELOCITY) {
-            atSpeed = true;
+        intakeSubsystem.setMotorVelocity(-4000);
+
+        if(intakeSubsystem.pieceDetected()) {
+            jointSubsystem.setPosition(JOINT_CLAMP_POSITION);
         }
 
-        if(Math.abs(intakeSubsystem.getEncoder().getVelocity()) < INTAKE_THRESHOLD_VELOCITY && atSpeed) {
-            intakeSubsystem.setMotorDutyCycle(0);
-            finished = true;
+        if(Math.abs(intakeSubsystem.getSmoothCurrent()) > INTAKE_THRESHOLD_CURRENT && RobotController.getFPGATime() - startTime > 500000) {
+            intakeSubsystem.setMotorDutyCycle(-0.08);
+            jointSubsystem.setPosition(JOINT_STOW_POSITION);
+            holdingPiece = true;
         }
     }
     
