@@ -31,7 +31,7 @@ public class GroundCommand extends DynamicCommand{
 
     @Override
     protected Command getCommand() {
-        if(elevatorSubsystem.getMotorPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_GROUND_POSITION: ELEVATOR_CONE_GROUND_POSITION)) {
+        if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_GROUND_POSITION: ELEVATOR_CONE_GROUND_POSITION)) {
             // Going Up
             return new SequentialCommandGroup(
                 elevatorSubsystem.groundCommand(cubeMode),

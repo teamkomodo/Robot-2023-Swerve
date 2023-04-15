@@ -22,6 +22,7 @@ import frc.robot.auto.commands.AlignToReflectiveTape.TapeLevel;
 import frc.robot.auto.definitions.AutoDefinitions;
 import frc.robot.auto.util.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
+import frc.robot.commands.IntakePieceCommand;
 import frc.robot.commands.PositionCommands;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.ClawSubsystem;
@@ -41,6 +42,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.JointSubsystem;
 import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
@@ -59,6 +61,7 @@ public class RobotContainer {
     public final TelescopeSubsystem telescopeSubsystem = new TelescopeSubsystem(mainTab);
     public final JointSubsystem jointSubsystem = new JointSubsystem(mainTab);
     public final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
@@ -124,9 +127,16 @@ public class RobotContainer {
         Trigger blueButton = new JoystickButton(driverButtons, 7);
         Trigger blueTriButton = new JoystickButton(driverButtons, 6);
 
-        // Position Commands
-
         BooleanSupplier cubeMode = () -> toggleSwitch1.getAsBoolean();
+
+        ledStripSubsystem.setDefaultCommand(Commands.run(() -> {
+            if(toggleSwitch1.getAsBoolean()) {
+                ledStripSubsystem.setPattern(LEDStripSubsystem.CUBE_SIGNAL_PATTERN);
+            }else {
+                ledStripSubsystem.setPattern(LEDStripSubsystem.CONE_SIGNAL_PATTERN);
+            }
+        }, ledStripSubsystem));
+        
         toggleSwitch1.onTrue(ledStripSubsystem.cubeSignalCommand()).onFalse(ledStripSubsystem.coneSignalCommand());
 
         aButton.onTrue(new StowCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem));
@@ -135,7 +145,7 @@ public class RobotContainer {
         yButton.onTrue(new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
         startButton.onTrue(new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem, cubeMode));
         rightJoystickDown.onTrue(new GroundCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
-
+        
         // Elevator Commands
         rightJoystickY.whileTrue(Commands.run(
                 () -> elevatorSubsystem.setMotorPercent(-driverXBoxController.getRightY()),
@@ -169,10 +179,29 @@ public class RobotContainer {
 
         // Claw Commands
 
-        rightBumper.whileTrue(clawSubsystem.openCommand());
-        leftBumper.whileTrue(clawSubsystem.closeCommand());
+        //rightBumper.whileTrue(clawSubsystem.openCommand());
+        //leftBumper.whileTrue(clawSubsystem.closeCommand());
+
+        // Intake Commands
+
+        // Intake
+        rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem, jointSubsystem, ledStripSubsystem));
+
+        // Eject
+        leftBumper.whileTrue(Commands.runEnd(() -> {
+            ledStripSubsystem.setPattern(-0.01); // Color 1 Larson Scanner
+            intakeSubsystem.setMotorDutyCycle(1.0);
+        }, () -> {
+            intakeSubsystem.setMotorDutyCycle(0);
+        }, intakeSubsystem, ledStripSubsystem));
 
         // Joint Commands
+
+        jointSubsystem.setDefaultCommand(Commands.run(() -> {
+            if(elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
+                jointSubsystem.setPosition(JOINT_DANGER_POSITION);
+            }
+        }, jointSubsystem));
 
         // Joint Up
         rightTrigger.whileTrue(Commands.run(
