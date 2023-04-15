@@ -35,7 +35,7 @@ public class IntakeSubsystem extends SubsystemBase{
         motor.restoreFactoryDefaults();
         motor.setInverted(false);
         motor.setSmartCurrentLimit(30);
-        //motor.setSmartCurrentLimit(3, 30);
+        //motor.setSmartCurrentLimit(20, 30);
         
         encoder = motor.getEncoder();
         encoder.setPosition(0);

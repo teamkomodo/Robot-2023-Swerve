@@ -13,9 +13,9 @@ public class StowCommand extends SequentialCommandGroup{
         addCommands(
             telescopeSubsystem.stowCommand(),
             jointSubsystem.stowCommand(),
-            clawSubsystem.closeCommand(),
             new SleepCommand(0.3),
-            elevatorSubsystem.stowCommand()
+            elevatorSubsystem.stowCommand(),
+            new SleepCommand(0.2)
         );
     }
 }

@@ -45,13 +45,13 @@ public final class Constants {
     public static final double TELESCOPE_MAX_POSITION = 100; // Code stop
     public static final double TELESCOPE_STOW_POSITION = 0;
     public static final double TELESCOPE_CONE_GROUND_POSITION = 0;
-    public static final double TELESCOPE_CUBE_GROUND_POSITION = 0;
+    public static final double TELESCOPE_CUBE_GROUND_POSITION = TELESCOPE_STOW_POSITION;
     public static final double TELESCOPE_CONE_LOW_POSITION = 16;
     public static final double TELESCOPE_CUBE_LOW_POSITION = 7.1;
-    public static final double TELESCOPE_CONE_MID_POSITION = 52.55;
-    public static final double TELESCOPE_CUBE_MID_POSITION = 52.55;
-    public static final double TELESCOPE_CONE_HIGH_POSITION = 99;
-    public static final double TELESCOPE_CUBE_HIGH_POSITION = 66.88;
+    public static final double TELESCOPE_CONE_MID_POSITION = 27.07;
+    public static final double TELESCOPE_CUBE_MID_POSITION = 21.45;
+    public static final double TELESCOPE_CONE_HIGH_POSITION = 85.29;
+    public static final double TELESCOPE_CUBE_HIGH_POSITION = 76.19;
     public static final double TELESCOPE_CONE_SHELF_POSITION = 0;
     public static final double TELESCOPE_CUBE_SHELF_POSITION = 0;
 
@@ -71,19 +71,20 @@ public final class Constants {
 
     // Position in rotations of the motor shaft before gearbox
     public static final double ELEVATOR_MIN_POSITION = 1;
-    public static final double ELEVATOR_MAX_POSITION = 38.2; // Code stop
-    public static final double ELEVATOR_STOW_POSITION = 1;
+    public static final double ELEVATOR_MAX_POSITION = 36; // Code stop
+    public static final double ELEVATOR_STOW_POSITION = ELEVATOR_MIN_POSITION;
     public static final double ELEVATOR_CONE_GROUND_POSITION = 1;
-    public static final double ELEVATOR_CUBE_GROUND_POSITION = 1;
+    public static final double ELEVATOR_CUBE_GROUND_POSITION = ELEVATOR_STOW_POSITION;
     public static final double ELEVATOR_CONE_LOW_POSITION = 12;
     public static final double ELEVATOR_CUBE_LOW_POSITION = 2.4;
-    public static final double ELEVATOR_CONE_MID_POSITION = 31.89;
-    public static final double ELEVATOR_CUBE_MID_POSITION = 23.8;
-    public static final double ELEVATOR_CONE_HIGH_POSITION = 38.2;
-    public static final double ELEVATOR_CUBE_HIGH_POSITION = 36.1;
-    public static final double ELEVATOR_CONE_SHELF_POSITION = 38.2;
+    public static final double ELEVATOR_CONE_MID_POSITION = 24.75;
+    public static final double ELEVATOR_CUBE_MID_POSITION = 15.36;
+    public static final double ELEVATOR_CONE_HIGH_POSITION = ELEVATOR_MAX_POSITION;
+    public static final double ELEVATOR_CUBE_HIGH_POSITION = ELEVATOR_MAX_POSITION;
+    public static final double ELEVATOR_CONE_SHELF_POSITION = ELEVATOR_MAX_POSITION;
     public static final double ELEVATOR_CUBE_SHELF_POSITION = 31.8;
     public static final double ELEVATOR_JOINT_DANGER_THRESHOLD = 15; // Position when joint will avoid limelight mount
+    public static final double ELEVATOR_BUFFER_DISTANCE = 4;
 
     public static final double[] ELEVATOR_POSITIONS_ORDERED = { // Order in array corresponds to selector position
         ELEVATOR_STOW_POSITION,
@@ -107,20 +108,20 @@ public final class Constants {
 
     // Position in rotations of the motor shaft before gearbox
     public static final double JOINT_MIN_POSITION = 5; // Code stop
-    public static final double JOINT_MAX_POSITION = 60; // Code stop
+    public static final double JOINT_MAX_POSITION = 50; // Code stop
     public static final double JOINT_STOW_POSITION = 5;
     public static final double JOINT_DANGER_POSITION = 15; // Min position where joint doesn't hit limelight mount
 
-    public static final double JOINT_CONE_GROUND_POSITION = 36;
-    public static final double JOINT_CUBE_GROUND_POSITION = 35.5;
+    public static final double JOINT_CONE_GROUND_POSITION = 35;
+    public static final double JOINT_CUBE_GROUND_POSITION = 40;
     public static final double JOINT_CONE_LOW_POSITION = 56;
-    public static final double JOINT_CUBE_LOW_POSITION = 43.0;
-    public static final double JOINT_CONE_MID_POSITION = 42.12;
-    public static final double JOINT_CUBE_MID_POSITION = 42.2;
-    public static final double JOINT_CONE_HIGH_POSITION = 30.12;
-    public static final double JOINT_CUBE_HIGH_POSITION = 42.6;
-    public static final double JOINT_CONE_SHELF_POSITION = 36;
-    public static final double JOINT_CUBE_SHELF_POSITION = 35.5;
+    public static final double JOINT_CUBE_LOW_POSITION = JOINT_STOW_POSITION;
+    public static final double JOINT_CONE_MID_POSITION = 32.7;
+    public static final double JOINT_CUBE_MID_POSITION = 29.83;
+    public static final double JOINT_CONE_HIGH_POSITION = 29.98;
+    public static final double JOINT_CUBE_HIGH_POSITION = 30.12;
+    public static final double JOINT_CONE_SHELF_POSITION = 33;
+    public static final double JOINT_CUBE_SHELF_POSITION = 34;
     public static final double JOINT_CLAMP_POSITION = 58.0;
 
     public static final double TOF_DISTANCE_METERS_CONE = 0.195;
