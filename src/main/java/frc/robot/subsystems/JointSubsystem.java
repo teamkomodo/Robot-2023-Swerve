@@ -85,7 +85,7 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        holdPositionCommand();
+        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
         // zeroed = false;
     }
 
@@ -237,5 +237,9 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+    }
+
+    public double getPosition() {
+        return encoder.getPosition();
     }
 }
