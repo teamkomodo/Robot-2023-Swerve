@@ -33,7 +33,7 @@ public class PositionCommands {
         );
 
         return Commands.runOnce(() -> {
-            if(elevatorSubsystem.getMotorPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_LOW_POSITION : ELEVATOR_CONE_LOW_POSITION)) {
+            if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_LOW_POSITION : ELEVATOR_CONE_LOW_POSITION)) {
                 CommandScheduler.getInstance().schedule(upGroup);
             }else {
                 CommandScheduler.getInstance().schedule(downGroup);
@@ -58,7 +58,7 @@ public class PositionCommands {
         );
 
         return Commands.runOnce(() -> {
-            if(elevatorSubsystem.getMotorPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_MID_POSITION : ELEVATOR_CONE_MID_POSITION)) {
+            if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_MID_POSITION : ELEVATOR_CONE_MID_POSITION)) {
                 CommandScheduler.getInstance().schedule(upGroup);
             }else {
                 CommandScheduler.getInstance().schedule(downGroup);
@@ -83,7 +83,7 @@ public class PositionCommands {
         );
 
         return Commands.runOnce(() -> {
-            if(elevatorSubsystem.getMotorPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_HIGH_POSITION : ELEVATOR_CONE_HIGH_POSITION)) {
+            if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_HIGH_POSITION : ELEVATOR_CONE_HIGH_POSITION)) {
                 CommandScheduler.getInstance().schedule(upGroup);
             }else {
                 CommandScheduler.getInstance().schedule(downGroup);
@@ -108,7 +108,7 @@ public class PositionCommands {
         );
 
         return Commands.runOnce(() -> {
-            if(elevatorSubsystem.getMotorPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_SHELF_POSITION : ELEVATOR_CONE_SHELF_POSITION)) {
+            if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_SHELF_POSITION : ELEVATOR_CONE_SHELF_POSITION)) {
                 CommandScheduler.getInstance().schedule(upGroup);
             }else {
                 CommandScheduler.getInstance().schedule(downGroup);

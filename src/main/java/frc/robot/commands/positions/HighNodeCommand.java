@@ -31,7 +31,7 @@ public class HighNodeCommand extends DynamicCommand{
 
     @Override
     protected Command getCommand() {
-        if(elevatorSubsystem.getMotorPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_LOW_POSITION: ELEVATOR_CONE_LOW_POSITION)) {
+        if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_LOW_POSITION: ELEVATOR_CONE_LOW_POSITION)) {
             // Going Up
             return new SequentialCommandGroup(
                 elevatorSubsystem.highNodeCommand(cubeMode),
