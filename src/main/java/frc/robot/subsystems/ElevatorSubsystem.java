@@ -35,12 +35,12 @@ public class ElevatorSubsystem extends SubsystemBase{
     private double i = 1.0e-6;
     private double d = 0.7;
 
-    private double SmartMotionMaxVel = 2000;
-    private double SmartMotionMaxAccl = 1000;
-    private double SmartMotionMinVel = 0;
-    private double SmartMotionAllowedClosedLoopError = 1;
+    private double smartMotionMaxVel = 2000;
+    private double smartMotionMaxAccel = 1000;
+    private double smartMotionMinVel = 0;
+    private double smartMotionAllowedClosedLoopError = 1;
 
-    private ControlType commadingControlType = ControlType.kSmartMotion;
+    private ControlType commandingControlType = ControlType.kPosition;
 
     private boolean atLimitSwitch = false;
     private boolean atMaxLimit = false;
@@ -72,11 +72,12 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
-        pidController.setReference(encoder.getPosition(), commadingControlType);
-        pidController.setSmartMotionMaxVelocity(SmartMotionMaxVel,0);
-        pidController.setSmartMotionMaxAccel(SmartMotionMaxAccl, 0);
-        pidController.setSmartMotionMinOutputVelocity(SmartMotionMinVel,0);
-        pidController.setSmartMotionAllowedClosedLoopError(SmartMotionAllowedClosedLoopError, 0);
+        pidController.setReference(encoder.getPosition(), commandingControlType);
+        pidController.setSmartMotionMaxVelocity(smartMotionMaxVel,0);
+        pidController.setSmartMotionMaxAccel(smartMotionMaxAccel, 0);
+        pidController.setSmartMotionMinOutputVelocity(smartMotionMinVel,0);
+        pidController.setSmartMotionAllowedClosedLoopError(smartMotionAllowedClosedLoopError, 0);
+        pidController.setOutputRange(-0.8, 0.8);
 
         shuffleboardTab = Shuffleboard.getTab("Elevator");
         
@@ -98,23 +99,26 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        pidController.setReference(encoder.getPosition(), commadingControlType);
+        pidController.setReference(encoder.getPosition(), commandingControlType);
         // zeroed = false;
     }
 
     public void checkLimitSwitch() {
         // true - switch is not pressed
         if(zeroLimitSwitch.get()) {
+            // reset encoder position on falling edge
+            if(atLimitSwitch) {
+                encoder.setPosition(0);
+            }
             atLimitSwitch = false;
             return;
         }
 
         zeroed = true;
         if(!atLimitSwitch) {
-            //stop motor and reset encoder position on rising edge
+            // stop motor on rising edge
             atLimitSwitch = true;
-            encoder.setPosition(0);
-            pidController.setReference(0, commadingControlType);
+            pidController.setReference(0, commandingControlType);
         }
         
     }
@@ -129,7 +133,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMinLimit) {
             //stop motor on rising edge
             atMinLimit = true;
-            pidController.setReference(0, commadingControlType);
+            pidController.setReference(0, commandingControlType);
         }
     }
 
@@ -143,7 +147,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
-            pidController.setReference(ELEVATOR_MAX_POSITION, commadingControlType);
+            pidController.setReference(ELEVATOR_MAX_POSITION, commandingControlType);
         }
     }
 
@@ -159,13 +163,15 @@ public class ElevatorSubsystem extends SubsystemBase{
      */
     public void setMotorPercent(double percent) {
         //at min and attempting to decrease
-        if(atMinLimit && percent < 0 && useLimits)
+        if(atMinLimit && zeroed && percent < 0 && useLimits)
             return;
         
         //at max or not yet zeroed and attempting to increase
         if((atMaxLimit || !zeroed) && percent > 0 && useLimits)
             return;
-        pidController.setReference(percent * (slowMode? ELEVATOR_SLOW_MODE_MULTIPLIER : 1), ControlType.kDutyCycle);
+        
+        boolean closeToEnds = ELEVATOR_MAX_POSITION - encoder.getPosition() < ELEVATOR_BUFFER_DISTANCE || encoder.getPosition() - ELEVATOR_MIN_POSITION < ELEVATOR_BUFFER_DISTANCE;
+        pidController.setReference(percent * (slowMode? ELEVATOR_SLOW_MODE_MULTIPLIER : 1) * (closeToEnds? 0.5: 1), ControlType.kDutyCycle);
     }
 
     /**
@@ -183,7 +189,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         if(!zeroed && position > encoder.getPosition())
             return;
 
-        pidController.setReference(position, commadingControlType);
+        pidController.setReference(position, commandingControlType);
         commandedPosition = position;
     }
 
@@ -220,7 +226,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public Command zeroCommand() {
-        return this.runOnce(() -> setPosition(0));
+        return this.runEnd(() -> setMotorPercent(-0.3), () -> setMotorPercent(0));
     }
 
     public Command disableLimitsCommand() {
@@ -241,6 +247,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
+        checkLimitSwitch();
         checkMinLimit();
         checkMaxLimit();
     }
@@ -257,5 +264,9 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public double getPosition() {
         return encoder.getPosition();
+    }
+
+    public boolean isZeroed() {
+        return zeroed;
     }
 }

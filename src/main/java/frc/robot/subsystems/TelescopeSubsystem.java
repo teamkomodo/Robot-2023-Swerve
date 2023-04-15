@@ -188,7 +188,7 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public Command zeroCommand() {
-        return this.runOnce(() -> setPosition(0));
+        return this.runEnd(() -> setMotorPercent(-0.2), () -> setMotorPercent(0));
     }
 
     public Command disableLimitsCommand() {
@@ -221,5 +221,9 @@ public class TelescopeSubsystem extends SubsystemBase{
         pidController.setP(p);
         pidController.setI(i);
         pidController.setD(d);
+    }
+
+    public boolean isZeroed() {
+        return zeroed;
     }
 }

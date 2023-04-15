@@ -30,7 +30,7 @@ public class JointSubsystem extends SubsystemBase{
     private double p = 5.0e-2;
     private double i = 3.0e-6;
     private double d = 2.0;
-    private double maxIAccum = 1.0e1;
+    private double maxIAccum = 5.0e3;
 
     private boolean atLimitSwitch = false;
     private boolean atMaxLimit = false;
@@ -64,6 +64,7 @@ public class JointSubsystem extends SubsystemBase{
         pidController.setD(d);
         pidController.setIMaxAccum(maxIAccum, 0);
         pidController.setReference(0, ControlType.kDutyCycle);
+        //pidController.setOutputRange(-0.5, 0.5);
         
         shuffleboardTab = Shuffleboard.getTab("Joint");
         
@@ -91,16 +92,19 @@ public class JointSubsystem extends SubsystemBase{
 
     public void checkLimitSwitch() {
         if(reverseSwitch.get()) {
+            if(atLimitSwitch) {
+                // reset encoder on falling edge
+                encoder.setPosition(0);
+            }
             atLimitSwitch = false;
             return;
         }
 
         zeroed = true;
         if(!atLimitSwitch) {
-            //stop motor and reset encoder position on rising edge
+            //stop motor on rising edge
             atLimitSwitch = true;
-            encoder.setPosition(0);
-            pidController.setReference(0, ControlType.kPosition);
+            setPosition(0);
         }
         
     }
@@ -113,7 +117,7 @@ public class JointSubsystem extends SubsystemBase{
 
         if(!atMinLimit) {
             atMinLimit = true;
-            pidController.setReference(JOINT_MIN_POSITION, ControlType.kPosition);
+            setPosition(JOINT_MIN_POSITION);
         }
     }
 
@@ -126,7 +130,7 @@ public class JointSubsystem extends SubsystemBase{
         if(!atMaxLimit) {
             //stop motor on rising edge
             atMaxLimit = true;
-            pidController.setReference(JOINT_MAX_POSITION, ControlType.kPosition);
+            setPosition(JOINT_MAX_POSITION);
         }
     }
 
@@ -175,7 +179,7 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public Command holdPositionCommand() {
-        return this.runOnce(() -> pidController.setReference(encoder.getPosition(), ControlType.kPosition));
+        return this.runOnce(() -> setPosition(encoder.getPosition()));
     }
 
     public Command lowNodeCommand(BooleanSupplier cubeMode) {
@@ -203,7 +207,7 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public Command zeroCommand() {
-        return this.runOnce(() -> encoder.setPosition(0));
+        return this.runEnd(() -> setMotorPercent(-0.1), () -> setMotorPercent(0));
     }
 
     public Command disableLimitsCommand() {
@@ -241,5 +245,9 @@ public class JointSubsystem extends SubsystemBase{
 
     public double getPosition() {
         return encoder.getPosition();
+    }
+
+    public boolean isZeroed() {
+        return zeroed;
     }
 }

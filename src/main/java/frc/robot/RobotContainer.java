@@ -145,6 +145,8 @@ public class RobotContainer {
         yButton.onTrue(new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
         startButton.onTrue(new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem, cubeMode));
         rightJoystickDown.onTrue(new GroundCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
+
+        whiteButton.whileTrue(Commands.parallel(elevatorSubsystem.zeroCommand(), telescopeSubsystem.zeroCommand(), jointSubsystem.zeroCommand()));
         
         // Elevator Commands
         rightJoystickY.whileTrue(Commands.run(
@@ -196,12 +198,6 @@ public class RobotContainer {
         }, intakeSubsystem, ledStripSubsystem));
 
         // Joint Commands
-
-        jointSubsystem.setDefaultCommand(Commands.run(() -> {
-            if(elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
-                jointSubsystem.setPosition(JOINT_DANGER_POSITION);
-            }
-        }, jointSubsystem));
 
         // Joint Up
         rightTrigger.whileTrue(Commands.run(

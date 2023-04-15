@@ -16,6 +16,7 @@ public class IntakePieceCommand extends CommandBase{
 
     private boolean holdingPiece;
     private long startTime;
+    private long clampStart;
 
     public IntakePieceCommand(IntakeSubsystem intakeSubsystem, JointSubsystem jointSubsystem, LEDStripSubsystem ledStripSubsystem) {
         this.intakeSubsystem = intakeSubsystem;
@@ -29,6 +30,7 @@ public class IntakePieceCommand extends CommandBase{
     public void initialize() {
         holdingPiece = false;
         startTime = RobotController.getFPGATime();
+        clampStart = -1;
     }
 
     @Override
@@ -48,11 +50,13 @@ public class IntakePieceCommand extends CommandBase{
         intakeSubsystem.setMotorVelocity(-4000);
 
         if(intakeSubsystem.pieceDetected()) {
-            jointSubsystem.setPosition(JOINT_CLAMP_POSITION);
+            if(clampStart == -1)
+                clampStart = RobotController.getFPGATime();
+            jointSubsystem.setPosition(jointSubsystem.getPosition() + 5);
         }
 
-        if(Math.abs(intakeSubsystem.getSmoothCurrent()) > INTAKE_THRESHOLD_CURRENT && RobotController.getFPGATime() - startTime > 500000) {
-            intakeSubsystem.setMotorDutyCycle(-0.08);
+        if(Math.abs(intakeSubsystem.getSmoothCurrent()) > INTAKE_THRESHOLD_CURRENT && RobotController.getFPGATime() - startTime > 500000 && RobotController.getFPGATime() - clampStart > 500000) {
+            intakeSubsystem.setMotorDutyCycle(-0.2);
             jointSubsystem.setPosition(JOINT_STOW_POSITION);
             holdingPiece = true;
         }
