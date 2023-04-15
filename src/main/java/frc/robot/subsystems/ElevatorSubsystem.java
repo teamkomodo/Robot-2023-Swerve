@@ -35,6 +35,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     private double i = 1.0e-6;
     private double d = 0.7;
 
+    private boolean atLimitSwitch = false;
     private boolean atMaxLimit = false;
     private boolean atMinLimit = false;
 
@@ -85,29 +86,44 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        holdPositionCommand();
+        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
         // zeroed = false;
     }
-    
-    public void checkMinLimit() {
-        //true - switch is not active
-        if(!useLimits || zeroLimitSwitch.get()) {
-            atMinLimit = false;
+
+    public void checkLimitSwitch() {
+        // true - switch is not pressed
+        if(zeroLimitSwitch.get()) {
+            atLimitSwitch = false;
             return;
         }
 
         zeroed = true;
-        //false - switch is active
-        if(!atMinLimit) {
+        if(!atLimitSwitch) {
             //stop motor and reset encoder position on rising edge
-            atMinLimit = true;
+            atLimitSwitch = true;
             encoder.setPosition(0);
+            pidController.setReference(0, ControlType.kPosition);
+        }
+        
+    }
+    
+    public void checkMinLimit() {
+        // Position is within lower bound
+        if(encoder.getPosition() > ELEVATOR_MIN_POSITION) {
+            atMinLimit = false;
+            return;
+        }
+
+        if(!atMinLimit) {
+            //stop motor on rising edge
+            atMinLimit = true;
             pidController.setReference(0, ControlType.kPosition);
         }
     }
 
     public void checkMaxLimit() {
-        if(!useLimits || encoder.getPosition() < ELEVATOR_MAX_POSITION) {
+        // Position is within upper bound
+        if(encoder.getPosition() < ELEVATOR_MAX_POSITION) {
             atMaxLimit = false;
             return;
         }
@@ -148,7 +164,7 @@ public class ElevatorSubsystem extends SubsystemBase{
      */
     public void setPosition(double position) {
         //position out of bounds
-        if(position < 0 || position > ELEVATOR_MAX_POSITION)
+        if(position < ELEVATOR_MIN_POSITION || position > ELEVATOR_MAX_POSITION)
             return;
         
         //not zeroed and moving away from limit switch
@@ -227,7 +243,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setD(d);
     }
 
-    public double getMotorPosition() {
+    public double getPosition() {
         return encoder.getPosition();
     }
 }

@@ -81,7 +81,7 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public void teleopInit() {
-        holdPositionCommand();
+        pidController.setReference(encoder.getPosition(), ControlType.kPosition);
         // zeroed = false;
     }
     
