@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import frc.robot.auto.commands.AlignToGamePiece;
 import frc.robot.commands.positions.GroundCommand;
 import frc.robot.commands.positions.HighNodeCommand;
 import frc.robot.commands.positions.LowNodeCommand;
@@ -27,7 +28,6 @@ import frc.robot.commands.PositionCommands;
 import frc.robot.commands.SwerveControllerCommandFactory;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.TrajectorySequencer;
 import frc.robot.subsystems.VisionPositioningSubsystem;
 import frc.robot.util.LimelightConnector;
 import frc.robot.util.VisionPipelineConnector;
@@ -51,6 +51,7 @@ import static frc.robot.Constants.*;
 
 import java.util.function.BooleanSupplier;
 
+@SuppressWarnings("unused")
 public class RobotContainer {
     private final Field2d field2d = new Field2d();
 
@@ -65,8 +66,6 @@ public class RobotContainer {
     public final LEDStripSubsystem ledStripSubsystem = new LEDStripSubsystem();
     public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(field2d);
     public final SwerveControllerCommandFactory sccf = new SwerveControllerCommandFactory(drivetrainSubsystem);
-    public final TrajectorySequencer trajectorySequencer = new TrajectorySequencer(drivetrainSubsystem, sccf, null,
-            null);
     public final VisionPositioningSubsystem vision = new VisionPositioningSubsystem(drivetrainSubsystem);
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
     public final LimelightConnector limelight = new LimelightConnector("limelight");
@@ -89,7 +88,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-
+    
         Trigger aButton = driverXBoxController.a();
         Trigger bButton = driverXBoxController.b();
         Trigger xButton = driverXBoxController.x();
@@ -247,6 +246,7 @@ public class RobotContainer {
         leftJoystickDown.whileTrue(new AlignToToF(drivetrainSubsystem, clawSubsystem.getTOF()));
 
         yellowButton.whileTrue(new AlignToReflectiveTape(drivetrainSubsystem, limelight, TapeLevel.HIGH_TAPE));
+        whiteButton.whileTrue(new AlignToGamePiece(drivetrainSubsystem, vision, detector, 0));
     }
 
     private Command autoCommand = null;

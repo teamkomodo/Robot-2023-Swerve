@@ -69,7 +69,6 @@ public class FinetuneFieldPose extends AutoCommand {
         speeds = new ChassisSpeeds(clamp(-speeds.vxMetersPerSecond, AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND),
                 clamp(-speeds.vyMetersPerSecond, AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND),
                 clamp(speeds.omegaRadiansPerSecond, AutoConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND));
-        System.out.println(speeds);
         drivetrainSubsystem.setChassisSpeeds(speeds);
     }
 

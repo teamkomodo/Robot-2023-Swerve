@@ -22,6 +22,10 @@ public class SwerveControllerCommandFactory {
         private Pose2d relativePose;
     }
 
+    private Pose2d invertPoseRotation(Pose2d p) {
+        return new Pose2d(p.getTranslation(), p.getRotation().unaryMinus());
+    }
+
     @FunctionalInterface
     public static interface SwerveControllerCommandOnComplete {
         void onComplete();
@@ -49,13 +53,14 @@ public class SwerveControllerCommandFactory {
                 drivetrainSubsystem.getPoseMeters().getTranslation()
                         .minus(desc.relativePose.getTranslation())
                         .plus(traj.getInitialPose().getTranslation()),
-                drivetrainSubsystem.getPoseMeters().getRotation()) : drivetrainSubsystem.getPoseMeters();
+                drivetrainSubsystem.getPoseMeters().getRotation().unaryMinus())
+                : invertPoseRotation(drivetrainSubsystem.getPoseMeters());
 
         SwerveControllerCommandImpl controllerCommand = new SwerveControllerCommandImpl(traj,
                 poseSupplier,
                 drivetrainSubsystem.getDriveKinematics(),
                 drivetrainSubsystem.getDriveController(),
-                drivetrainSubsystem::setSwerveModuleStates, drivetrainSubsystem);
+                drivetrainSubsystem::setSwerveModuleStates, drivetrainSubsystem, drivetrainSubsystem);
 
         desc.command = controllerCommand;
         desc.baseCommand = controllerCommand;

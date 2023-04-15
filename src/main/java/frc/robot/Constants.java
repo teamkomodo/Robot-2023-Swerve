@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -140,18 +141,19 @@ public final class Constants {
 //Auto
     public static class AutoConstants {
         // Trajectory following
-        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 1.5;
+        public static final double MAX_TRAJ_SPEED_METERS_PER_SECOND = 4.0;
         public static final double MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED = 3;
-        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 5;
+        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 2;
         public static final double MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED = 3;
-        public static final double P_X_CONTROLLER = 6.5;
+        public static final double P_X_CONTROLLER = RobotBase.isSimulation() ? 20.0 : 1.8;
         public static final double P_Y_CONTROLLER = P_X_CONTROLLER;
-        public static final double I_X_CONTROLLER = 0.45;
+        public static final double I_X_CONTROLLER = RobotBase.isSimulation() ? 0.00 : 0.5;
         public static final double I_Y_CONTROLLER = I_X_CONTROLLER;
-        public static final double D_X_CONTROLLER = 1.0;
+        public static final double D_X_CONTROLLER = RobotBase.isSimulation() ? 0.00 : 0.7;
         public static final double D_Y_CONTROLLER = D_X_CONTROLLER;
-        public static final double P_THETA_CONTROLLER = 5;
-        public static final double I_THETA_CONTROLLER = 1.5;
+        public static final double P_THETA_CONTROLLER = RobotBase.isSimulation() ? 5.00 : 4.0;
+        public static final double I_THETA_CONTROLLER = 0.75;
+        public static final double D_THETA_CONTROLLER = 0.19;
         public static final TrapezoidProfile.Constraints THETA_PID_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_ACCEL_RADIANS_PER_SECOND_SQUARED);
         public static final boolean ENABLE_RANDOM_GENERATION_TWEAKAGE = true;
@@ -167,18 +169,18 @@ public final class Constants {
         public static final double MAX_POSITIONING_ERROR_METERS = 0.06;
         public static final double MAX_ANGULAR_ERROR_RADIANS = Math.toRadians(7);
         // Game piece detector
-        public static final double MAX_PIECE_OFFSET_RATIO = 0.6; // 1 would be "just within the hitbox", 0 would be
-                                                                 // impossibly precise.
+        public static final double MAX_PIECE_OFFSET_RATIO = 0.35; // 1 would be "just within the hitbox", 0 would be
+                                                                  // impossibly precise.
         public static final double PIECE_LINEUP_MIN_ALIGNMENT_TIME = 0.5; // Seconds
-        public static final double P_PIECE_LINEUP = 3.0;
-        public static final double I_PIECE_LINEUP = 2.0;
-        public static final double D_PIECE_LINEUP = 0.2;
+        public static final double P_PIECE_LINEUP = 6.0;
+        public static final double I_PIECE_LINEUP = 0.0;
+        public static final double D_PIECE_LINEUP = 1.0;
         // Reflective tape alignment
-        public static final double MIN_REFLECTIVE_OFFSET_DEGREES = 4.0;
+        public static final double MIN_REFLECTIVE_OFFSET_DEGREES = 2.0;
         public static final double REFLECTIVE_MIN_ALIGN_TIME = 0.5;
-        public static final double P_REFL_LINEUP = 2.5;
-        public static final double I_REFL_LINEUP = 3.0;
-        public static final double D_REFL_LINEUP = 0.2;
+        public static final double P_REFL_LINEUP = 4.0;
+        public static final double I_REFL_LINEUP = 0.4;
+        public static final double D_REFL_LINEUP = 0.0;
         // ToF constants
         public static final double TOF_LEAKY_COEFFICIENT = 0.5;
         public static final double TOF_HALF_SWEEP_ANGLE = Math.toRadians(12);
