@@ -12,6 +12,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
@@ -36,7 +38,8 @@ public class VisionPositioningSubsystem extends SubsystemBase {
                     .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
             poseEstimator = new PhotonPoseEstimator(
                     fieldLayout,
-                    PoseStrategy.AVERAGE_BEST_TARGETS, camera, VisionConstants.rbt2cam);
+                    PoseStrategy.MULTI_TAG_PNP, camera, VisionConstants.rbt2cam);
+            poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
@@ -47,12 +50,34 @@ public class VisionPositioningSubsystem extends SubsystemBase {
 
     private Runnable onVisionData = null;
 
+    public Runnable getOnVisionData(){
+        return onVisionData;
+    }
+
     public void setOnVisionData(Runnable r) {
         onVisionData = r;
     }
 
-    // private Pose3d accumulator = new Pose3d();
-    // private double accumulator_weight = 0.0;
+    public void resetAccumulators() {
+        accumulator_rotation = 0.0;
+        accumulator_translation = new Translation2d();
+        accumulator_weight = 0.0;
+    }
+
+    private double accumulator_rotation = 0.0;
+    private Translation2d accumulator_translation = new Translation2d();
+    private double accumulator_weight = 0.0;
+    private double discontinuity = 0.0;
+
+    private double moveDiscontinuity(double in, double discontinuity) {
+        while (in < discontinuity) {
+            in += 2 * Math.PI;
+        }
+        while (in >= discontinuity + (2 * Math.PI)) {
+            in -= 2 * Math.PI;
+        }
+        return in;
+    }
 
     @Override
     public void periodic() {
@@ -60,24 +85,17 @@ public class VisionPositioningSubsystem extends SubsystemBase {
             Optional<EstimatedRobotPose> est_pose_opt = poseEstimator.update();
             if (est_pose_opt.isPresent()) {
                 Pose3d pose = est_pose_opt.get().estimatedPose;
-                // accumulator = new Pose3d(
-                // accumulator.getTranslation().times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT)
-                // .plus(pose.getTranslation()),
-                // accumulator.getRotation().times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT)
-                // .plus(pose.getRotation()));
-                // accumulator_weight *=
-                // VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT;
-                // accumulator_weight += 1.0;
-                // if (accumulator_weight <= 0) {
-                // DriverStation.reportError("Accumulator weight is <= 0 somehow", true);
-                // throw new RuntimeException("Accumulator weight is <= 0 somehow");
-                // }
-                // pose = new Pose3d(accumulator.getTranslation().times(1.0 /
-                // accumulator_weight),
-                // accumulator.getRotation().times(1.0 / accumulator_weight));
                 if (pose != null) {
                     Pose2d pose2d = pose.toPose2d();
-                    pose2d = new Pose2d(pose2d.getTranslation(), pose2d.getRotation().unaryMinus());
+                    accumulator_translation = accumulator_translation.plus(pose2d.getTranslation()).times(VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT);
+                    if (accumulator_weight <= 0.0) {
+                        discontinuity = pose2d.getRotation().getRadians() + Math.PI;
+                    }
+                    double rotation = moveDiscontinuity(pose2d.getRotation().getRadians(), discontinuity);
+                    accumulator_rotation = (accumulator_rotation + rotation) * VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT;
+                    accumulator_weight = (accumulator_weight + 1) * VisionConstants.ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT;
+                    rotation = moveDiscontinuity(accumulator_rotation / accumulator_weight, 0.0);
+                    pose2d = new Pose2d(accumulator_translation.div(accumulator_weight), Rotation2d.fromRadians(rotation));
                     if (doOdometryUpdate) {
                         drive.resetOdometry(pose2d);
                         if (onVisionData != null) {
@@ -87,7 +105,7 @@ public class VisionPositioningSubsystem extends SubsystemBase {
                     }
                 }
             }
-        }catch(Exception ignored) {
+        } catch (Exception ignored) {
 
         }
     }

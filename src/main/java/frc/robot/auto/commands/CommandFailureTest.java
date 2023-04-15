@@ -8,11 +8,11 @@ public class CommandFailureTest extends AutoCommand {
     }
     @Override
     public void initialize() {
-        // Do nothing
+        // Do not do anything
     }
     @Override
     public void execute() {
-        // Do nothing
+        // Carry out nothingness
     }
     @Override
     public boolean isFinished() {
@@ -20,7 +20,7 @@ public class CommandFailureTest extends AutoCommand {
     }
     @Override
     public void end(boolean interrupted) {
-        // Do nothing
+        // Perform an absolute lack of concrete actions
     }
     @Override
     public boolean didSucceed() {

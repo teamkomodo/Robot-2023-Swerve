@@ -5,9 +5,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
+import frc.robot.auto.commands.AlignToGamePiece;
 import frc.robot.auto.commands.AllianceFailsafe;
 import frc.robot.auto.commands.AutoLevelCommand;
 import frc.robot.auto.commands.FinetuneFieldPose;
+import frc.robot.auto.commands.PickUpGamePiece;
 import frc.robot.auto.commands.RunUntilNotLevel;
 import frc.robot.auto.commands.SleepCommand;
 import frc.robot.auto.commands.WaitForVisionData;
@@ -22,6 +24,8 @@ public class AutoSegments {
     public AutoSegments(RobotContainer container) {
         this.container = container;
     }
+
+    
     
     public AutoTemplate place_cube_high = new AutoTemplate(() -> {
         return new AutoCommand[] {
@@ -80,11 +84,11 @@ public class AutoSegments {
                 AutoCommand.wrap(new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = true;
                 })),
-                new WaitForVisionData(container.vision),
+                new WaitForVisionData(container.vision, 1.5),
                 AutoCommand.wrap(new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                 })),
-                new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_BLUE),
+                new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_BLUE, false),
                 new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
                     return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
                             inFront.getRotation());
@@ -103,11 +107,11 @@ public class AutoSegments {
             AutoCommand.wrap(new InstantCommand(() -> {
                 container.vision.doOdometryUpdate = true;
             })),
-            new WaitForVisionData(container.vision),
+            new WaitForVisionData(container.vision, 1.5),
             AutoCommand.wrap(new InstantCommand(() -> {
                 container.vision.doOdometryUpdate = false;
             })),
-            new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_RED),
+            new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_RED, false),
             new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
                 return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
                         inFront.getRotation());
@@ -116,6 +120,13 @@ public class AutoSegments {
             new RunUntilNotLevel(container.drivetrainSubsystem,
                     new FinetuneFieldPose(container.drivetrainSubsystem, station, 0.15)),
             new AutoLevelCommand(container.drivetrainSubsystem)
+        };
+    });
+
+    public AutoTemplate pickup_piece = new AutoTemplate(() -> {
+        return new AutoCommand[] {
+            new AlignToGamePiece(container.drivetrainSubsystem, container.vision, container.detector, 0),
+            new PickUpGamePiece(container.drivetrainSubsystem, container.intakeSubsystem, container.jointSubsystem)
         };
     });
 }

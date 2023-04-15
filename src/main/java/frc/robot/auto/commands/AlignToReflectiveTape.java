@@ -17,6 +17,7 @@ public class AlignToReflectiveTape extends AutoCommand {
     private final DrivetrainSubsystem drivetrainSubsystem;
     private final LimelightConnector limelight;
     private final Timer correctTime = new Timer();
+    private final Timer waitTime = new Timer();
     private final int pipelineIndex;
     private final PIDController alignmentController = new PIDController(AutoConstants.P_REFL_LINEUP, AutoConstants.I_REFL_LINEUP, AutoConstants.D_REFL_LINEUP);
     public AlignToReflectiveTape(DrivetrainSubsystem drivetrainSubsystem, LimelightConnector limelight, TapeLevel level) {
@@ -25,15 +26,31 @@ public class AlignToReflectiveTape extends AutoCommand {
         pipelineIndex = (level == TapeLevel.LOW_TAPE) ? 0 : 1;
         addRequirements(drivetrainSubsystem);
     }
+    private double clamp(double val, double mag) {
+        if (val > mag) {
+            return mag;
+        }
+        if (val < -mag) {
+            return -mag;
+        }
+        return val;
+    }
     @Override
     public void initialize() {
         this.limelight.setLEDs(true);
         correctTime.reset();
         correctTime.start();
+        waitTime.reset();
+        waitTime.start();
         this.limelight.setPipeline(this.pipelineIndex);
     }
     @Override
     public void execute() {
+        if (!waitTime.hasElapsed(0.65)) {
+            correctTime.reset();
+            drivetrainSubsystem.stopMotion();
+            return;
+        }
         LimelightResult result = this.limelight.get();
         if (result == null) {
             drivetrainSubsystem.stopMotion();
@@ -41,7 +58,8 @@ public class AlignToReflectiveTape extends AutoCommand {
             return;
         }
         double angvel = alignmentController.calculate(result.tx / 27.0, 0);
-        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, -angvel));
+        angvel = clamp(angvel, 0.8);
+        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, -angvel, 0));
         if (Math.abs(result.tx) > AutoConstants.MIN_REFLECTIVE_OFFSET_DEGREES) {
             correctTime.reset();
         }
