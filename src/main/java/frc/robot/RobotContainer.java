@@ -140,12 +140,11 @@ public class RobotContainer {
         toggleSwitch1.onTrue(ledStripSubsystem.cubeSignalCommand()).onFalse(ledStripSubsystem.coneSignalCommand());
 
         aButton.onTrue(new StowCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem));
-        bButton.onTrue(new LowNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
-        xButton.onTrue(new MidNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
-        yButton.onTrue(new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
-        startButton.onTrue(
-                new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem, cubeMode));
-        rightJoystickDown.onTrue(new GroundCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, cubeMode));
+        bButton.onTrue(new LowNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeMode));
+        xButton.onTrue(new MidNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem,  cubeMode));
+        yButton.onTrue(new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeMode));
+        startButton.onTrue(new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeMode));
+        rightJoystickDown.onTrue(new GroundCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeMode));
 
         whiteButton.whileTrue(Commands.parallel(elevatorSubsystem.zeroCommand(), telescopeSubsystem.zeroCommand(), jointSubsystem.zeroCommand()));
         

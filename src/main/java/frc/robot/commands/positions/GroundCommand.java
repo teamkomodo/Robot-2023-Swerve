@@ -9,6 +9,7 @@ import frc.robot.auto.commands.SleepCommand;
 import frc.robot.commands.DynamicCommand;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
+import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
@@ -18,16 +19,18 @@ public class GroundCommand extends DynamicCommand{
     private final ElevatorSubsystem elevatorSubsystem;
     private final TelescopeSubsystem telescopeSubsystem;
     private final JointSubsystem jointSubsystem;
+    private final LEDStripSubsystem ledStripSubsystem;
 
     private final BooleanSupplier cubeMode;
 
-    public GroundCommand(ElevatorSubsystem elevatorSubsystem, TelescopeSubsystem telescopeSubsystem, JointSubsystem jointSubsystem, BooleanSupplier cubeMode) {
+    public GroundCommand(ElevatorSubsystem elevatorSubsystem, TelescopeSubsystem telescopeSubsystem, JointSubsystem jointSubsystem, LEDStripSubsystem ledStripSubsystem, BooleanSupplier cubeMode) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.telescopeSubsystem = telescopeSubsystem;
         this.jointSubsystem = jointSubsystem;
+        this.ledStripSubsystem = ledStripSubsystem;
         this.cubeMode = cubeMode;
 
-        addRequirements(elevatorSubsystem, telescopeSubsystem, jointSubsystem);
+        addRequirements(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem);
     }
 
     @Override
@@ -36,7 +39,8 @@ public class GroundCommand extends DynamicCommand{
             return Commands.parallel(
                 elevatorSubsystem.zeroCommand(),
                 telescopeSubsystem.zeroCommand(),
-                jointSubsystem.zeroCommand()
+                jointSubsystem.zeroCommand(),
+                ledStripSubsystem.setPatternCommand(-0.11) // Strobe Red
             );
         }
         if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_GROUND_POSITION: ELEVATOR_CONE_GROUND_POSITION)) {

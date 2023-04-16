@@ -7,9 +7,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.auto.commands.SleepCommand;
 import frc.robot.commands.DynamicCommand;
-import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JointSubsystem;
+import frc.robot.subsystems.LEDStripSubsystem;
 import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
@@ -19,18 +19,18 @@ public class ShelfCommand extends DynamicCommand{
     private final ElevatorSubsystem elevatorSubsystem;
     private final TelescopeSubsystem telescopeSubsystem;
     private final JointSubsystem jointSubsystem;
-    private final ClawSubsystem clawSubsystem;
+    private final LEDStripSubsystem ledStripSubsystem;
 
     private final BooleanSupplier cubeMode;
 
-    public ShelfCommand(ElevatorSubsystem elevatorSubsystem, TelescopeSubsystem telescopeSubsystem, JointSubsystem jointSubsystem, ClawSubsystem clawSubsystem, BooleanSupplier cubeMode) {
+    public ShelfCommand(ElevatorSubsystem elevatorSubsystem, TelescopeSubsystem telescopeSubsystem, JointSubsystem jointSubsystem, LEDStripSubsystem ledStripSubsystem, BooleanSupplier cubeMode) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.telescopeSubsystem = telescopeSubsystem;
         this.jointSubsystem = jointSubsystem;
-        this.clawSubsystem = clawSubsystem;
+        this.ledStripSubsystem = ledStripSubsystem;
         this.cubeMode = cubeMode;
 
-        addRequirements(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem);
+        addRequirements(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem);
     }
 
     @Override
@@ -39,7 +39,8 @@ public class ShelfCommand extends DynamicCommand{
             return Commands.parallel(
                 elevatorSubsystem.zeroCommand(),
                 telescopeSubsystem.zeroCommand(),
-                jointSubsystem.zeroCommand()
+                jointSubsystem.zeroCommand(),
+                ledStripSubsystem.setPatternCommand(-0.11) // Strobe Red
             );
         }
         if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_SHELF_POSITION: ELEVATOR_CONE_SHELF_POSITION)) {
@@ -48,15 +49,13 @@ public class ShelfCommand extends DynamicCommand{
                 elevatorSubsystem.shelfCommand(cubeMode),
                 new SleepCommand(0.8),
                 telescopeSubsystem.shelfCommand(cubeMode),
-                jointSubsystem.shelfCommand(cubeMode),
-                clawSubsystem.openCommand()
+                jointSubsystem.shelfCommand(cubeMode)
             );
         }else {
             // Going Down
             return new SequentialCommandGroup(
                 telescopeSubsystem.shelfCommand(cubeMode),
                 jointSubsystem.shelfCommand(cubeMode),
-                clawSubsystem.openCommand(),
                 new SleepCommand(0.3),
                 elevatorSubsystem.shelfCommand(cubeMode)
             );
