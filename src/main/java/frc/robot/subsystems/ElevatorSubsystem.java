@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
@@ -170,8 +171,12 @@ public class ElevatorSubsystem extends SubsystemBase{
         if((atMaxLimit || !zeroed) && percent > 0 && useLimits)
             return;
         
-        boolean closeToEnds = ELEVATOR_MAX_POSITION - encoder.getPosition() < ELEVATOR_BUFFER_DISTANCE || encoder.getPosition() - ELEVATOR_MIN_POSITION < ELEVATOR_BUFFER_DISTANCE;
-        pidController.setReference(percent * (slowMode? ELEVATOR_SLOW_MODE_MULTIPLIER : 1) * (closeToEnds? 0.5: 1), ControlType.kDutyCycle);
+        // Cut the speed if the elevator is approaching the min or max positions
+        boolean closeToTop = ELEVATOR_MAX_POSITION - encoder.getPosition() < ELEVATOR_BUFFER_DISTANCE;
+        boolean closeToBottom = encoder.getPosition() - ELEVATOR_MIN_POSITION < ELEVATOR_BUFFER_DISTANCE;
+        boolean slowDown = (closeToBottom && percent < 0) || (closeToTop && percent > 0);
+
+        pidController.setReference(percent * (slowMode? ELEVATOR_SLOW_MODE_MULTIPLIER : 1) * (slowDown? 0.5: 1), ControlType.kDutyCycle);
     }
 
     /**
@@ -226,7 +231,10 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public Command zeroCommand() {
-        return this.runEnd(() -> setMotorPercent(-0.3), () -> setMotorPercent(0));
+        return Commands.sequence(
+            Commands.runOnce(() -> setMotorPercent(-0.3), this),
+            Commands.waitUntil(() -> (atLimitSwitch))
+        );
     }
 
     public Command disableLimitsCommand() {

@@ -3,6 +3,7 @@ package frc.robot.commands.positions;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.auto.commands.SleepCommand;
 import frc.robot.commands.DynamicCommand;
@@ -31,6 +32,13 @@ public class GroundCommand extends DynamicCommand{
 
     @Override
     protected Command getCommand() {
+        if(!(elevatorSubsystem.isZeroed() && telescopeSubsystem.isZeroed() && jointSubsystem.isZeroed())) {
+            return Commands.parallel(
+                elevatorSubsystem.zeroCommand(),
+                telescopeSubsystem.zeroCommand(),
+                jointSubsystem.zeroCommand()
+            );
+        }
         if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_GROUND_POSITION: ELEVATOR_CONE_GROUND_POSITION)) {
             // Going Up
             return new SequentialCommandGroup(
