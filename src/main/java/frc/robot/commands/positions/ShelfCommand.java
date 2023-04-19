@@ -40,14 +40,14 @@ public class ShelfCommand extends DynamicCommand{
                 elevatorSubsystem.zeroCommand(),
                 telescopeSubsystem.zeroCommand(),
                 jointSubsystem.zeroCommand(),
-                ledStripSubsystem.setPatternCommand(-0.11) // Strobe Red
+                ledStripSubsystem.setPatternCommand(LEDStripSubsystem.Patterns.FIXED_PALETTE_PATTERN_STROBE_BLUE)
             );
         }
         if(elevatorSubsystem.getPosition() < (cubeMode.getAsBoolean()? ELEVATOR_CUBE_SHELF_POSITION: ELEVATOR_CONE_SHELF_POSITION)) {
             // Going Up
             return new SequentialCommandGroup(
                 elevatorSubsystem.shelfCommand(cubeMode),
-                new SleepCommand(0.8),
+                new SleepCommand(1.0),
                 telescopeSubsystem.shelfCommand(cubeMode),
                 jointSubsystem.shelfCommand(cubeMode)
             );
@@ -56,7 +56,7 @@ public class ShelfCommand extends DynamicCommand{
             return new SequentialCommandGroup(
                 telescopeSubsystem.shelfCommand(cubeMode),
                 jointSubsystem.shelfCommand(cubeMode),
-                new SleepCommand(0.3),
+                new SleepCommand(0.2),
                 elevatorSubsystem.shelfCommand(cubeMode)
             );
         }

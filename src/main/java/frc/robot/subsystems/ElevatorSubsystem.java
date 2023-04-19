@@ -78,7 +78,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         pidController.setSmartMotionMaxAccel(smartMotionMaxAccel, 0);
         pidController.setSmartMotionMinOutputVelocity(smartMotionMinVel,0);
         pidController.setSmartMotionAllowedClosedLoopError(smartMotionAllowedClosedLoopError, 0);
-        pidController.setOutputRange(-0.8, 0.8);
+        pidController.setOutputRange(-1.0, 1.0);
 
         shuffleboardTab = Shuffleboard.getTab("Elevator");
         
@@ -149,6 +149,16 @@ public class ElevatorSubsystem extends SubsystemBase{
             //stop motor on rising edge
             atMaxLimit = true;
             pidController.setReference(ELEVATOR_MAX_POSITION, commandingControlType);
+        }
+    }
+
+    public void checkCloseToEnds() {
+        if(ELEVATOR_MAX_POSITION - encoder.getPosition() < ELEVATOR_BUFFER_DISTANCE) {
+            pidController.setOutputRange(-1.0, 0.8);
+        }else if(encoder.getPosition() - ELEVATOR_MIN_POSITION < ELEVATOR_BUFFER_DISTANCE) {
+            pidController.setOutputRange(-0.8, 1.0);
+        }else {
+            pidController.setOutputRange(-1.0, 1.0);
         }
     }
 
@@ -258,6 +268,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         checkLimitSwitch();
         checkMinLimit();
         checkMaxLimit();
+        checkCloseToEnds();
     }
 
     public void setPID(double p, double i, double d) {

@@ -139,7 +139,7 @@ public class RobotContainer {
 
         toggleSwitch1.onTrue(ledStripSubsystem.cubeSignalCommand()).onFalse(ledStripSubsystem.coneSignalCommand());
 
-        aButton.onTrue(new StowCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, clawSubsystem));
+        aButton.onTrue(new StowCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem));
         bButton.onTrue(new LowNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeMode));
         xButton.onTrue(new MidNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem,  cubeMode));
         yButton.onTrue(new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeMode));
