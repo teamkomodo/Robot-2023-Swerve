@@ -16,6 +16,8 @@ import frc.robot.auto.commands.WaitForVisionData;
 import frc.robot.auto.util.AutoCommand;
 import frc.robot.auto.util.AutoMode;
 import frc.robot.auto.util.AutoTemplate;
+import frc.robot.commands.positions.HighNodeCommand;
+import frc.robot.commands.positions.StowCommand;
 
 public class AutoSegments {
     private RobotContainer container;
@@ -25,8 +27,6 @@ public class AutoSegments {
         this.container = container;
     }
 
-    
-    
     public AutoTemplate place_cube_high = new AutoTemplate(() -> {
         return new AutoCommand[] {
                 AutoCommand.wrap(container.elevatorSubsystem.highNodeCommand(() -> true)),
@@ -42,6 +42,18 @@ public class AutoSegments {
                 AutoCommand.wrap(container.jointSubsystem.stowCommand()),
                 new SleepCommand(0.4),
                 AutoCommand.wrap(container.elevatorSubsystem.stowCommand())
+        };
+    });
+
+    public AutoTemplate place_cone_high = new AutoTemplate(() -> {
+        return new AutoCommand[] {
+            AutoCommand.wrap(new HighNodeCommand(container.elevatorSubsystem, container.telescopeSubsystem, container.jointSubsystem, container.ledStripSubsystem, () -> false))
+        };
+    });
+
+    public AutoTemplate stow = new AutoTemplate(() -> {
+        return new AutoCommand[] {
+            AutoCommand.wrap(new StowCommand(container.elevatorSubsystem, container.telescopeSubsystem, container.jointSubsystem))
         };
     });
 
