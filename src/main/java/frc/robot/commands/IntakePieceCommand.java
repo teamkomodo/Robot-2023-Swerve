@@ -41,12 +41,13 @@ public class IntakePieceCommand extends CommandBase{
 
     @Override
     public void execute() {
+        // 
         if(holdingPiece) {
-            ledStripSubsystem.setPattern(0.75); // Solid Color Dark Green
+            ledStripSubsystem.setPattern(LEDStripSubsystem.Patterns.SOLID_COLORS_DARK_GREEN);
             return;
         }
 
-        ledStripSubsystem.setPattern(0.19); // Color 2 Larson Scanner
+        ledStripSubsystem.setPattern(LEDStripSubsystem.Patterns.COLOR_2_PATTERN_LARSON_SCANNER);
         intakeSubsystem.setMotorVelocity(-4000);
 
         if(intakeSubsystem.pieceDetected()) {
@@ -57,7 +58,6 @@ public class IntakePieceCommand extends CommandBase{
 
         if(Math.abs(intakeSubsystem.getSmoothCurrent()) > INTAKE_THRESHOLD_CURRENT && RobotController.getFPGATime() - startTime > 500000 && RobotController.getFPGATime() - clampStart > 500000) {
             intakeSubsystem.setMotorDutyCycle(-0.2);
-            jointSubsystem.setPosition(JOINT_STOW_POSITION);
             holdingPiece = true;
         }
     }

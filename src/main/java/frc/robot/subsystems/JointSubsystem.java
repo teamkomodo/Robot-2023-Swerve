@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
@@ -93,7 +94,7 @@ public class JointSubsystem extends SubsystemBase{
     public void checkLimitSwitch() {
         if(reverseSwitch.get()) {
             if(atLimitSwitch) {
-                // reset encoder on falling edge
+                // reset encoder on falling edge incase the robot started up and the switch was pressed
                 encoder.setPosition(0);
             }
             atLimitSwitch = false;
@@ -102,8 +103,9 @@ public class JointSubsystem extends SubsystemBase{
 
         zeroed = true;
         if(!atLimitSwitch) {
-            //stop motor on rising edge
+            //stop motor and reset encoder on rising edge
             atLimitSwitch = true;
+            encoder.setPosition(0);
             setPosition(0);
         }
         
@@ -207,7 +209,10 @@ public class JointSubsystem extends SubsystemBase{
     }
 
     public Command zeroCommand() {
-        return this.runEnd(() -> setMotorPercent(-0.1), () -> setMotorPercent(0));
+        return Commands.sequence(
+            Commands.runOnce(() -> setMotorPercent(-0.3), this),
+            Commands.waitUntil(() -> (atLimitSwitch))
+        );
     }
 
     public Command disableLimitsCommand() {

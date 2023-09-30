@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
@@ -188,7 +189,10 @@ public class TelescopeSubsystem extends SubsystemBase{
     }
 
     public Command zeroCommand() {
-        return this.runEnd(() -> setMotorPercent(-0.2), () -> setMotorPercent(0));
+        return Commands.sequence(
+            Commands.runOnce(() -> setMotorPercent(-0.3), this),
+            Commands.waitUntil(() -> (atMinLimit))
+        );
     }
 
     public Command disableLimitsCommand() {

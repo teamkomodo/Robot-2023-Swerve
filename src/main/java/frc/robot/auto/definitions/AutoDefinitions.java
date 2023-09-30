@@ -6,7 +6,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
+import frc.robot.auto.commands.AlignToGamePiece;
 import frc.robot.auto.commands.FollowSpecifiedPath;
+import frc.robot.auto.commands.PickUpGamePiece;
 import frc.robot.auto.commands.WaitForVisionData;
 import frc.robot.auto.util.AutoCommand;
 import frc.robot.auto.util.AutoMode;
@@ -73,6 +75,29 @@ public class AutoDefinitions {
         }));
     });
 
+    private AutoMode bump_two_piece = new AutoMode(() -> {
+        return new AutoSegment(new AutoTemplate(() -> {
+            return new AutoCommand[] {
+                    templates.place_cone_high.generateCommand(container),
+                    AutoCommand.wrap(new InstantCommand(() -> {
+                        container.vision.doOdometryUpdate = true;
+                        container.vision.resetAccumulators();
+                    })),
+                    new WaitForVisionData(container.vision, 1.5),
+                    AutoCommand.wrap(new InstantCommand(() -> {
+                        container.vision.doOdometryUpdate = false;
+                    })),
+                    FollowSpecifiedPath.generatePathCommand(container.drivetrainSubsystem, container.sccf, false,
+                            "bump-1"),
+                    templates.pickup_piece.generateCommand(container),
+                    templates.stow.generateCommand(container),
+                    FollowSpecifiedPath.generatePathCommand(container.drivetrainSubsystem, container.sccf, false,
+                            "bump-2"),
+                    templates.place_cube_high.generateCommand(container)
+            };
+        }));
+    });
+
     public void initAutonomous() {
         SmartDashboard.putData("Auto chooser", chooser);
         chooser.addOption("Cube mobility balance (1,3) (blue)", cube_mobility_balance_1_3_blue);
@@ -82,6 +107,7 @@ public class AutoDefinitions {
         chooser.addOption("Just balance (2) (colorless)", balance_2_cl);
         chooser.addOption("Just mobility (1,3) (colorless)", mobility_1_3_cl);
         chooser.addOption("Testing mode (DO NOT SELECT IN MATCH)", test_mode);
+        chooser.addOption("[NOT READY] Cone Pickup Cube (blue)", bump_two_piece);
         chooser.setDefaultOption("No autonomous", null);
     }
 }
