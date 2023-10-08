@@ -63,19 +63,19 @@ public class FinetuneFieldPose extends AutoCommand {
 
     @Override
     public void execute() {
-        ChassisSpeeds speeds = drivetrainSubsystem.getDriveController().calculate(drivetrainSubsystem.getPoseMeters(),
+        ChassisSpeeds speeds = drivetrainSubsystem.getDriveController().calculate(drivetrainSubsystem.getPose(),
                 pose, 0,
                 pose.getRotation());
         speeds = new ChassisSpeeds(clamp(-speeds.vxMetersPerSecond, AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND),
                 clamp(-speeds.vyMetersPerSecond, AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND),
                 clamp(speeds.omegaRadiansPerSecond, AutoConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND));
-        drivetrainSubsystem.setChassisSpeeds(speeds);
+        drivetrainSubsystem.drive(speeds, false);
     }
 
     @Override
     public boolean isFinished() {
-        double d = pose.getTranslation().getDistance(drivetrainSubsystem.getPoseMeters().getTranslation());
-        double a = Math.abs(pose.getRotation().minus(drivetrainSubsystem.getPoseMeters().getRotation()).getRadians());
+        double d = pose.getTranslation().getDistance(drivetrainSubsystem.getPose().getTranslation());
+        double a = Math.abs(pose.getRotation().minus(drivetrainSubsystem.getPose().getRotation()).getRadians());
         return (d < error && a < AutoConstants.MAX_ANGULAR_ERROR_RADIANS);
     }
 

@@ -27,10 +27,10 @@ public class AllianceFailsafe extends AutoCommand {
     public void initialize() {
         switch (alliance) {
             case ALLIANCE_BLUE:
-                this.isOk = this.drivetrainSubsystem.getPoseMeters().getX() < 8.00;
+                this.isOk = this.drivetrainSubsystem.getPose().getX() < 8.00;
                 break;
             case ALLIANCE_RED:
-                this.isOk = this.drivetrainSubsystem.getPoseMeters().getX() > 8.00;
+                this.isOk = this.drivetrainSubsystem.getPose().getX() > 8.00;
                 break;
         }
         if (!this.isOk) {

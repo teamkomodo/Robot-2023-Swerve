@@ -32,7 +32,7 @@ public class VisionPositioningSubsystem extends SubsystemBase {
     public VisionPositioningSubsystem(DrivetrainSubsystem drivetrainSubsystem) {
         this.drive = drivetrainSubsystem;
         camera = new PhotonCamera("FrontCamera");
-        drive.stopMotion();
+        drive.drive(0, 0, 0, false);
         try {
             AprilTagFieldLayout fieldLayout = AprilTagFieldLayout
                     .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
@@ -97,7 +97,7 @@ public class VisionPositioningSubsystem extends SubsystemBase {
                     rotation = moveDiscontinuity(accumulator_rotation / accumulator_weight, 0.0);
                     pose2d = new Pose2d(accumulator_translation.div(accumulator_weight), Rotation2d.fromRadians(rotation));
                     if (doOdometryUpdate) {
-                        drive.resetOdometry(pose2d);
+                        drive.resetPose(pose2d);
                         if (onVisionData != null) {
                             onVisionData.run();
                         }

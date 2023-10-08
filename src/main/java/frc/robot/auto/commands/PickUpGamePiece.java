@@ -42,7 +42,7 @@ public class PickUpGamePiece extends AutoCommand {
         if (intakeSubsystem.pieceDetected()) {
             jointSubsystem.setPosition(JOINT_CLAMP_POSITION);
         }
-        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0.5, 0, 0));
+        drivetrainSubsystem.drive(new ChassisSpeeds(0.5, 0, 0), false);
         if (timer.hasElapsed(0.5)) {
             if (Math.abs(intakeSubsystem.getSmoothCurrent()) > INTAKE_THRESHOLD_CURRENT) {
                 gotPiece = true;

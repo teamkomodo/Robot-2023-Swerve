@@ -311,7 +311,7 @@ public class SwerveControllerCommandImpl extends CommandBase {
         }
         // System.out.println(desiredState.poseMeters);
         // System.out.println(targetChassisSpeeds);
-        m_drivetrainSubsystem.setChassisSpeeds(targetChassisSpeeds);
+        m_drivetrainSubsystem.drive(targetChassisSpeeds, false);
         // SwerveModuleState[] targetModuleStates =
         // m_kinematics.toSwerveModuleStates(targetChassisSpeeds);
 

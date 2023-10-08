@@ -62,7 +62,7 @@ public class AutoSegments {
                 AutoCommand.wrap(new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                     container.drivetrainSubsystem.zeroGyro();
-                    container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
+                    container.drivetrainSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
                 })),
                 new FinetuneFieldPose(container.drivetrainSubsystem, new Pose2d(-4.136, 0, Rotation2d.fromRadians(0)),
                         -1),
@@ -77,7 +77,7 @@ public class AutoSegments {
                 AutoCommand.wrap(new InstantCommand(() -> {
                     container.vision.doOdometryUpdate = false;
                     container.drivetrainSubsystem.zeroGyro();
-                    container.drivetrainSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
+                    container.drivetrainSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromRadians(0)));
                 })),
                 new RunUntilNotLevel(container.drivetrainSubsystem,
                         new FinetuneFieldPose(container.drivetrainSubsystem,
@@ -102,7 +102,7 @@ public class AutoSegments {
                 })),
                 new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_BLUE, false),
                 new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
-                    return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
+                    return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPose().getY(),
                             inFront.getRotation());
                 }, 0.15),
                 new FinetuneFieldPose(container.drivetrainSubsystem, inFront, 0.15),
@@ -125,7 +125,7 @@ public class AutoSegments {
             })),
             new AllianceFailsafe(container.drivetrainSubsystem, AllianceFailsafe.Alliance.ALLIANCE_RED, false),
             new FinetuneFieldPose(container.drivetrainSubsystem, () -> {
-                return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPoseMeters().getY(),
+                return new Pose2d(inFront.getX(), container.drivetrainSubsystem.getPose().getY(),
                         inFront.getRotation());
             }, 0.15),
             new FinetuneFieldPose(container.drivetrainSubsystem, inFront, 0.15),

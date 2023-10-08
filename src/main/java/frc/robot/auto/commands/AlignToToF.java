@@ -54,8 +54,8 @@ public class AlignToToF extends AutoCommand {
 
         switch (stage) {
             case 0:
-                prevRot = drivetrainSubsystem.getPoseMeters().getRotation();
-                bestRot = drivetrainSubsystem.getPoseMeters().getRotation();
+                prevRot = drivetrainSubsystem.getPose().getRotation();
+                bestRot = drivetrainSubsystem.getPose().getRotation();
                 bestRange = proc_range;
                 if (count > 10) {
                     stage++;
@@ -63,15 +63,15 @@ public class AlignToToF extends AutoCommand {
                 count++;
                 break;
             case 1: {
-                drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, AutoConstants.TOF_ANGULAR_VELOCITY));
+                drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, AutoConstants.TOF_ANGULAR_VELOCITY), false);
                 if (proc_range < bestRange) {
-                    bestRot = drivetrainSubsystem.getPoseMeters().getRotation();
+                    bestRot = drivetrainSubsystem.getPose().getRotation();
                     bestRange = proc_range;
                 }
-                double offset = drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians()
+                double offset = drivetrainSubsystem.getPose().getRotation().minus(prevRot).getRadians()
                         % (2 * Math.PI);
                 if (Math.abs(bestRange - proc_range) > 100) {
-                    if (Math.abs(drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians()) < Math
+                    if (Math.abs(drivetrainSubsystem.getPose().getRotation().minus(prevRot).getRadians()) < Math
                             .toRadians(5)) {
                         stage++;
                         break;
@@ -84,19 +84,19 @@ public class AlignToToF extends AutoCommand {
             }
                 break;
             case 2: {
-                drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, -AutoConstants.TOF_ANGULAR_VELOCITY));
+                drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, -AutoConstants.TOF_ANGULAR_VELOCITY), false);
                 if (proc_range < bestRange) {
-                    bestRot = drivetrainSubsystem.getPoseMeters().getRotation();
+                    bestRot = drivetrainSubsystem.getPose().getRotation();
                     bestRange = proc_range;
                 }
-                double offset = drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians();
+                double offset = drivetrainSubsystem.getPose().getRotation().minus(prevRot).getRadians();
                 if (offset > 0) {
                     offset -= 2 * Math.PI;
                 }
                 offset %= 2 * Math.PI;
                 if (Math.abs(bestRange - proc_range) > 100 && offset <= 0
                         && offset >= -AutoConstants.TOF_HALF_SWEEP_ANGLE) {
-                    if (Math.abs(drivetrainSubsystem.getPoseMeters().getRotation().minus(prevRot).getRadians()) < Math
+                    if (Math.abs(drivetrainSubsystem.getPose().getRotation().minus(prevRot).getRadians()) < Math
                             .toRadians(5)) {
                         stage++;
                         break;
@@ -110,9 +110,9 @@ public class AlignToToF extends AutoCommand {
                 break;
             case 3:
                 ChassisSpeeds speeds = drivetrainSubsystem.getDriveController().calculate(
-                        drivetrainSubsystem.getPoseMeters(),
-                        new Pose2d(drivetrainSubsystem.getPoseMeters().getTranslation(), bestRot), 0, bestRot);
-                drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond));
+                        drivetrainSubsystem.getPose(),
+                        new Pose2d(drivetrainSubsystem.getPose().getTranslation(), bestRot), 0, bestRot);
+                drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, speeds.omegaRadiansPerSecond), false);
                 break;
         }
         // SmartDashboard.putNumber("Processed range", proc_range);
@@ -121,7 +121,7 @@ public class AlignToToF extends AutoCommand {
     @Override
     public boolean isFinished() {
         if (stage >= 3) {
-            Rotation2d current = drivetrainSubsystem.getPoseMeters().getRotation();
+            Rotation2d current = drivetrainSubsystem.getPose().getRotation();
             Rotation2d target = bestRot;
             Rotation2d difference = target.minus(current);
             if (Math.abs(difference.getRadians()) < Math.toRadians(2.5)) {

@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -8,308 +9,281 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import frc.robot.util.SwerveDriveOdometryImpl;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.SwerveModuleImpl;
-
-import com.kauailabs.navx.frc.AHRS;
-import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
-import com.swervedrivespecialties.swervelib.Mk4iSwerveModuleHelper;
-import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
-import com.swervedrivespecialties.swervelib.SwerveModule;
-import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
-import com.swervedrivespecialties.swervelib.Mk4iSwerveModuleHelper.GearRatio;
-import com.swervedrivespecialties.swervelib.ctre.CanCoderAbsoluteConfiguration;
-import com.swervedrivespecialties.swervelib.ctre.CanCoderFactoryBuilder;
-import com.swervedrivespecialties.swervelib.rev.NeoDriveControllerFactoryBuilder;
-import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
-import com.swervedrivespecialties.swervelib.rev.NeoSteerControllerFactoryBuilder;
-
-import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.util.NeoSwerveModule;
+import frc.robot.util.SwerveModule;
 
 import static frc.robot.Constants.*;
 
-public class DrivetrainSubsystem extends SubsystemBase {
-    public static final double MAX_VOLTAGE = 12.0;
-    private double simGyroYawRadians = 0.0;
-    private final HolonomicDriveController driveController;
+import java.util.function.DoubleSupplier;
 
-    private boolean slowMode = true;
+import com.kauailabs.navx.frc.AHRS;
+
+public class DrivetrainSubsystem implements Subsystem {
+
+    /*
+     * Robot Coordinate System
+     * See https://docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/coordinate-systems.html#robot-coordinate-system
+     * Forward is x+, Left is y+, counterclockwise is theta+
+     */
+
+    private final Translation2d frontLeftPosition = new Translation2d(DRIVETRAIN_WIDTH / 2D, DRIVETRAIN_LENGTH / 2D); // All translations are relative to center of rotation
+    private final Translation2d frontRightPosition = new Translation2d(DRIVETRAIN_WIDTH / 2D, -DRIVETRAIN_LENGTH / 2D);
+    private final Translation2d backLeftPosition = new Translation2d(-DRIVETRAIN_WIDTH / 2D, DRIVETRAIN_LENGTH / 2D);
+    private final Translation2d backRightPosition = new Translation2d(-DRIVETRAIN_WIDTH / 2D, -DRIVETRAIN_LENGTH / 2D);
+
+    private final SwerveModule frontLeft;
+    private final SwerveModule frontRight;
+    private final SwerveModule backLeft;
+    private final SwerveModule backRight;
+
+    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(frontLeftPosition, frontRightPosition, backLeftPosition, backRightPosition);
+    private final SwerveDriveOdometry odometry;
+    private final Field2d field;
+
+    private final HolonomicDriveController driveController = new HolonomicDriveController(
+        new PIDController(1, 0, 0),
+        new PIDController(1, 0, 0),
+        new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCEL)));
+    
+    private final AHRS navX = new AHRS(SPI.Port.kMXP, (byte) 200);
+
+    private boolean slowMode = false;
+    private double rotationOffsetRadians = 0.0;
+
+    public DrivetrainSubsystem(Field2d field) {
+        this.field = field;
+
+        ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+
+        frontLeft = new NeoSwerveModule(
+                FRONT_LEFT_DRIVE_MOTOR_ID,
+                FRONT_LEFT_STEER_MOTOR_ID,
+                FRONT_LEFT_STEER_ENCODER_ID,
+                FRONT_LEFT_STEER_OFFSET,
+                tab.getLayout("Front Left", BuiltInLayouts.kList).withSize(3, 7).withPosition(0, 0));
+        
+        frontRight = new NeoSwerveModule(
+                FRONT_RIGHT_DRIVE_MOTOR_ID,
+                FRONT_RIGHT_STEER_MOTOR_ID,
+                FRONT_RIGHT_STEER_ENCODER_ID,
+                FRONT_RIGHT_STEER_OFFSET,
+                tab.getLayout("Front Right", BuiltInLayouts.kList).withSize(3, 7).withPosition(3, 0));
+
+        backLeft = new NeoSwerveModule(
+                BACK_LEFT_DRIVE_MOTOR_ID,
+                BACK_LEFT_STEER_MOTOR_ID,
+                BACK_LEFT_STEER_ENCODER_ID,
+                BACK_LEFT_STEER_OFFSET,
+                tab.getLayout("Back Left", BuiltInLayouts.kList).withSize(3, 7).withPosition(6, 0));
+        
+        backRight = new NeoSwerveModule(
+                BACK_RIGHT_DRIVE_MOTOR_ID,
+                BACK_RIGHT_STEER_MOTOR_ID,
+                BACK_RIGHT_STEER_ENCODER_ID,
+                BACK_RIGHT_STEER_OFFSET,
+                tab.getLayout("Back Right", BuiltInLayouts.kList).withSize(3, 7).withPosition(9, 0));
+
+        tab.add("Test Drivetrain", testDrivetrain()).withPosition(8, 0);
+
+        tab.addNumber("Rotation", () -> (getAdjustedRotation().getDegrees()));
+
+        odometry = new SwerveDriveOdometry(
+                kinematics,
+                navX.getRotation2d(),
+                new SwerveModulePosition[] {
+                        frontLeft.getPosition(),
+                        frontRight.getPosition(),
+                        backLeft.getPosition(),
+                        backRight.getPosition()
+                });
+        resetPose(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0)));
+    }
+
+    @Override
+    public void periodic() {
+        
+        // does not need to use adjusted rotation, odometry handles it.
+        odometry.update(navX.getRotation2d(), getSwervePositions());
+        field.setRobotPose(getPose());
+
+    }
+
+    public void drive(double xSpeed, double ySpeed, double angularVelocity, boolean fieldRelative) {
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, angularVelocity);
+
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(fieldRelative? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, getAdjustedRotation()) : chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, MAX_LINEAR_VELOCITY);
+
+        setModuleStates(moduleStates);
+    }
+
+    public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
+        drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, fieldRelative);
+    }
+
+    public void stopMotion() {
+        drive(0, 0, 0, false);
+    }
+
+    public void zeroGyro() {
+        rotationOffsetRadians = -navX.getRotation2d().getRadians();
+        resetPose(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(0)));
+    }
+
+    // Getters
+
+    public SwerveModulePosition[] getSwervePositions() {
+        return new SwerveModulePosition[] {
+            frontLeft.getPosition(),
+            frontRight.getPosition(),
+            backLeft.getPosition(),
+            backRight.getPosition()
+        };
+    }
+
+    public Pose2d getPose() {
+        return odometry.getPoseMeters();
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return kinematics;
+    }
+
+    public AHRS getNavx() {
+        return navX;
+    }
 
     public HolonomicDriveController getDriveController() {
         return driveController;
     }
 
-    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-            // Front left
-            new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
-            // Front right
-            new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
-            // Back left
-            new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
-            // Back right
-            new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
-
-    public SwerveDriveKinematics getDriveKinematics() {
-        return kinematics;
+    public Rotation2d getAdjustedRotation() {
+        return navX.getRotation2d().plus(Rotation2d.fromRadians(rotationOffsetRadians));
     }
 
-    public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0
-            * SdsModuleConfigurations.MK4I_L1.getDriveReduction() * SdsModuleConfigurations.MK4I_L1.getWheelDiameter()
-            * Math.PI;
-    private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200);
+    // Setters
 
-    public AHRS getNavx() {
-        return navx;
+    public void setModuleStates(SwerveModuleState[] moduleStates) {
+        frontLeft.setDesiredState(moduleStates[0]);
+        frontRight.setDesiredState(moduleStates[1]);
+        backLeft.setDesiredState(moduleStates[2]);
+        backRight.setDesiredState(moduleStates[3]);
     }
 
-    private final SwerveModuleImpl frontLeftModule;
-    private final SwerveModuleImpl frontRightModule;
-    private final SwerveModuleImpl backLeftModule;
-    private final SwerveModuleImpl backRightModule;
-    private final ShuffleboardTab tab;
-
-    private final SwerveDriveOdometryImpl odometry;
-    private final Field2d field2d;
-
-    public DrivetrainSubsystem(Field2d field) {
-        this.field2d = field;
-        tab = Shuffleboard.getTab("Drivetrain");
-        tab.addString("Chassis Speeds", () -> ("" + currentChassisSpeeds));
-
-        tab.addDouble("Gyro Yaw", () -> (getGyroYaw().getDegrees()));
-
-        frontLeftModule = new SwerveModuleImpl(createCustomNeo(
-                // This parameter is optional, but will allow you to see the current state of
-                // the module on the dashboard.
-                tab.getLayout("Front Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(0, 0),
-                // This can either be STANDARD or FAST depending on your gear configuration
-                Mk4iSwerveModuleHelper.GearRatio.L1,
-                // This is the ID of the drive motor
-                FRONT_LEFT_MODULE_DRIVE_MOTOR,
-                // This is the ID of the steer motor
-                FRONT_LEFT_MODULE_STEER_MOTOR,
-                // This is the ID of the steer encoder
-                FRONT_LEFT_MODULE_STEER_ENCODER,
-                // This is how much the steer encoder is offset from true zero (In our case,
-                // zero is facing straight forward)
-                FRONT_LEFT_MODULE_STEER_OFFSET),
-                MAX_VELOCITY_METERS_PER_SECOND,
-                MAX_VOLTAGE);
-
-        frontRightModule = new SwerveModuleImpl(createCustomNeo(
-                tab.getLayout("Front Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0),
-                Mk4iSwerveModuleHelper.GearRatio.L1,
-                FRONT_RIGHT_MODULE_DRIVE_MOTOR,
-                FRONT_RIGHT_MODULE_STEER_MOTOR,
-                FRONT_RIGHT_MODULE_STEER_ENCODER,
-                FRONT_RIGHT_MODULE_STEER_OFFSET),
-                MAX_VELOCITY_METERS_PER_SECOND,
-                MAX_VOLTAGE);
-
-        backLeftModule = new SwerveModuleImpl(createCustomNeo(
-                tab.getLayout("Back Left Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0),
-                Mk4iSwerveModuleHelper.GearRatio.L1,
-                BACK_LEFT_MODULE_DRIVE_MOTOR,
-                BACK_LEFT_MODULE_STEER_MOTOR,
-                BACK_LEFT_MODULE_STEER_ENCODER,
-                BACK_LEFT_MODULE_STEER_OFFSET),
-                MAX_VELOCITY_METERS_PER_SECOND,
-                MAX_VOLTAGE);
-
-        backRightModule = new SwerveModuleImpl(createCustomNeo(
-                tab.getLayout("Back Right Module", BuiltInLayouts.kList).withSize(2, 4).withPosition(6, 0),
-                Mk4iSwerveModuleHelper.GearRatio.L1,
-                BACK_RIGHT_MODULE_DRIVE_MOTOR,
-                BACK_RIGHT_MODULE_STEER_MOTOR,
-                BACK_RIGHT_MODULE_STEER_ENCODER,
-                BACK_RIGHT_MODULE_STEER_OFFSET),
-                MAX_VELOCITY_METERS_PER_SECOND,
-                MAX_VOLTAGE);
-
-        // odometry = new SwerveDriveOdometryImpl(
-        //         kinematics, this.getGyroYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-        // odometry.getOdometry().forgetGyro = false;
-        odometry = new SwerveDriveOdometryImpl(kinematics, getGyroYawRaw());
-
-        ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.P_THETA_CONTROLLER,
-                AutoConstants.I_THETA_CONTROLLER, AutoConstants.D_THETA_CONTROLLER,
-                AutoConstants.THETA_PID_CONTROLLER_CONSTRAINTS);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        this.driveController = new HolonomicDriveController(
-                new PIDController(AutoConstants.P_X_CONTROLLER, AutoConstants.I_X_CONTROLLER, AutoConstants.D_X_CONTROLLER),
-                new PIDController(AutoConstants.P_Y_CONTROLLER, AutoConstants.I_Y_CONTROLLER, AutoConstants.D_Y_CONTROLLER),
-                thetaController);
+    public void resetPose(Pose2d pose) {
+        //does not need to be adjusted rotation, odometry handles this
+        odometry.resetPosition(navX.getRotation2d(), getSwervePositions(), pose);
     }
 
-    public SwerveModulePosition[] getModulePositions() {
-        return new SwerveModulePosition[] {
-                frontLeftModule.getPosition(),
-                frontRightModule.getPosition(),
-                backLeftModule.getPosition(),
-                backRightModule.getPosition()
-        };
+    public void setGyro(Rotation2d rotation) {
+        rotationOffsetRadians = -navX.getRotation2d().getRadians() + rotation.getRadians();
     }
 
-    public SwerveModuleState[] getModuleStates() {
-        return new SwerveModuleState[] {
-                frontLeftModule.getState(),
-                frontRightModule.getState(),
-                backLeftModule.getState(),
-                backRightModule.getState()
-        };
-    }
+    // Commands
 
-    private Rotation2d gyroOffset = Rotation2d.fromRadians(0);
-    public void resetGyro(Rotation2d offset) {
-        if (RobotBase.isReal()) {
-            gyroOffset = getGyroYawRaw();
-            gyroOffset = gyroOffset.minus(offset);
-            return;
-        }
-        simGyroYawRadians = 0.0;
-    }
-    public void zeroGyro() {
-        resetGyro(Rotation2d.fromRadians(0));
-    }
-
-    /**
-     * 
-     * @return a {@link Rotation2d} object with the heading of the robot (clockwise positive)
-     */
-    public Rotation2d getGyroYaw() {
-        return getGyroYawRaw().minus(gyroOffset);
-    }
-    private Rotation2d getGyroYawRaw() {
-        if (RobotBase.isReal()) {
-            if (navx.isMagnetometerCalibrated()) {
-                return Rotation2d.fromDegrees(navx.getFusedHeading());
-            }
-            return Rotation2d.fromDegrees(navx.getYaw());
-        }
-        return Rotation2d.fromRadians(simGyroYawRadians);
-    }
-
-    public void stopMotion() {
-        this.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
-    }
-
-    public void setSwerveModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
-        frontLeftModule.set(states[0].speedMetersPerSecond, states[0].angle.getRadians());
-        frontRightModule.set(states[1].speedMetersPerSecond, states[1].angle.getRadians());
-        backLeftModule.set(states[2].speedMetersPerSecond, states[2].angle.getRadians());
-        backRightModule.set(states[3].speedMetersPerSecond, states[3].angle.getRadians());
-    }
-
-    private ChassisSpeeds currentChassisSpeeds = null;
-
-    public void setChassisSpeeds(ChassisSpeeds speeds) {
-        currentChassisSpeeds = speeds;
-    }
-
-    public void drive(double forward, double right, double rotation, boolean fieldRelative) {
-        ChassisSpeeds speeds = new ChassisSpeeds(forward * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1), right * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1), rotation * (slowMode? DRIVETRAIN_SLOW_MODE_MODIFIER : 1));
-        if (fieldRelative) {
-            setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroYaw().times(-1)));
-            return;
-        }
-        setChassisSpeeds(speeds);
-    }
-
-    private void drivePeriodic() {
-        if (currentChassisSpeeds == null) {
-            return;
-        }
-        setSwerveModuleStates(kinematics.toSwerveModuleStates(currentChassisSpeeds));
-    }
-
-    private SwerveModule createCustomNeo(
-        ShuffleboardLayout container,
-            GearRatio gearRatio,
-            int driveMotorPort,
-            int steerMotorPort,
-            int steerEncoderPort,
-            double steerOffset
-    ) {
-        Mk4ModuleConfiguration configuration = new Mk4ModuleConfiguration();
-        return new SwerveModuleFactory<>(
-                gearRatio.getConfiguration(),
-                new NeoDriveControllerFactoryBuilder()
-                .withVoltageCompensation(configuration.getNominalVoltage())
-                .withCurrentLimit(configuration.getDriveCurrentLimit())
-                .build(),
-                new NeoSteerControllerFactoryBuilder()
-                .withVoltageCompensation(configuration.getNominalVoltage())
-                .withPidConstants(SWERVE_STEER_P, SWERVE_STEER_I, SWERVE_STEER_D)
-                .withCurrentLimit(configuration.getSteerCurrentLimit())
-                .build(new CanCoderFactoryBuilder()
-                        .withReadingUpdatePeriod(100)
-                        .build())
-        ).create(
-                container,
-                driveMotorPort,
-                new NeoSteerConfiguration<>(
-                        steerMotorPort,
-                        new CanCoderAbsoluteConfiguration(steerEncoderPort, steerOffset)
-                )
+    public CommandBase testDrivetrain() {
+        return Commands.sequence(
+            Commands.run(() -> {
+                setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(0)),
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(0)),
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(0)),
+                    new SwerveModuleState(0.0, Rotation2d.fromDegrees(0))
+                });
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(0)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(0)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(0)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(0))
+                });
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(90)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(90)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(90)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(90))
+                });
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(180)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(180)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(180)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(180))
+                });
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(-90)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(-90)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(-90)),
+                    new SwerveModuleState(1.0, Rotation2d.fromDegrees(-90))
+                });
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(360)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(360)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(360)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(360))
+                });
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(0, 0.0, 0, false);
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(1.0, 0.0, 0, false);
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(-1.0, 0.0, 0, false);
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(0.0, 1.0, 0, false);
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(0.0, -1.0, 0, false);
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(0.0, 0.0, 1.0, false);
+            }, this).withTimeout(1),
+            Commands.run(() -> {
+                drive(0.0, 0.0, -1.0, false);
+            }, this).withTimeout(1)
         );
     }
-    public Pose2d getPoseMeters() {
-        // return odometry.getEstimatedPosition();
-        Pose2d p = odometry.getPoseMeters();
-        return new Pose2d(p.getTranslation(), p.getRotation().unaryMinus());
-    }
-    public Pose2d getClockwiseNegativePoseMeters() {
-        Pose2d pose = getPoseMeters();
-        return new Pose2d(pose.getTranslation(), pose.getRotation().unaryMinus());
+
+    public CommandBase enableSlowModeCommand() {
+        return Commands.runOnce(() -> { slowMode = true; });
     }
 
-    public void resetOdometry(Pose2d pose) {
-        odometry.resetPosition(pose, getGyroYawRaw().unaryMinus());
+    public CommandBase disableSlowModeCommand() {
+        return Commands.runOnce(() -> { slowMode = false; });
     }
 
-    public void addVisionMeasurement(Pose2d pose) {
-        // odometry.addVisionMeasurement(pose, Timer.getFPGATimestamp());
-    }
-    private Pose2d lastSimFieldPose = null;
-    @Override
-    public void periodic() {
-        frontLeftModule.periodic();
-        frontRightModule.periodic();
-        backLeftModule.periodic();
-        backRightModule.periodic();
+    public CommandBase joystickDriveCommand(DoubleSupplier xAxis, DoubleSupplier yAxis, DoubleSupplier rotAxis) {
+        return Commands.run(() -> {
 
-        odometry.update(this.getGyroYawRaw().unaryMinus(), getModuleStates());
-        simGyroYawRadians += odometry.getLast_dTheta();
-        if (RobotBase.isSimulation()) {
-            if (lastSimFieldPose != null && !field2d.getRobotPose().equals(lastSimFieldPose)) {
-                resetOdometry(field2d.getRobotPose());
-            }
-        }
-        Pose2d pose = this.getPoseMeters();
-        field2d.setRobotPose(new Pose2d(pose.getTranslation(), pose.getRotation().unaryMinus()));
-        if (RobotBase.isSimulation()) {
-            lastSimFieldPose = field2d.getRobotPose();
-        }
-        drivePeriodic();
-    }
+            double xVelocity = MathUtil.applyDeadband(xAxis.getAsDouble(), 0.05) * MAX_LINEAR_VELOCITY * (slowMode ? SLOW_MODE_MODIFIER : 1);
+            double yVelocity = MathUtil.applyDeadband(yAxis.getAsDouble(), 0.05) * MAX_LINEAR_VELOCITY * (slowMode ? SLOW_MODE_MODIFIER : 1);
+            double rotVelocity = MathUtil.applyDeadband(rotAxis.getAsDouble(), 0.05) * MAX_ANGULAR_VELOCITY * (slowMode ? SLOW_MODE_MODIFIER : 1);
+            drive(xVelocity, yVelocity, rotVelocity, FIELD_RELATIVE_DRIVE);
 
-    public Command runDisableSlowModeCommand() {
-        return this.runOnce(() -> slowMode = false);
+        }, this);
     }
-
-    public Command runEnableSlowModeCommand() {
-        return this.runOnce(() -> slowMode = true);
-    }
+    
 }

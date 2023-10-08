@@ -41,7 +41,7 @@ public class ApproximateFieldPose extends AutoCommand {
         // seq.startNonRelativeTrajectory(List.of(), pose, () -> {
         // this.finished = true;
         // });
-        this.fromPose = this.drive.getPoseMeters();
+        this.fromPose = this.drive.getPose();
         double distance = this.pose.getTranslation().getDistance(this.fromPose.getTranslation());
         double totalTime = distance / AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND;
         totalTime += 0.5; // To account for whatever
@@ -68,10 +68,10 @@ public class ApproximateFieldPose extends AutoCommand {
         Pose2d target = new Pose2d(targetTranslation, targetRotation);
         SmartDashboard.putString("Target pose", "" + target);
         ChassisSpeeds speeds = this.drive.getDriveController()
-                .calculate(this.drive.getPoseMeters(), target, 0, target.getRotation());
+                .calculate(this.drive.getPose(), target, 0, target.getRotation());
         speeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond,
                 clamp(speeds.omegaRadiansPerSecond, AutoConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND));
-        this.drive.setChassisSpeeds(speeds);
+        this.drive.drive(speeds, false);
     }
 
     @Override

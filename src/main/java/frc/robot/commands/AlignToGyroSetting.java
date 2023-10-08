@@ -32,14 +32,14 @@ public class AlignToGyroSetting extends CommandBase {
 
     @Override
     public void execute() {
-        Rotation2d gyro = this.drivetrainSubsystem.getGyroYaw();
+        Rotation2d gyro = this.drivetrainSubsystem.getAdjustedRotation();
         double rot = gyro.getRotations();
         Rotation2d targetRotation = Rotation2d.fromRotations(Math.round(rot * 2) / 2.0);
-        double omega = thetaController.calculate(this.drivetrainSubsystem.getGyroYaw().getRadians(),
+        double omega = thetaController.calculate(this.drivetrainSubsystem.getAdjustedRotation().getRadians(),
                 targetRotation.getRadians());
         
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, clamp(omega, 2.5));
-        drivetrainSubsystem.setChassisSpeeds(speeds);
+        drivetrainSubsystem.drive(speeds, false);
     }
 
     @Override

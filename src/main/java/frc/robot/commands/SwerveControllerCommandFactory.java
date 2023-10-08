@@ -40,7 +40,7 @@ public class SwerveControllerCommandFactory {
     public TrajectoryConfig getTrajectoryConfig() {
         return new TrajectoryConfig(AutoConstants.MAX_TRAJ_SPEED_METERS_PER_SECOND,
                 AutoConstants.MAX_TRAJ_ACCEL_METERS_PER_SECOND_SQUARED)
-                .setKinematics(this.drivetrainSubsystem.getDriveKinematics());
+                .setKinematics(this.drivetrainSubsystem.getKinematics());
     }
 
     public SwerveControllerCommandDescriptor generateCommand(Trajectory traj, boolean relativeToInitialTranslation,
@@ -50,17 +50,17 @@ public class SwerveControllerCommandFactory {
         desc.relativePose = new Pose2d(0, 0, Rotation2d.fromRadians(0));
 
         Supplier<Pose2d> poseSupplier = () -> relativeToInitialTranslation ? new Pose2d(
-                drivetrainSubsystem.getPoseMeters().getTranslation()
+                drivetrainSubsystem.getPose().getTranslation()
                         .minus(desc.relativePose.getTranslation())
                         .plus(traj.getInitialPose().getTranslation()),
-                drivetrainSubsystem.getPoseMeters().getRotation().unaryMinus())
-                : invertPoseRotation(drivetrainSubsystem.getPoseMeters());
+                drivetrainSubsystem.getPose().getRotation().unaryMinus())
+                : invertPoseRotation(drivetrainSubsystem.getPose());
 
         SwerveControllerCommandImpl controllerCommand = new SwerveControllerCommandImpl(traj,
                 poseSupplier,
-                drivetrainSubsystem.getDriveKinematics(),
+                drivetrainSubsystem.getKinematics(),
                 drivetrainSubsystem.getDriveController(),
-                drivetrainSubsystem::setSwerveModuleStates, drivetrainSubsystem, drivetrainSubsystem);
+                drivetrainSubsystem::setModuleStates, drivetrainSubsystem, drivetrainSubsystem);
 
         desc.command = controllerCommand;
         desc.baseCommand = controllerCommand;
@@ -71,7 +71,7 @@ public class SwerveControllerCommandFactory {
             desc.staticTrajectoryTimer.reset();
             desc.staticTrajectoryTimer.start();
             if (relativeToInitialTranslation) {
-                desc.relativePose = drivetrainSubsystem.getPoseMeters();
+                desc.relativePose = drivetrainSubsystem.getPose();
             }
         }), desc.command, new InstantCommand(() -> {
             drivetrainSubsystem.stopMotion();

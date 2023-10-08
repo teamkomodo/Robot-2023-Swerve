@@ -52,7 +52,7 @@ public class AutoLevelCommand extends AutoCommand {
     }
 
     private Rotation2d getCurrentYaw() {
-        return this.drivetrainSubsystem.getPoseMeters().getRotation();
+        return this.drivetrainSubsystem.getPose().getRotation();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class AutoLevelCommand extends AutoCommand {
         // Shuffleboard.getTab("Autolevel X PID").add(x_pid);
         // Shuffleboard.getTab("Autolevel Y PID").add(y_pid);
         if (RobotBase.isSimulation()) {
-            drivetrainSubsystem.resetOdometry(new Pose2d(1, 3, Rotation2d.fromDegrees(0)));
+            drivetrainSubsystem.resetPose(new Pose2d(1, 3, Rotation2d.fromDegrees(0)));
         }
     }
 
@@ -73,17 +73,17 @@ public class AutoLevelCommand extends AutoCommand {
         // SmartDashboard.putNumber("GYRO PITCH", Math.toDegrees(deadzone(getCurrentPitch().getRadians())));
         // SmartDashboard.putString("Calculated correction", "" + correction);
         if (RobotBase.isSimulation()) {
-            simAlpha = (drivetrainSubsystem.getPoseMeters().getX() - 4) * 0.5;
+            simAlpha = (drivetrainSubsystem.getPose().getX() - 4) * 0.5;
             simAlpha = Math.min(Math.toRadians(15), simAlpha);
             simAlpha = Math.max(Math.toRadians(-15), simAlpha);
             // Simulate sliding:
             ChassisSpeeds fieldRelative = new ChassisSpeeds(4.0 * simAlpha, 0, 0);
             ChassisSpeeds rbtRel = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelative, getCurrentYaw());
             drivetrainSubsystem
-                    .setChassisSpeeds(new ChassisSpeeds(rbtRel.vxMetersPerSecond + correction.vxMetersPerSecond,
-                            rbtRel.vyMetersPerSecond + correction.vyMetersPerSecond, correction.omegaRadiansPerSecond));
+                    .drive(new ChassisSpeeds(rbtRel.vxMetersPerSecond + correction.vxMetersPerSecond,
+                            rbtRel.vyMetersPerSecond + correction.vyMetersPerSecond, correction.omegaRadiansPerSecond), false);
         } else {
-            drivetrainSubsystem.setChassisSpeeds(correction);
+            drivetrainSubsystem.drive(correction, false);
         }
     }
 

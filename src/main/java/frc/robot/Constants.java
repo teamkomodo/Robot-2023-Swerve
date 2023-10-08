@@ -202,34 +202,44 @@ public final class Constants {
         public static final double ITERATIVE_LEAKY_INTEGRATION_COEFFICIENT = 0.9;
     }
 
-//Drivetrain
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.47625; // Width of robot in meters
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.67945; // Length of robot in meters
-    public static final double DRIVETRAIN_SLOW_MODE_MODIFIER = 0.5D;
+    //Drivetrain
     public static final boolean FIELD_RELATIVE_DRIVE = true;
+    public static final double SLOW_MODE_MODIFIER = 0.5;
 
-    public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 10;
-    public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 11;
-    public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 20;
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(192.7 - 180);
+    public static final double DRIVETRAIN_WIDTH = 0.47625;
+    public static final double DRIVETRAIN_LENGTH = 0.67945;
 
-    public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 12;
-    public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 13;
-    public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 21;
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(328.1 - 180);
+    public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 10;
+    public static final int FRONT_LEFT_STEER_MOTOR_ID = 11;
+    public static final int FRONT_LEFT_STEER_ENCODER_ID = 20;
+    public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(240.12);
 
-    public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 14;
-    public static final int BACK_LEFT_MODULE_STEER_MOTOR = 15;
-    public static final int BACK_LEFT_MODULE_STEER_ENCODER = 22;
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(173.5 - 180);
+    public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 12;
+    public static final int FRONT_RIGHT_STEER_MOTOR_ID = 13;
+    public static final int FRONT_RIGHT_STEER_ENCODER_ID = 21;
+    public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(286.96);
 
-    public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 16;
-    public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 17;
-    public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 23;
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(205.0 - 180);
+    public static final int BACK_LEFT_DRIVE_MOTOR_ID = 14;
+    public static final int BACK_LEFT_STEER_MOTOR_ID = 15;
+    public static final int BACK_LEFT_STEER_ENCODER_ID = 22;
+    public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(174.90);
 
+    public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 16;
+    public static final int BACK_RIGHT_STEER_MOTOR_ID = 17;
+    public static final int BACK_RIGHT_STEER_ENCODER_ID = 23;
+    public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(201.71);
 
-    public static final double SWERVE_STEER_P = 1.0;
-    public static final double SWERVE_STEER_I = 1.0e-3;
-    public static final double SWERVE_STEER_D = 0.1;
+    public static final double WHEEL_DIAMETER = 0.1016;
+
+    public static final double DRIVE_REDUCTION = (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0); // reduction * motor rpm = wheel rpm
+    public static final double STEER_REDUCTION = (14.0 / 50.0) * (10.0 / 60.0);
+
+    public static final double NEO_BRUSHLESS_FREE_RPM = 5676.0;
+    public static final double NEO_KV = 12.0/NEO_BRUSHLESS_FREE_RPM; // V/RPM
+
+    public static final double MAX_LINEAR_VELOCITY = 3.0;
+    public static final double MAX_LINEAR_ACCEL = 6.0;
+
+    public static final double MAX_ANGULAR_VELOCITY = 4.0 * Math.PI;
+    public static final double MAX_ANGULAR_ACCEL = 4.0 * Math.PI;
 }

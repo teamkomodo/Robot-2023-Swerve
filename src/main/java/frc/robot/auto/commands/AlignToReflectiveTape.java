@@ -59,7 +59,7 @@ public class AlignToReflectiveTape extends AutoCommand {
         }
         double angvel = alignmentController.calculate(result.tx / 27.0, 0);
         angvel = clamp(angvel, 0.8);
-        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, -angvel, 0));
+        drivetrainSubsystem.drive(new ChassisSpeeds(0, -angvel, 0), false);
         if (Math.abs(result.tx) > AutoConstants.MIN_REFLECTIVE_OFFSET_DEGREES) {
             correctTime.reset();
         }

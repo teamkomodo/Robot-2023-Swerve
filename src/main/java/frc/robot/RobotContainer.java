@@ -38,6 +38,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -50,7 +51,15 @@ import frc.robot.subsystems.TelescopeSubsystem;
 
 import static frc.robot.Constants.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.BooleanSupplier;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
@@ -79,13 +88,38 @@ public class RobotContainer {
     private final GenericHID driverButtons = new GenericHID(BUTTONS_PORT);
     private final GenericHID selector = new GenericHID(SELECTOR_PORT);
 
+    private final HashMap<String, Command> eventMap = new HashMap<>();
+
+    private final SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+        drivetrainSubsystem::getPose,
+        drivetrainSubsystem::resetPose,
+        drivetrainSubsystem.getKinematics(),
+        new PIDConstants(5.0, 0.0, 0.0),
+        new PIDConstants(1.5, 0.0, 0.0),
+        drivetrainSubsystem::setModuleStates,
+        eventMap, true, drivetrainSubsystem
+    );
+
     public int selectorState = 0;
 
     public RobotContainer() {
         SmartDashboard.putData("Field", field2d);
 
         autonomousController.initAutonomous();
+
+        configureAutoEvents();
         configureBindings();
+    }
+
+    private void configureAutoEvents() {
+        eventMap.put("print", new PrintCommand("Autonomous Message"));
+        eventMap.put("shelf", new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, () -> (false)));
+        eventMap.put("eject", Commands.runEnd(() -> {
+            ledStripSubsystem.setPattern(-0.01); // Color 1 Larson Scanner
+            intakeSubsystem.setMotorDutyCycle(1.0);
+        }, () -> {
+            intakeSubsystem.setMotorDutyCycle(0);
+        }, intakeSubsystem, ledStripSubsystem).withTimeout(1.0));
     }
 
     private void configureBindings() {
@@ -162,21 +196,17 @@ public class RobotContainer {
 
         // Drivetrain Commands
         // Drive command
+
         drivetrainSubsystem.setDefaultCommand(
-                Commands.run(
-                        () -> drivetrainSubsystem.drive(
-                                -driverJoystick.getRawAxis(1)
-                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                -driverJoystick.getRawAxis(0)
-                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                driverJoystick.getRawAxis(2)
-                                        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                                FIELD_RELATIVE_DRIVE),
-                        drivetrainSubsystem));
+            drivetrainSubsystem.joystickDriveCommand(
+                () -> (driverJoystick.getRawAxis(1)), // +Y on joystick is +X for robot
+                () -> (driverJoystick.getRawAxis(0)), // +X on joystick is +Y for robot
+                () -> (-driverJoystick.getRawAxis(2))) // -Z on joystick is +Z for robot
+        );
 
         // Slow Mode
-        blueButton.onTrue(drivetrainSubsystem.runDisableSlowModeCommand())
-                .onFalse(drivetrainSubsystem.runEnableSlowModeCommand());
+        blueButton.onTrue(drivetrainSubsystem.disableSlowModeCommand())
+                .onFalse(drivetrainSubsystem.enableSlowModeCommand());
 
         // Zero Gyro
         leftDriverJoystickButton.onTrue(Commands.runOnce(() -> drivetrainSubsystem.zeroGyro()));
@@ -269,16 +299,18 @@ public class RobotContainer {
         }
         ledStripSubsystem.setPattern(LEDStripSubsystem.IDLE_PATTERN);
         drivetrainSubsystem.stopMotion();
-        drivetrainSubsystem.resetGyro(Rotation2d.fromDegrees(180));
+        drivetrainSubsystem.setGyro(Rotation2d.fromDegrees(180));
     }
 
     public Command getAutonomousCommand() {
-        AutoMode mode = autonomousController.chooser.getSelected();
-        if (mode == null) {
-            return null;
-        } else {
-            autoCommand = mode.generateAutonomousEngine(this);
-            return autoCommand;
-        }
+        // AutoMode mode = autonomousController.chooser.getSelected();
+        // if (mode == null) {
+        //     return null;
+        // } else {
+        //     autoCommand = mode.generateAutonomousEngine(this);
+        //     return autoCommand;
+        // }
+        List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup("Demo", new PathConstraints(1.0, 2));
+        return autoBuilder.fullAuto(pathGroup);
     }
 }

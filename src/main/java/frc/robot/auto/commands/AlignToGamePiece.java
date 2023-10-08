@@ -95,7 +95,7 @@ public class AlignToGamePiece extends AutoCommand {
         double xcomp = bestTarget.centerX;
         double angvel = -controller.calculate(xcomp, targetX);
         angvel = clamp(angvel, 0.7);
-        drivetrainSubsystem.setChassisSpeeds(new ChassisSpeeds(0, 0, angvel));
+        drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, angvel), false);
         if (Math.abs(xcomp - targetX) > bestTarget.width * 0.5 * AutoConstants.MAX_PIECE_OFFSET_RATIO) {
             // Not lined up
             correctTime.reset();
