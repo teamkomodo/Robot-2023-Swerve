@@ -59,7 +59,7 @@ public class DrivetrainSubsystem implements Subsystem {
     
     private final AHRS navX = new AHRS(SPI.Port.kMXP, (byte) 200);
 
-    private boolean slowMode = false;
+    private boolean slowMode = true;
     private double rotationOffsetRadians = 0.0;
 
     public DrivetrainSubsystem(Field2d field) {
@@ -139,7 +139,7 @@ public class DrivetrainSubsystem implements Subsystem {
 
     public void zeroGyro() {
         rotationOffsetRadians = -navX.getRotation2d().getRadians();
-        resetPose(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(0)));
+        //resetPose(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(0)));
     }
 
     // Getters
@@ -278,9 +278,9 @@ public class DrivetrainSubsystem implements Subsystem {
     public CommandBase joystickDriveCommand(DoubleSupplier xAxis, DoubleSupplier yAxis, DoubleSupplier rotAxis) {
         return Commands.run(() -> {
 
-            double xVelocity = MathUtil.applyDeadband(xAxis.getAsDouble(), 0.05) * MAX_LINEAR_VELOCITY * (slowMode ? SLOW_MODE_MODIFIER : 1);
-            double yVelocity = MathUtil.applyDeadband(yAxis.getAsDouble(), 0.05) * MAX_LINEAR_VELOCITY * (slowMode ? SLOW_MODE_MODIFIER : 1);
-            double rotVelocity = MathUtil.applyDeadband(rotAxis.getAsDouble(), 0.05) * MAX_ANGULAR_VELOCITY * (slowMode ? SLOW_MODE_MODIFIER : 1);
+            double xVelocity = MathUtil.applyDeadband(xAxis.getAsDouble(), 0.01) * MAX_LINEAR_VELOCITY * (slowMode ? LINEAR_SLOW_MODE_MODIFIER : 1);
+            double yVelocity = MathUtil.applyDeadband(yAxis.getAsDouble(), 0.01) * MAX_LINEAR_VELOCITY * (slowMode ? LINEAR_SLOW_MODE_MODIFIER : 1);
+            double rotVelocity = MathUtil.applyDeadband(rotAxis.getAsDouble(), 0.01) * MAX_ANGULAR_VELOCITY * (slowMode ? ANGULAR_SLOW_MODE_MODIFIER : 1);
             drive(xVelocity, yVelocity, rotVelocity, FIELD_RELATIVE_DRIVE);
 
         }, this);

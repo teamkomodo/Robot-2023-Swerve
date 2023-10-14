@@ -57,7 +57,7 @@ public class IntakePieceCommand extends CommandBase{
         }
 
         if(Math.abs(intakeSubsystem.getSmoothCurrent()) > INTAKE_THRESHOLD_CURRENT && RobotController.getFPGATime() - startTime > 500000 && RobotController.getFPGATime() - clampStart > 500000) {
-            intakeSubsystem.setMotorDutyCycle(-0.2);
+            intakeSubsystem.setMotorDutyCycle(-0.5);
             holdingPiece = true;
         }
     }

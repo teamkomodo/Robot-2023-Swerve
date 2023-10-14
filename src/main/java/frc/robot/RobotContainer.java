@@ -19,11 +19,13 @@ import frc.robot.auto.commands.AlignToToF;
 import frc.robot.auto.commands.AutoLevelCommand;
 import frc.robot.auto.commands.GetToToFDistance;
 import frc.robot.auto.commands.PickUpGamePiece;
+import frc.robot.auto.commands.RunUntilNotLevel;
 import frc.robot.auto.commands.SleepCommand;
 import frc.robot.auto.commands.AlignToReflectiveTape.TapeLevel;
 import frc.robot.auto.definitions.AutoDefinitions;
 import frc.robot.auto.util.AutoMode;
 import frc.robot.commands.AlignToGyroSetting;
+import frc.robot.commands.CommandFactory;
 import frc.robot.commands.IntakePieceCommand;
 import frc.robot.commands.PositionCommands;
 import frc.robot.commands.SwerveControllerCommandFactory;
@@ -33,6 +35,7 @@ import frc.robot.subsystems.VisionPositioningSubsystem;
 import frc.robot.util.LimelightConnector;
 import frc.robot.util.VisionPipelineConnector;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -80,6 +83,8 @@ public class RobotContainer {
     public final VisionPipelineConnector detector = new VisionPipelineConnector("VisionPipeline");
     public final LimelightConnector limelight = new LimelightConnector("limelight");
 
+    private final CommandFactory commandFactory = new CommandFactory(elevatorSubsystem, telescopeSubsystem, jointSubsystem, intakeSubsystem, ledStripSubsystem);
+
     private final AutoDefinitions autonomousController = new AutoDefinitions(this);
 
     private final CommandXboxController driverXBoxController = new CommandXboxController(
@@ -100,6 +105,8 @@ public class RobotContainer {
         eventMap, true, drivetrainSubsystem
     );
 
+    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+
     public int selectorState = 0;
 
     public RobotContainer() {
@@ -107,19 +114,36 @@ public class RobotContainer {
 
         autonomousController.initAutonomous();
 
-        configureAutoEvents();
+        configureAuto();
         configureBindings();
     }
 
-    private void configureAutoEvents() {
+    private void configureAuto() {
+
+        BooleanSupplier cubeModeTrue = () -> (true);
+        BooleanSupplier cubeModeFalse = () -> (false);
+
         eventMap.put("print", new PrintCommand("Autonomous Message"));
-        eventMap.put("shelf", new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, () -> (false)));
-        eventMap.put("eject", Commands.runEnd(() -> {
-            ledStripSubsystem.setPattern(-0.01); // Color 1 Larson Scanner
-            intakeSubsystem.setMotorDutyCycle(1.0);
-        }, () -> {
-            intakeSubsystem.setMotorDutyCycle(0);
-        }, intakeSubsystem, ledStripSubsystem).withTimeout(1.0));
+        eventMap.put("shelf", new ShelfCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, cubeModeFalse));
+        eventMap.put("eject", commandFactory.getEjectCommand().withTimeout(0.2));
+
+        eventMap.put("place-high-cone", commandFactory.getPlaceHighCommand(cubeModeFalse));
+
+        eventMap.put("balance", new RunUntilNotLevel(drivetrainSubsystem, new AutoLevelCommand(drivetrainSubsystem)));
+
+        eventMap.put("place-high-cube", commandFactory.getPlaceHighCommand(cubeModeTrue));
+
+        eventMap.put("pickup-ground-cube", commandFactory.getPickupGroundCommand(cubeModeTrue));
+
+        eventMap.put("stow", new StowCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem));
+
+        autoChooser.addOption("Cone Balance", autoBuilder.fullAuto(PathPlanner.loadPath("Cone Balance", new PathConstraints(3.0, 2.0))));
+        autoChooser.addOption("2-Piece Bump", autoBuilder.fullAuto(PathPlanner.loadPathGroup("2-Piece Bump", new PathConstraints(2.0, 1.5))));
+        autoChooser.addOption("2-Piece Open", autoBuilder.fullAuto(PathPlanner.loadPathGroup("2-Piece Open", new PathConstraints(2.0, 1.5))));
+        autoChooser.addOption("Cone Mobility Bump", autoBuilder.fullAuto(PathPlanner.loadPathGroup("Cone Mobility Bump", new PathConstraints(2.0, 1.5))));        
+        autoChooser.addOption("Cone Mobility Open", autoBuilder.fullAuto(PathPlanner.loadPathGroup("Cone Mobility Open", new PathConstraints(2.0, 1.5))));
+        autoChooser.addOption("Cone Sit", commandFactory.getPlaceHighCommand(cubeModeFalse));
+        SmartDashboard.putData(autoChooser);
     }
 
     private void configureBindings() {
@@ -222,21 +246,17 @@ public class RobotContainer {
         rightBumper.whileTrue(new IntakePieceCommand(intakeSubsystem, jointSubsystem, ledStripSubsystem));
 
         // Eject
-        leftBumper.whileTrue(Commands.runEnd(() -> {
-            ledStripSubsystem.setPattern(-0.01); // Color 1 Larson Scanner
-            intakeSubsystem.setMotorDutyCycle(1.0);
-        }, () -> {
-            intakeSubsystem.setMotorDutyCycle(0);
-        }, intakeSubsystem, ledStripSubsystem));
+        leftBumper.whileTrue(commandFactory.getEjectCommand());
 
         // Joint Commands
 
-        jointSubsystem.setDefaultCommand(Commands.run(() -> {
-            if (elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD
-                    && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
-                jointSubsystem.setPosition(JOINT_DANGER_POSITION);
-            }
-        }, jointSubsystem));
+        // jointSubsystem.setDefaultCommand(Commands.run(() -> {
+        //     if (elevatorSubsystem.getPosition() > ELEVATOR_JOINT_DANGER_THRESHOLD
+        //             && jointSubsystem.getPosition() < JOINT_DANGER_POSITION) {
+        //         jointSubsystem.setPosition(JOINT_DANGER_POSITION);
+        //     }
+        // }, jointSubsystem));
+        
         // Joint Up
         rightTrigger.whileTrue(Commands.run(
                 () -> jointSubsystem.setMotorPercent(-driverXBoxController.getRightTriggerAxis()),
@@ -310,7 +330,9 @@ public class RobotContainer {
         //     autoCommand = mode.generateAutonomousEngine(this);
         //     return autoCommand;
         // }
-        List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup("Demo", new PathConstraints(1.0, 2));
-        return autoBuilder.fullAuto(pathGroup);
+        return autoChooser.getSelected();
+        // List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup("2-Piece Open Side", new PathConstraints(1.5, 1.0));
+        // //return autoBuilder.fullAuto(pathGroup);
+        // return new HighNodeCommand(elevatorSubsystem, telescopeSubsystem, jointSubsystem, ledStripSubsystem, () -> (false));
     }
 }

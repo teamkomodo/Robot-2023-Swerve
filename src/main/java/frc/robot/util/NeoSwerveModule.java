@@ -32,8 +32,6 @@ public class NeoSwerveModule implements SwerveModule{
     private final CANSparkMax steerMotor;
     private final CANCoder steerAbsoluteEncoder;
 
-    private final double steerOffset;
-
     private final RelativeEncoder driveRelativeEncoder;
     private final RelativeEncoder steerRelativeEncoder;
 
@@ -52,7 +50,6 @@ public class NeoSwerveModule implements SwerveModule{
         this.driveMotor = new CANSparkMax(driveMotorId, MotorType.kBrushless);
         this.steerMotor = new CANSparkMax(steerMotorId, MotorType.kBrushless);
         this.steerAbsoluteEncoder = new CANCoder(steerAbsoluteEncoderId);
-        this.steerOffset = steerOffset;
         this.desiredState = new SwerveModuleState(0.0, Rotation2d.fromRadians(0));
 
         driveRelativeEncoder = driveMotor.getEncoder();

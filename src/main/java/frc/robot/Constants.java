@@ -204,7 +204,8 @@ public final class Constants {
 
     //Drivetrain
     public static final boolean FIELD_RELATIVE_DRIVE = true;
-    public static final double SLOW_MODE_MODIFIER = 0.5;
+    public static final double LINEAR_SLOW_MODE_MODIFIER = 0.5;
+    public static final double ANGULAR_SLOW_MODE_MODIFIER = 0.2;
 
     public static final double DRIVETRAIN_WIDTH = 0.47625;
     public static final double DRIVETRAIN_LENGTH = 0.67945;
